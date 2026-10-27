@@ -1,0 +1,14 @@
+{
+  "_comment": "Class-change crowding model and hours (Phase 3). FILL IN real Duke values. Weekends are off. Times are local 24-hour 'HH:MM'.",
+  "_comment_classEndTimes": "Weekday class end times (same every weekday) that each trigger a crowding spike.",
+  "classEndTimes": [],
+  "crowding": {
+    "_comment": "Edges within radiusMeters of an academic building get a time-dependent multiplier that ramps up, peaks just after each class end time, then decays.",
+    "windowMinutes": null,
+    "rampShape": null,
+    "peakMultiplier": null,
+    "radiusMeters": null
+  },
+  "_comment_academicBuildings": "Names (matching OSM building names / the place index) of academic buildings that cause crowding.",
+  "academicBuildings": []
+}

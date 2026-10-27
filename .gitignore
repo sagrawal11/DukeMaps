@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.vite/
+
+# Raw OSM responses are large and re-fetchable via `npm run fetch`.
+# Processed graph data (data/processed) stays tracked for reproducible builds.
+data/raw/*
+!data/raw/.gitkeep
+
+*.log
+.DS_Store

@@ -1,0 +1,28 @@
+{
+  "name": "dukemaps",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Walking-directions web app for Duke's campus that shows routing algorithms at work.",
+  "scripts": {
+    "dev": "vite",
+    "editor": "vite --open /editor/",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "fetch": "tsx scripts/fetch.ts",
+    "build:graph": "tsx scripts/build-graph.ts",
+    "build:ch": "tsx scripts/build-ch.ts",
+    "bench": "tsx scripts/bench.ts",
+    "rebuild": "npm run fetch && npm run build:graph && npm run build:ch",
+    "deploy": "node -e \"console.log('deploy: wired to a GitHub Pages Action in Phase 7')\""
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0",
+    "vite": "^6.0.0",
+    "vitest": "^2.1.0"
+  }
+}

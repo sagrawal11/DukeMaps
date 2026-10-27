@@ -1,0 +1,3 @@
+# Keeps this directory tracked by git.
+# Built graph + prebuilt contraction hierarchies land here (Phases 1 & 5).
+# These ARE committed, so the static site builds reproducibly without re-fetching OSM.

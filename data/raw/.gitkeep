@@ -1,0 +1,3 @@
+# Keeps this directory tracked by git.
+# Timestamped raw OSM Overpass responses land here in Phase 1.
+# Contents are gitignored (large, re-fetchable via `npm run fetch`); this marker stays.

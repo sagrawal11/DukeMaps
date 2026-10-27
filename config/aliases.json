@@ -1,0 +1,7 @@
+{
+  "_comment": "Campus nicknames mapped to places for the search box (Phase 4). FILL IN. Keys are what users type; values reference a place (building name or place id) from the place index. The two entries below are illustrative only.",
+  "aliases": {
+    "WU": "<place id or building name>",
+    "the Chapel": "<place id or building name>"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "_comment": "Demo routes for the landing screen (Phases 6-7). FILL IN once the place index exists. Each preset is a from/to pair with an optional label, profile, and leave-at time. The `_example` shows the shape and is not itself a preset.",
+  "_example": {
+    "label": "West to East at class change",
+    "from": "<place id or building name>",
+    "to": "<place id or building name>",
+    "profile": "visitor",
+    "leaveAt": "12:05"
+  },
+  "presets": []
+}

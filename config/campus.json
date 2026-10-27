@@ -1,0 +1,8 @@
+{
+  "_comment": "Bounding boxes for each Duke campus area. FILL IN real coordinates — never guessed. bbox order is [south, west, north, east] in decimal degrees (lat, lon). Phase 1's `npm run fetch` queries OSM Overpass for exactly these boxes.",
+  "areas": {
+    "west": { "bbox": [null, null, null, null] },
+    "central": { "bbox": [null, null, null, null] },
+    "east": { "bbox": [null, null, null, null] }
+  }
+}
