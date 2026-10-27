@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DukeMaps — Bounding box picker (dev)</title>
+    <style>
+      html, body, #map { height: 100%; margin: 0; }
+      #map { position: absolute; inset: 0; }
+      #panel {
+        position: absolute; top: 0; right: 0; width: 330px; max-height: 100%;
+        overflow: auto; background: #fff; font: 13px/1.45 system-ui, sans-serif;
+        padding: 14px; box-shadow: -2px 0 10px rgba(0, 0, 0, 0.15); z-index: 1;
+      }
+      #panel h2 { font-size: 16px; }
+      #panel input[type="number"] { width: 100%; box-sizing: border-box; }
+      #panel button { border: 1px solid #ccc; background: #f7f7f7; border-radius: 4px; }
+      #panel button:hover { background: #eee; }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <div id="panel"></div>
+    <script type="module" src="./bbox.ts"></script>
+  </body>
+</html>
