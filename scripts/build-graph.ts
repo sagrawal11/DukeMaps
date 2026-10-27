@@ -1,4 +1,67 @@
-// Phase 1 implements this: split OSM ways at shared nodes so intersections become graph
-// nodes, compute haversine edge lengths and walking-time weights, replay the edit log in
-// data/my_edits.json, and write the merged graph to data/processed/.
-console.log('[build:graph] Not implemented yet — graph builder lands in Phase 1.')
+// Phase 1: build the routable graph from the newest raw OSM response, replay my edit log,
+// validate connectivity, and write data/processed/{graph.json, places.json, validation.geojson}.
+import { readFileSync, writeFileSync, mkdirSync, readdirSync, existsSync, statSync } from 'node:fs'
+import { resolve, dirname } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { buildGraph } from '../src/graph/build'
+import { applyEdits, type EditOp, type Dangling } from '../src/graph/edits'
+import { connectedComponents, danglingStubs, toValidationGeoJSON } from '../src/graph/validate'
+import type { OsmResponse } from '../src/osm/overpass'
+import type { Graph } from '../src/graph/types'
+import { loadAreas } from './campus'
+
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
+
+function newestRaw(dir: string): string | null {
+  if (!existsSync(dir)) return null
+  const files = readdirSync(dir)
+    .filter((f) => f.startsWith('osm-') && f.endsWith('.json'))
+    .sort() // ISO timestamps sort lexically = chronologically
+  return files.length ? resolve(dir, files[files.length - 1]) : null
+}
+
+function main(): void {
+  const raw = newestRaw(resolve(ROOT, 'data/raw'))
+  if (!raw) {
+    console.error('[build:graph] No data/raw/osm-*.json found. Run `npm run fetch` first.')
+    process.exit(1)
+  }
+  const osm = JSON.parse(readFileSync(raw, 'utf8')) as OsmResponse
+  const areas = loadAreas(ROOT)
+  const built = buildGraph(osm, areas)
+
+  // Merge my replayable edit log (absent until the Phase 2 editor writes it).
+  let graph: Graph = built.graph
+  let dangling: Dangling[] = []
+  const editsPath = resolve(ROOT, 'data/my_edits.json')
+  if (existsSync(editsPath)) {
+    const ops = JSON.parse(readFileSync(editsPath, 'utf8')) as EditOp[]
+    const r = applyEdits(graph, ops)
+    graph = r.graph
+    dangling = r.dangling
+    console.log(`[build:graph] replayed ${ops.length} edit(s)`)
+  }
+
+  graph.meta.builtAt = new Date().toISOString()
+  graph.meta.osmFetchedAt = statSync(raw).mtime.toISOString()
+
+  const outDir = resolve(ROOT, 'data/processed')
+  mkdirSync(outDir, { recursive: true })
+  writeFileSync(resolve(outDir, 'graph.json'), JSON.stringify(graph))
+  writeFileSync(resolve(outDir, 'places.json'), JSON.stringify(built.places, null, 2))
+  writeFileSync(resolve(outDir, 'validation.geojson'), JSON.stringify(toValidationGeoJSON(graph)))
+
+  const comp = connectedComponents(graph)
+  const stubs = danglingStubs(graph)
+  console.log('[build:graph] ──── report ────')
+  console.log(`  nodes: ${graph.nodes.length}   edges: ${graph.edges.length}   places: ${built.places.length}`)
+  console.log(`  connected components: ${comp.count}  (largest: ${comp.sizes.slice(0, 5).join(', ')})`)
+  console.log(`  dangling stubs (degree-1): ${stubs.length}`)
+  if (dangling.length) {
+    console.log(`  ⚠ ${dangling.length} dangling edit ref(s):`)
+    for (const d of dangling) console.log(`    - ${d.reason}`)
+  }
+  console.log('[build:graph] wrote data/processed/{graph.json, places.json, validation.geojson}')
+}
+
+main()
