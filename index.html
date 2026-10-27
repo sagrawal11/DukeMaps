@@ -4,6 +4,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>DukeMaps</title>
+    <style>
+      html, body, #app { height: 100%; margin: 0; }
+      #app { position: absolute; inset: 0; }
+      .legend {
+        position: absolute; top: 10px; right: 10px; max-width: 260px; background: #fff;
+        padding: 10px 12px; font: 13px/1.4 system-ui, sans-serif; border-radius: 6px;
+        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.2); z-index: 1;
+      }
+      .legend code { background: #f4f4f4; padding: 0 3px; border-radius: 3px; }
+    </style>
   </head>
   <body>
     <div id="app"></div>

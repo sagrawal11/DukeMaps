@@ -4,6 +4,7 @@ import { edgeWeightS, WALK_SPEED_MPS, STAIRS_PENALTY } from '../src/graph/weight
 import { buildGraph } from '../src/graph/build'
 import { connectedComponents, danglingStubs } from '../src/graph/validate'
 import { applyEdits, type EditOp } from '../src/graph/edits'
+import { graphToGeoJSON, componentColor } from '../src/map/render'
 import type { OsmResponse } from '../src/osm/overpass'
 
 // Tiny synthetic OSM network (no real Duke data needed):
@@ -131,5 +132,24 @@ describe('applyEdits', () => {
     const before = graph.edges.length
     applyEdits(graph, [{ op: 'delete_edge', id: '100:0' }])
     expect(graph.edges.length).toBe(before)
+  })
+})
+
+describe('render', () => {
+  const { graph } = buildGraph(osm)
+
+  it('maps every edge to a colored GeoJSON feature', () => {
+    const fc = graphToGeoJSON(graph)
+    expect(fc.features).toHaveLength(graph.edges.length)
+    expect(fc.features.every((f) => typeof f.properties?.color === 'string')).toBe(true)
+  })
+
+  it('gives the two components different colors', () => {
+    const colors = new Set(graphToGeoJSON(graph).features.map((f) => f.properties?.color))
+    expect(colors.size).toBe(2) // mainland + island
+  })
+
+  it('componentColor cycles the palette', () => {
+    expect(componentColor(0)).toBe(componentColor(10))
   })
 })
