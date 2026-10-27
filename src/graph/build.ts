@@ -8,7 +8,7 @@
 import type { Area, Graph, GraphEdge, GraphNode, Place } from './types'
 import type { AreaBBox, OsmNode, OsmResponse, OsmWay } from '../osm/overpass'
 import { WALKABLE_HIGHWAY, kindFromTags, stepFreeFromTags } from '../osm/overpass'
-import { polylineLengthM } from './geo'
+import { polylineLengthM, pointInPolygon } from './geo'
 import { edgeWeightS } from './weights'
 
 const WALKABLE = new Set(WALKABLE_HIGHWAY)
@@ -113,11 +113,13 @@ export function buildGraph(osm: OsmResponse, areas: AreaBBox[] = []): BuildResul
 }
 
 function areaOf(lat: number, lon: number, areas: AreaBBox[]): Area | undefined {
-  for (const {
-    area,
-    bbox: [s, w, n, e],
-  } of areas) {
-    if (lat >= s && lat <= n && lon >= w && lon <= e) return area
+  for (const a of areas) {
+    if (a.polygon && a.polygon.length >= 3) {
+      if (pointInPolygon(lat, lon, a.polygon)) return a.area
+    } else {
+      const [s, w, n, e] = a.bbox
+      if (lat >= s && lat <= n && lon >= w && lon <= e) return a.area
+    }
   }
   return undefined
 }

@@ -1,8 +1,9 @@
 {
-  "_comment": "Bounding boxes for each Duke campus area. FILL IN real coordinates — never guessed. bbox order is [south, west, north, east] in decimal degrees (lat, lon). Phase 1's `npm run fetch` queries OSM Overpass for exactly these boxes.",
+  "_comment": "Freeform polygons per Duke campus area; each is a [lon, lat] ring. FILL IN via `npm run bbox` (trace each area on the map). Used for the OSM fetch (bounding box of each polygon) and to tag which campus a place/edge belongs to (point-in-polygon).",
   "areas": {
-    "west": { "bbox": [null, null, null, null] },
-    "central": { "bbox": [null, null, null, null] },
-    "east": { "bbox": [null, null, null, null] }
+    "west": { "polygon": [] },
+    "east": { "polygon": [] },
+    "athletic": { "polygon": [] },
+    "hospital": { "polygon": [] }
   }
 }

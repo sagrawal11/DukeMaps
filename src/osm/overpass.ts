@@ -32,7 +32,8 @@ export interface OsmResponse {
 
 export interface AreaBBox {
   area: Area
-  bbox: [number, number, number, number] // [south, west, north, east]
+  bbox: [number, number, number, number] // [south, west, north, east] (for OSM fetch)
+  polygon?: [number, number][] // optional [lon, lat] ring for precise area tagging
 }
 
 // highway=* values that are walkable on campus. Shared with the graph builder.

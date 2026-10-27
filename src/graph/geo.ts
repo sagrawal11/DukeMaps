@@ -25,3 +25,17 @@ export function polylineLengthM(coords: [number, number][]): number {
   }
   return total
 }
+
+// Ray-casting point-in-polygon. `ring` is a [lon, lat] array (open or closed).
+export function pointInPolygon(lat: number, lon: number, ring: [number, number][]): boolean {
+  let inside = false
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const xi = ring[i][0]
+    const yi = ring[i][1]
+    const xj = ring[j][0]
+    const yj = ring[j][1]
+    const intersects = yi > lat !== yj > lat && lon < ((xj - xi) * (lat - yi)) / (yj - yi) + xi
+    if (intersects) inside = !inside
+  }
+  return inside
+}

@@ -1,7 +1,7 @@
 // Core graph data model. The brief's edge schema lives here; every algorithm in Phase 5
 // runs on this Graph, and the pipeline (fetch -> build -> edits -> validate) produces it.
 
-export type Area = 'west' | 'central' | 'east'
+export type Area = 'west' | 'east' | 'athletic' | 'hospital'
 
 export type EdgeKind =
   | 'sidewalk'

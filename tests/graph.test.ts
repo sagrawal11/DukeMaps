@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { haversineM, polylineLengthM } from '../src/graph/geo'
+import { haversineM, polylineLengthM, pointInPolygon } from '../src/graph/geo'
 import { edgeWeightS, WALK_SPEED_MPS, STAIRS_PENALTY } from '../src/graph/weights'
 import { buildGraph } from '../src/graph/build'
 import { connectedComponents, danglingStubs } from '../src/graph/validate'
@@ -38,6 +38,11 @@ describe('geo', () => {
   it('polylineLength sums segments', () => {
     const d = haversineM(36.0, -78.9, 36.001, -78.9)
     expect(polylineLengthM([[-78.9, 36.0], [-78.9, 36.001], [-78.9, 36.002]])).toBeCloseTo(2 * d, 5)
+  })
+  it('pointInPolygon: inside vs outside a square ring', () => {
+    const square: [number, number][] = [[-78.91, 36.0], [-78.9, 36.0], [-78.9, 36.01], [-78.91, 36.01]]
+    expect(pointInPolygon(36.005, -78.905, square)).toBe(true)
+    expect(pointInPolygon(36.02, -78.905, square)).toBe(false)
   })
 })
 
