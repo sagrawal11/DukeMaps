@@ -54,19 +54,19 @@ export const WALKABLE_HIGHWAY = [
 
 // Overpass QL query: for every area bbox, pull walkable ways, indoor corridors, crossing
 // nodes, and named buildings; then recurse to each way's member nodes so we get coordinates.
-export function buildOverpassQuery(areas: AreaBBox[]): string {
+// One bounding box = the overall Duke extent. Using a single box (not per-region boxes) means
+// the walkable ways *between* campuses are pulled too, so the graph is one connected network
+// you can route across. Region polygons are only used later to tag which campus a point is in.
+export function buildOverpassQuery(bbox: [number, number, number, number]): string {
   const hw = WALKABLE_HIGHWAY.join('|')
-  const clauses = areas
-    .map(({ bbox: [s, w, n, e] }) => {
-      const b = `(${s},${w},${n},${e})`
-      return [
-        `  way["highway"~"^(${hw})$"]${b};`,
-        `  way["indoor"="corridor"]${b};`,
-        `  node["highway"="crossing"]${b};`,
-        `  way["building"]["name"]${b};`,
-      ].join('\n')
-    })
-    .join('\n')
+  const [s, w, n, e] = bbox
+  const b = `(${s},${w},${n},${e})`
+  const clauses = [
+    `  way["highway"~"^(${hw})$"]${b};`,
+    `  way["indoor"="corridor"]${b};`,
+    `  node["highway"="crossing"]${b};`,
+    `  way["building"]["name"]${b};`,
+  ].join('\n')
   return `[out:json][timeout:90];
 (
 ${clauses}

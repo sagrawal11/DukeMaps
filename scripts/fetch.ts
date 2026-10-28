@@ -4,7 +4,7 @@ import { writeFileSync, mkdirSync } from 'node:fs'
 import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { buildOverpassQuery } from '../src/osm/overpass'
-import { loadAreas } from './campus'
+import { loadBounds } from './campus'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const OVERPASS_URL = 'https://overpass-api.de/api/interpreter'
@@ -31,13 +31,15 @@ async function overpass(query: string): Promise<string> {
 }
 
 async function main(): Promise<void> {
-  const areas = loadAreas(ROOT)
-  if (areas.length === 0) {
-    console.error('[fetch] No bounding boxes set in config/campus.json. Run `npm run bbox` to pick them.')
+  let bounds: [number, number, number, number]
+  try {
+    bounds = loadBounds(ROOT)
+  } catch {
+    console.error('[fetch] No campus regions/bounds in config/campus.json. Run `npm run bbox`.')
     process.exit(1)
   }
-  const query = buildOverpassQuery(areas)
-  console.log(`[fetch] Querying Overpass for: ${areas.map((a) => a.area).join(', ')}`)
+  const query = buildOverpassQuery(bounds)
+  console.log(`[fetch] Querying Overpass for Duke bounds [s,w,n,e] = ${bounds.map((x) => x.toFixed(5)).join(', ')}`)
 
   let body: string | undefined
   for (let attempt = 1; attempt <= 2 && body === undefined; attempt++) {
