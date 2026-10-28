@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { haversineM, polylineLengthM, pointInPolygon } from '../src/graph/geo'
 import { edgeWeightS, WALK_SPEED_MPS, STAIRS_PENALTY } from '../src/graph/weights'
 import { buildGraph } from '../src/graph/build'
-import { connectedComponents, danglingStubs } from '../src/graph/validate'
+import { connectedComponents, danglingStubs, keepLargestComponent } from '../src/graph/validate'
 import { applyEdits, type EditOp } from '../src/graph/edits'
 import { graphToGeoJSON, componentColor } from '../src/map/render'
 import type { OsmResponse } from '../src/osm/overpass'
@@ -106,6 +106,13 @@ describe('validate', () => {
   it('finds dangling stubs (every leaf, not the intersection)', () => {
     const stubs = danglingStubs(graph).sort((a, b) => a - b)
     expect(stubs).toEqual([1, 3, 4, 5, 6, 8])
+  })
+
+  it('keepLargestComponent drops islands', () => {
+    const pruned = keepLargestComponent(graph)
+    expect(pruned.nodes.length).toBe(5) // mainland {1,2,3,4,5}
+    expect(pruned.nodes.some((n) => n.id === 6)).toBe(false) // island removed
+    expect(connectedComponents(pruned).count).toBe(1)
   })
 })
 

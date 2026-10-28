@@ -48,6 +48,18 @@ export function connectedComponents(graph: Graph): Components {
   return { count: roots.length, sizes: roots.map(([, s]) => s), componentOf }
 }
 
+// Keep only the largest connected component, dropping disconnected islands (mostly off-campus
+// Durham OSM fragments). Call AFTER replaying edits, so an edit that reconnects a real path to
+// the mainland saves it from being pruned.
+export function keepLargestComponent(graph: Graph): Graph {
+  if (graph.nodes.length === 0) return graph
+  const { componentOf } = connectedComponents(graph)
+  const inMain = (id: number) => componentOf.get(id) === 0 // component 0 is the largest
+  const nodes = graph.nodes.filter((n) => inMain(n.id))
+  const edges = graph.edges.filter((e) => inMain(e.from) && inMain(e.to))
+  return { nodes, edges, meta: { ...graph.meta, nodeCount: nodes.length, edgeCount: edges.length } }
+}
+
 // Degree-1 nodes: dead-end stubs worth eyeballing (often unconnected way ends).
 export function danglingStubs(graph: Graph): number[] {
   const degree = new Map<number, number>()

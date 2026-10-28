@@ -5,7 +5,7 @@ import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { buildGraph } from '../src/graph/build'
 import { applyEdits, type EditOp, type Dangling } from '../src/graph/edits'
-import { connectedComponents, danglingStubs, toValidationGeoJSON } from '../src/graph/validate'
+import { connectedComponents, danglingStubs, keepLargestComponent, toValidationGeoJSON } from '../src/graph/validate'
 import type { OsmResponse } from '../src/osm/overpass'
 import type { Graph } from '../src/graph/types'
 import { loadAreas } from './campus'
@@ -42,6 +42,13 @@ function main(): void {
     console.log(`[build:graph] replayed ${ops.length} edit(s)`)
   }
 
+  // Drop disconnected islands (mostly off-campus Durham fragments) — keep the largest connected
+  // component. After edits, so a reconnecting edit saves a real path from being pruned.
+  const beforePrune = connectedComponents(graph)
+  const beforeNodeCount = graph.nodes.length
+  graph = keepLargestComponent(graph)
+  const droppedNodes = beforeNodeCount - graph.nodes.length
+
   graph.meta.builtAt = new Date().toISOString()
   graph.meta.osmFetchedAt = statSync(raw).mtime.toISOString()
 
@@ -54,11 +61,10 @@ function main(): void {
   writeFileSync(resolve(outDir, 'places.json'), JSON.stringify(built.places, null, 2))
   writeFileSync(resolve(outDir, 'validation.geojson'), JSON.stringify(toValidationGeoJSON(graph)))
 
-  const comp = connectedComponents(graph)
   const stubs = danglingStubs(graph)
   console.log('[build:graph] ──── report ────')
   console.log(`  nodes: ${graph.nodes.length}   edges: ${graph.edges.length}   places: ${built.places.length}`)
-  console.log(`  connected components: ${comp.count}  (largest: ${comp.sizes.slice(0, 5).join(', ')})`)
+  console.log(`  pruned ${beforePrune.count - 1} island component(s) (${droppedNodes} nodes); graph is now 1 connected network`)
   console.log(`  dangling stubs (degree-1): ${stubs.length}`)
   if (dangling.length) {
     console.log(`  ⚠ ${dangling.length} dangling edit ref(s):`)
