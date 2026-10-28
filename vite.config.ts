@@ -11,6 +11,11 @@ import { defineConfig } from 'vitest/config'
 // /editor/, which is all the brief's "dev-only page" needs.
 export default defineConfig({
   base: './',
+  // maplibre-gl v6 loads a web worker (maplibre-gl-worker.mjs) via a relative URL. Vite's dep
+  // optimizer pre-bundles maplibre but doesn't copy that worker into .vite/deps, so the worker
+  // 404s and the map hangs forever on "Loading…". Excluding it from pre-bundling makes the
+  // worker resolve from the real package files.
+  optimizeDeps: { exclude: ['maplibre-gl'] },
   test: {
     environment: 'node',
     include: ['tests/**/*.test.ts'],
