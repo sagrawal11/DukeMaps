@@ -47,7 +47,10 @@ function main(): void {
 
   const outDir = resolve(ROOT, 'data/processed')
   mkdirSync(outDir, { recursive: true })
-  writeFileSync(resolve(outDir, 'graph.json'), JSON.stringify(graph))
+  const publicDataDir = resolve(ROOT, 'public/data')
+  mkdirSync(publicDataDir, { recursive: true })
+  // graph.json is fetched by the app at runtime, so it lives under public/ (served + shipped).
+  writeFileSync(resolve(publicDataDir, 'graph.json'), JSON.stringify(graph))
   writeFileSync(resolve(outDir, 'places.json'), JSON.stringify(built.places, null, 2))
   writeFileSync(resolve(outDir, 'validation.geojson'), JSON.stringify(toValidationGeoJSON(graph)))
 
@@ -61,7 +64,7 @@ function main(): void {
     console.log(`  ⚠ ${dangling.length} dangling edit ref(s):`)
     for (const d of dangling) console.log(`    - ${d.reason}`)
   }
-  console.log('[build:graph] wrote data/processed/{graph.json, places.json, validation.geojson}')
+  console.log('[build:graph] wrote public/data/graph.json + data/processed/{places.json, validation.geojson}')
 }
 
 main()
