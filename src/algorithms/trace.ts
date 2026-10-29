@@ -9,6 +9,7 @@ export type TraceEventType =
   | 'skip' // an edge was unusable for this query (not step-free / closed) and ignored
   | 'meet' // the two halves of a bidirectional search touched the same node
   | 'found' // the target was reached (search can stop)
+  | 'shortcut' // a CH shortcut was unpacked into its two underlying arcs (node = the contracted via-node)
 
 export interface TraceEvent {
   type: TraceEventType
