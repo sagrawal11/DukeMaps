@@ -4,6 +4,7 @@ import { readFileSync, writeFileSync, mkdirSync, readdirSync, existsSync, statSy
 import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { buildGraph } from '../src/graph/build'
+import { densifyGraph } from '../src/graph/densify'
 import { applyEdits, type EditOp, type Dangling } from '../src/graph/edits'
 import { connectedComponents, danglingStubs, keepLargestComponent, toValidationGeoJSON } from '../src/graph/validate'
 import type { OsmResponse } from '../src/osm/overpass'
@@ -49,6 +50,14 @@ function main(): void {
   graph = keepLargestComponent(graph)
   const droppedNodes = beforeNodeCount - graph.nodes.length
 
+  // Densify long edges: split any edge > MAX_SEG_M into ~MAX_SEG_M sub-edges with pass-through nodes, so a
+  // tap snaps to a node near where you clicked instead of a distant edge endpoint (which caused long
+  // detours like exiting a building from the wrong side). Shape + total walking cost are preserved.
+  const MAX_SEG_M = 25
+  const preDensifyNodes = graph.nodes.length
+  graph = densifyGraph(graph, MAX_SEG_M)
+  const addedNodes = graph.nodes.length - preDensifyNodes
+
   graph.meta.builtAt = new Date().toISOString()
   graph.meta.osmFetchedAt = statSync(raw).mtime.toISOString()
 
@@ -73,6 +82,7 @@ function main(): void {
   const stubs = danglingStubs(graph)
   console.log('[build:graph] ──── report ────')
   console.log(`  nodes: ${graph.nodes.length}   edges: ${graph.edges.length}   places: ${built.places.length}`)
+  console.log(`  densified: +${addedNodes} pass-through nodes (split edges > ${MAX_SEG_M}m for accurate snapping)`)
   console.log(`  pruned ${beforePrune.count - 1} island component(s) (${droppedNodes} nodes); graph is now 1 connected network`)
   console.log(`  dangling stubs (degree-1): ${stubs.length}`)
   if (dangling.length) {
