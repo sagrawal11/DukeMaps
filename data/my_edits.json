@@ -5,5 +5,97 @@
     "from": 1643293398,
     "to": 6085591792,
     "kind": "path"
+  },
+  {
+    "op": "add_edge",
+    "id": "mine:1",
+    "from": 170519473,
+    "to": 7491862264,
+    "kind": "path"
+  },
+  {
+    "op": "add_edge",
+    "id": "mine:2",
+    "from": 7491862274,
+    "to": 170519473,
+    "kind": "path"
+  },
+  {
+    "op": "add_edge",
+    "id": "mine:3",
+    "from": 6245701868,
+    "to": 14188798802,
+    "kind": "path"
+  },
+  {
+    "op": "add_edge",
+    "id": "mine:4",
+    "from": 5366936734,
+    "to": 5366932191,
+    "kind": "path"
+  },
+  {
+    "op": "add_edge",
+    "id": "mine:5",
+    "from": 5366932191,
+    "to": 5366936730,
+    "kind": "path"
+  },
+  {
+    "op": "delete_edge",
+    "id": "mine:5"
+  },
+  {
+    "op": "add_node",
+    "id": -1,
+    "lat": 35.98942708375077,
+    "lon": -78.92627086438999
+  },
+  {
+    "op": "add_edge",
+    "id": "mine:6",
+    "from": 5366932191,
+    "to": -1,
+    "kind": "path"
+  },
+  {
+    "op": "add_edge",
+    "id": "mine:7",
+    "from": -1,
+    "to": 5366936730,
+    "kind": "path"
+  },
+  {
+    "op": "add_edge",
+    "id": "mine:8",
+    "from": 5366932169,
+    "to": 5366932171,
+    "kind": "path"
+  },
+  {
+    "op": "add_edge",
+    "id": "mine:9",
+    "from": 5366932171,
+    "to": 5366932173,
+    "kind": "path"
+  },
+  {
+    "op": "add_edge",
+    "id": "mine:10",
+    "from": 5366932173,
+    "to": 5366936734,
+    "kind": "path"
+  },
+  {
+    "op": "move_node",
+    "id": 170734602,
+    "lat": 36.013153550685644,
+    "lon": -78.90561092269036
+  },
+  {
+    "op": "move_node",
+    "id": 6245701812,
+    "lat": 36.00241158630314,
+    "lon": -78.92913904095508
   }
 ]
