@@ -145,6 +145,23 @@ describe('applyEdits', () => {
     applyEdits(graph, [{ op: 'delete_edge', id: '100:0' }])
     expect(graph.edges.length).toBe(before)
   })
+
+  it('move_node drags incident edge endpoints and recomputes length/weight', () => {
+    // Edge 101:1 is the OSM edge 2 -> 5; node 5 is its `to` endpoint (geometry[last]).
+    const before = applyEdits(graph, []).graph.edges.find((e) => e.id === '101:1')!
+    expect(before.to).toBe(5)
+
+    const after = applyEdits(graph, [{ op: 'move_node', id: 5, lat: 36.002, lon: -78.897 }]).graph.edges.find(
+      (e) => e.id === '101:1',
+    )!
+    expect(after.geometry[after.geometry.length - 1]).toEqual([-78.897, 36.002]) // endpoint followed node 5
+    expect(after.geometry[0]).toEqual(before.geometry[0]) // the other end stayed put
+    expect(after.lengthM).not.toBeCloseTo(before.lengthM, 5) // length recomputed
+    expect(after.weightS).toBeCloseTo(after.lengthM / WALK_SPEED_MPS, 6) // path kind: no stairs penalty
+
+    // The input graph's geometry is untouched (applyEdits stays pure).
+    expect(graph.edges.find((e) => e.id === '101:1')!.geometry[1]).toEqual([-78.899, 36.001])
+  })
 })
 
 describe('render', () => {

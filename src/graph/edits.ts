@@ -53,6 +53,21 @@ export function applyEdits(graph: Graph, ops: EditOp[]): EditResult {
         }
         n.lat = op.lat
         n.lon = op.lon
+        // Dragging a node drags the endpoints of its incident edges with it, so geometry stays
+        // attached (edge geometry[0] is always the `from` node, geometry[last] the `to` node —
+        // see build.ts). Two independent ifs cover a self-loop (from === to === id). We clone the
+        // geometry array first so the base graph passed in is never mutated (applyEdits is pure,
+        // and the editor re-applies the log against the same base on every render). Length and
+        // weight are recomputed from the moved geometry.
+        for (const e of edges.values()) {
+          if (e.from !== op.id && e.to !== op.id) continue
+          const geom = e.geometry.map((c) => [c[0], c[1]] as [number, number])
+          if (e.from === op.id) geom[0] = [op.lon, op.lat]
+          if (e.to === op.id) geom[geom.length - 1] = [op.lon, op.lat]
+          e.geometry = geom
+          e.lengthM = polylineLengthM(geom)
+          e.weightS = edgeWeightS(e.lengthM, e.kind)
+        }
         break
       }
       case 'delete_node':

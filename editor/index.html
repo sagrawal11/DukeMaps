@@ -4,9 +4,23 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>DukeMaps — Editor (dev only)</title>
+    <style>
+      html, body, #map { height: 100%; margin: 0; }
+      #map { position: absolute; inset: 0; }
+      #panel {
+        position: absolute; top: 0; right: 0; width: 320px; max-height: 100%;
+        overflow: auto; background: #fff; font: 13px/1.45 system-ui, sans-serif;
+        padding: 14px; box-shadow: -2px 0 10px rgba(0, 0, 0, 0.15); z-index: 1;
+      }
+      #panel h2 { font-size: 16px; margin: 0 0 6px; }
+      #panel code { background: #f4f4f4; padding: 0 3px; border-radius: 3px; }
+      #panel button { border: 1px solid #ccc; background: #f7f7f7; border-radius: 4px; cursor: pointer; }
+      #panel button:hover { background: #eee; }
+    </style>
   </head>
   <body>
-    <div id="editor"></div>
+    <div id="map"></div>
+    <div id="panel"></div>
     <script type="module" src="./main.ts"></script>
   </body>
 </html>

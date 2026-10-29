@@ -58,6 +58,13 @@ function main(): void {
   mkdirSync(publicDataDir, { recursive: true })
   // graph.json is fetched by the app at runtime, so it lives under public/ (served + shipped).
   writeFileSync(resolve(publicDataDir, 'graph.json'), JSON.stringify(graph))
+  // The dev-only editor edits against the pre-edit, pre-prune OSM build (this "base"), then
+  // replays the edit log itself — mirroring this script — so what it shows equals what build:graph
+  // produces. `built.graph` is still pristine here (applyEdits/keepLargestComponent return new
+  // graphs). Kept in data/processed (committed, NOT public/, so it isn't shipped); served to the
+  // editor via the dev plugin's /__base route.
+  built.graph.meta.osmFetchedAt = graph.meta.osmFetchedAt
+  writeFileSync(resolve(outDir, 'graph.base.json'), JSON.stringify(built.graph))
   writeFileSync(resolve(outDir, 'places.json'), JSON.stringify(built.places, null, 2))
   writeFileSync(resolve(outDir, 'validation.geojson'), JSON.stringify(toValidationGeoJSON(graph)))
 
@@ -70,7 +77,7 @@ function main(): void {
     console.log(`  ⚠ ${dangling.length} dangling edit ref(s):`)
     for (const d of dangling) console.log(`    - ${d.reason}`)
   }
-  console.log('[build:graph] wrote public/data/graph.json + data/processed/{places.json, validation.geojson}')
+  console.log('[build:graph] wrote public/data/graph.json + data/processed/{graph.base.json, places.json, validation.geojson}')
 }
 
 main()
