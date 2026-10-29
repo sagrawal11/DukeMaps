@@ -7,10 +7,14 @@ import * as maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { Protocol } from 'pmtiles'
 import themeLayers from 'protomaps-themes-base'
-import type { Graph, Place } from './graph/types'
+import type { Graph, GraphNode, Place } from './graph/types'
 import { graphToGeoJSON } from './map/render'
 import { buildPlaceIndex, type PlaceIndex } from './places/search'
 import { buildEdgeIndex, type EdgeIndex } from './spatial/snap'
+import { buildRoutingGraph, makeWeight } from './algorithms/routing'
+import { dijkstra } from './algorithms/dijkstra'
+import { createOverlay } from './map/overlay'
+import { makePlayer, type Player } from './anim/player'
 import aliasesConfig from '../config/aliases.json'
 
 const statusEl = document.createElement('div')
@@ -79,19 +83,43 @@ interface Endpoint {
   label: string
   point: [number, number]
   distM: number
+  node: GraphNode // routing anchor (nearest edge endpoint) — what the algorithms route between
 }
 
 // Pick From and To by searching a building (fuzzy autocomplete) or tapping the map. Each endpoint
 // snaps to the nearest point on the walk network via the Phase-4 edge index.
-function setupUI(map: maplibregl.Map, placeIndex: PlaceIndex, edgeIndex: EdgeIndex): void {
+function setupUI(map: maplibregl.Map, graph: Graph, placeIndex: PlaceIndex, edgeIndex: EdgeIndex): void {
+  const rg = buildRoutingGraph(graph) // the algorithms' view of the graph, built once
+  const weight = makeWeight(rg) // base walking-time metric (step-free + "Leave at" come in 6c)
+  const overlay = createOverlay(map, graph) // canvas layer the animation draws on
+  let player: Player | null = null
+
   const panel = document.createElement('div')
   panel.className = 'panel'
   panel.innerHTML =
     '<div class="brand">DukeMaps</div>' +
     '<div class="field"><input id="from" placeholder="From — search or tap the map" autocomplete="off" /><div class="ac" id="ac-from"></div></div>' +
     '<div class="field"><input id="to" placeholder="To — search or tap the map" autocomplete="off" /><div class="ac" id="ac-to"></div></div>' +
-    '<div class="info" id="info"></div>'
+    '<div class="info" id="info"></div>' +
+    '<div class="show" id="show" hidden>' +
+    '<div class="caption" id="caption"></div>' +
+    '<div class="controls">' +
+    '<button type="button" id="playpause">Pause</button>' +
+    '<button type="button" id="skip">Skip to result</button>' +
+    '<label class="spd">Speed <input type="range" id="speed" min="0.25" max="4" step="0.25" value="1" /></label>' +
+    '</div>' +
+    '<div class="stats" id="stats"></div>' +
+    '<div class="result" id="result"></div>' +
+    '</div>'
   document.body.appendChild(panel)
+
+  const showEl = panel.querySelector('#show') as HTMLDivElement
+  const captionEl = panel.querySelector('#caption') as HTMLDivElement
+  const statsEl = panel.querySelector('#stats') as HTMLDivElement
+  const resultEl = panel.querySelector('#result') as HTMLDivElement
+  const playBtn = panel.querySelector('#playpause') as HTMLButtonElement
+  const skipBtn = panel.querySelector('#skip') as HTMLButtonElement
+  const speedEl = panel.querySelector('#speed') as HTMLInputElement
 
   const input = (w: Which): HTMLInputElement => panel.querySelector(`#${w}`) as HTMLInputElement
   const infoEl = panel.querySelector('#info') as HTMLDivElement
@@ -104,19 +132,66 @@ function setupUI(map: maplibregl.Map, placeIndex: PlaceIndex, edgeIndex: EdgeInd
       chosen[w]
         ? `<b>${name}:</b> ${esc(chosen[w]!.label)} <span class="dim">· snapped ${Math.round(chosen[w]!.distM)} m</span>`
         : `<b>${name}:</b> <span class="dim">—</span>`
-    const both = chosen.from && chosen.to
-    infoEl.innerHTML =
-      `${line('from', 'From')}<br>${line('to', 'To')}` +
-      (both ? '<br><span class="ready">Both pinned — routing + the algorithm race arrive in Phase 5–6.</span>' : '')
+    infoEl.innerHTML = `${line('from', 'From')}<br>${line('to', 'To')}`
   }
+
+  const fmtTime = (s: number): string => (s < 90 ? `${Math.round(s)} s` : `${Math.round(s / 60)} min`)
+  const fmtDist = (m: number): string => (m < 950 ? `${Math.round(m)} m` : `${(m / 1000).toFixed(2)} km`)
+
+  // Route between the two snapped anchors with Dijkstra and animate its exploration, then draw the
+  // route. (Phase 6b adds the other algorithms in sequence; 6c adds step-free + "Leave at" options.)
+  const runShow = (): void => {
+    if (!chosen.from || !chosen.to) return
+    player?.dispose()
+    overlay.clear()
+    resultEl.textContent = ''
+    const trace = dijkstra(rg, chosen.from.node.id, chosen.to.node.id, { weight })
+    showEl.hidden = false
+    captionEl.textContent = 'Dijkstra — always expands the node reachable in the least walking time so far.'
+    const onDone = (): void => {
+      playBtn.textContent = 'Replay'
+      if (trace.route) {
+        overlay.drawRoute(trace.route)
+        resultEl.innerHTML = `<b>${fmtTime(trace.route.costS)}</b> · ${fmtDist(trace.route.distanceM)} walk`
+      } else {
+        resultEl.textContent = 'No route found.'
+      }
+    }
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    player = makePlayer(
+      trace,
+      (s) => {
+        overlay.redraw(s)
+        statsEl.innerHTML = `settled <b>${s.settled.size}</b> · edges relaxed <b>${s.relaxed.size}</b>`
+      },
+      { speed: Number(speedEl.value) || 1, reducedMotion: reduced, onDone },
+    )
+    playBtn.textContent = 'Pause'
+    player.play()
+  }
+
+  playBtn.addEventListener('click', () => {
+    if (!player) return
+    if (playBtn.textContent === 'Replay') runShow()
+    else if (player.playing) {
+      player.pause()
+      playBtn.textContent = 'Play'
+    } else {
+      player.play()
+      playBtn.textContent = 'Pause'
+    }
+  })
+  skipBtn.addEventListener('click', () => player?.skipToResult())
+  speedEl.addEventListener('input', () => player?.setSpeed(Number(speedEl.value) || 1))
 
   const setEndpoint = (w: Which, lonLat: [number, number], label: string): void => {
     const snap = edgeIndex.snap(lonLat[0], lonLat[1])
     if (!snap) return
-    chosen[w] = { label, point: snap.point, distM: snap.distM }
+    chosen[w] = { label, point: snap.point, distM: snap.distM, node: snap.node }
     const m = markers[w] ?? new maplibregl.Marker({ color: colors[w] })
     markers[w] = m.setLngLat(snap.point).addTo(map)
     renderInfo()
+    if (chosen.from && chosen.to) runShow() // both pinned → start the show
   }
 
   const clearEndpoint = (w: Which): void => {
@@ -124,6 +199,10 @@ function setupUI(map: maplibregl.Map, placeIndex: PlaceIndex, edgeIndex: EdgeInd
     markers[w] = null
     chosen[w] = null
     input(w).value = ''
+    showEl.hidden = true
+    overlay.clear()
+    player?.dispose()
+    player = null
   }
 
   const wireField = (w: Which): void => {
@@ -209,6 +288,6 @@ map.on('load', () => {
     const aliases = (aliasesConfig as { aliases?: Record<string, string> }).aliases ?? {}
     const placeIndex = buildPlaceIndex(places ?? [], aliases)
     const edgeIndex = buildEdgeIndex(graph)
-    setupUI(map, placeIndex, edgeIndex)
+    setupUI(map, graph, placeIndex, edgeIndex)
   })
 })
