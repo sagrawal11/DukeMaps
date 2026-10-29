@@ -90,6 +90,17 @@ export function splitEdgeOps(
   }
 }
 
+// Audit flag for the "missing attributes" view — does this edge look incomplete or mis-tagged?
+// These are the four conditions chosen for the audit; it's a toggle-on review aid, so a little
+// over-flagging is fine (better to eyeball an edge than miss one).
+export function missingAttrs(edge: GraphEdge): boolean {
+  if (edge.kind === 'unknown') return true // OSM tags didn't classify it
+  if ((edge.kind === 'passage' || edge.kind === 'indoor') && edge.requires.length === 0) return true // building/dorm passage with no access rule
+  if (edge.kind === 'stairs' && edge.stepFree) return true // stairs can't be step-free (contradiction)
+  if (edge.source === 'mine' && edge.requires.length === 0) return true // an edge I added that's still public — confirm it's meant to be
+  return false
+}
+
 // Nearest graph node to a lon/lat within radiusM (linear scan — a spatial index is Phase 4). Used
 // by the GPX "accept" flow to snap new endpoints onto the existing network.
 // ponytail: O(n) scan over ~6k nodes, sub-ms; replace with the Phase 4 index if it ever matters.

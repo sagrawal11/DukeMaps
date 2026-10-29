@@ -11,6 +11,7 @@ import type { EditOp } from '../src/graph/edits'
 import { splitEdgeOps } from '../src/graph/editing'
 import { installInspector } from './inspector'
 import { updateGraphLayers, setSelection, NODES_SRC, EDGES_SRC } from './layers'
+import { installAudit, AUDIT_ORDER } from './audit'
 
 type Gesture =
   | { type: 'draw-edge'; fromId: number; fromPx: [number, number] }
@@ -24,6 +25,7 @@ const HINTS: Record<Tool, string> = {
     'Press on a node, drag to another node, release. Release on empty space to create a new node. Snaps to nearby nodes.',
   'split-edge': 'Click an edge to split it at that point (inserts a node).',
   'move-node': 'Drag a node to move it — its edges follow. Drag empty space to pan.',
+  passage: 'Click the first door, then the second, to join them with a passage edge. Then set its access rule in the inspector.',
 }
 const CURSORS: Record<Tool, string> = {
   select: '',
@@ -31,12 +33,15 @@ const CURSORS: Record<Tool, string> = {
   'draw-edge': 'crosshair',
   'split-edge': 'crosshair',
   'move-node': 'move',
+  passage: 'crosshair',
 }
 
 export function installTools(map: maplibregl.Map, state: EditorState, overlay: Overlay): void {
   const container = map.getCanvasContainer()
   let gesture: Gesture | null = null
+  let pendingDoor: number | null = null // passage tool: the first door awaiting its partner
   const inspector = installInspector(state)
+  const audit = installAudit(map)
 
   // ---- geometry / hit-testing helpers ----
   const containerXY = (ev: MouseEvent): [number, number] => {
@@ -92,6 +97,7 @@ export function installTools(map: maplibregl.Map, state: EditorState, overlay: O
          <button data-tool="draw-edge">Draw edge <kbd>E</kbd></button>
          <button data-tool="split-edge">Split <kbd>S</kbd></button>
          <button data-tool="move-node">Move <kbd>M</kbd></button>
+         <button data-tool="passage">Passage <kbd>P</kbd></button>
        </div>
        <div style="display:flex;gap:4px;margin-top:6px">
          <button id="t-undo">Undo <kbd>⌘Z</kbd></button>
@@ -120,7 +126,8 @@ export function installTools(map: maplibregl.Map, state: EditorState, overlay: O
     hintEl.textContent = HINTS[state.tool]
     statusEl.innerHTML =
       `<b>${state.graph.edges.length.toLocaleString()} edges · ${state.graph.nodes.length.toLocaleString()} nodes</b>` +
-      ` <span style="color:#888">· ${state.editCount()} edit(s) this session</span>`
+      ` <span style="color:#888">· ${state.editCount()} edit(s) this session</span>` +
+      (state.dangling ? `<div style="color:#b00">⚠ ${state.dangling} edit(s) reference a missing id</div>` : '')
     selEl.textContent = nSel + eSel ? `${nSel} node(s), ${eSel} edge(s) selected` : ''
     container.style.cursor = CURSORS[state.tool]
   }
@@ -220,6 +227,7 @@ export function installTools(map: maplibregl.Map, state: EditorState, overlay: O
   // ---- tool switching + delete ----
   const setTool = (t: Tool): void => {
     cancelGesture()
+    pendingDoor = null
     state.tool = t
     render()
   }
@@ -272,6 +280,27 @@ export function installTools(map: maplibregl.Map, state: EditorState, overlay: O
         render()
       } else {
         hintEl.textContent = `⚠ ${r.error}`
+      }
+    } else if (state.tool === 'passage') {
+      // Door-to-door: click the first door, then the second. Snap to an existing node or drop a new
+      // door node. The passage edge (kind=passage) is auto-selected so the inspector opens to set
+      // requires/hours/step-free — "all in one panel" per the brief.
+      let id = nearestNode(px)
+      if (id == null) {
+        id = state.newNodeId()
+        state.commit([{ op: 'add_node', id, lat: e.lngLat.lat, lon: e.lngLat.lng }])
+      }
+      if (pendingDoor == null || pendingDoor === id) {
+        pendingDoor = id
+        state.selection = { nodes: new Set([id]), edges: new Set() }
+        render()
+        hintEl.textContent = 'First door set — click the second door to connect the passage.'
+      } else {
+        const edgeId = state.newEdgeId()
+        state.commit([{ op: 'add_edge', id: edgeId, from: pendingDoor, to: id, kind: 'passage' }])
+        state.selection = { nodes: new Set(), edges: new Set([edgeId]) }
+        pendingDoor = null
+        render()
       }
     } else if (state.tool === 'select' && !e.originalEvent.shiftKey) {
       const nid = nearestNode(px)
@@ -352,6 +381,19 @@ export function installTools(map: maplibregl.Map, state: EditorState, overlay: O
       case 'M':
         setTool('move-node')
         break
+      case 'p':
+      case 'P':
+        setTool('passage')
+        break
+      case '1':
+      case '2':
+      case '3':
+      case '4':
+      case '5': {
+        const mode = AUDIT_ORDER[Number(ev.key) - 1]
+        if (mode) audit.setMode(mode)
+        break
+      }
       case 'Delete':
       case 'Backspace':
         ev.preventDefault()

@@ -9,7 +9,7 @@ import type { Graph, GraphNode } from '../src/graph/types'
 import type { EditOp } from '../src/graph/edits'
 import { applyEdits } from '../src/graph/edits'
 
-export type Tool = 'select' | 'add-node' | 'draw-edge' | 'split-edge' | 'move-node'
+export type Tool = 'select' | 'add-node' | 'draw-edge' | 'split-edge' | 'move-node' | 'passage'
 
 // Multi-select: sets of selected node ids and edge ids (either may be empty).
 export interface Selection {
@@ -25,6 +25,7 @@ export class EditorState {
   redo: EditOp[][] = []
   graph: Graph
   nodeIndex: Map<number, GraphNode>
+  dangling = 0 // edit-log ops that reference a now-missing id (reported, not fatal)
   tool: Tool = 'select'
   selection: Selection = emptySelection()
   onChange: () => void = () => {}
@@ -49,7 +50,9 @@ export class EditorState {
     }
     this.nextNodeId = nextNode
     this.nextEdgeSeq = nextSeq
-    this.graph = applyEdits(base, this.log()).graph
+    const applied = applyEdits(base, this.log())
+    this.graph = applied.graph
+    this.dangling = applied.dangling.length
     this.nodeIndex = this.indexNodes()
   }
 
@@ -101,7 +104,9 @@ export class EditorState {
   }
 
   private refresh(): void {
-    this.graph = applyEdits(this.base, this.log()).graph
+    const applied = applyEdits(this.base, this.log())
+    this.graph = applied.graph
+    this.dangling = applied.dangling.length
     this.nodeIndex = this.indexNodes()
     this.onChange()
     this.scheduleSave()

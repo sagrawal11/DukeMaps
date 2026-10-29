@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { projectPointOnSegment, projectPointOnPolyline, splitEdgeOps, snapToNearestNode } from '../src/graph/editing'
+import { projectPointOnSegment, projectPointOnPolyline, splitEdgeOps, snapToNearestNode, missingAttrs } from '../src/graph/editing'
 import { polylineLengthM } from '../src/graph/geo'
 import { applyEdits, type EditOp } from '../src/graph/edits'
 import type { Graph, GraphEdge, GraphNode } from '../src/graph/types'
@@ -127,4 +127,34 @@ describe('snapToNearestNode', () => {
   it('returns null when nothing is within the radius', () => {
     expect(snapToNearestNode(nodes, -78.95, 36.0, 20)).toBeNull()
   })
+})
+
+describe('missingAttrs', () => {
+  const mk = (over: Partial<GraphEdge>): GraphEdge => ({
+    id: 'x',
+    source: 'osm',
+    from: 1,
+    to: 2,
+    kind: 'footway',
+    requires: [],
+    stepFree: true,
+    geometry: [
+      [0, 0],
+      [0, 0],
+    ],
+    lengthM: 0,
+    weightS: 0,
+    ...over,
+  })
+  it('flags unknown kind', () => expect(missingAttrs(mk({ kind: 'unknown' }))).toBe(true))
+  it('flags a passage/indoor edge with no requires', () => {
+    expect(missingAttrs(mk({ kind: 'passage' }))).toBe(true)
+    expect(missingAttrs(mk({ kind: 'indoor' }))).toBe(true)
+  })
+  it('flags stairs marked step-free', () => expect(missingAttrs(mk({ kind: 'stairs', stepFree: true }))).toBe(true))
+  it('flags a mine edge still public (no requires)', () =>
+    expect(missingAttrs(mk({ source: 'mine', requires: [] }))).toBe(true))
+  it('passes a complete public OSM footway', () => expect(missingAttrs(mk({}))).toBe(false))
+  it('passes a passage that has an access rule', () =>
+    expect(missingAttrs(mk({ kind: 'passage', requires: ['duke_card'] }))).toBe(false))
 })
