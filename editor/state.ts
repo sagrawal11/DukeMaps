@@ -9,8 +9,14 @@ import type { Graph, GraphNode } from '../src/graph/types'
 import type { EditOp } from '../src/graph/edits'
 import { applyEdits } from '../src/graph/edits'
 
-export type Tool = 'select' | 'add-node' | 'draw-edge' | 'move-node'
-export type Selection = { kind: 'node'; id: number } | { kind: 'edge'; id: string } | null
+export type Tool = 'select' | 'add-node' | 'draw-edge' | 'split-edge' | 'move-node'
+
+// Multi-select: sets of selected node ids and edge ids (either may be empty).
+export interface Selection {
+  nodes: Set<number>
+  edges: Set<string>
+}
+export const emptySelection = (): Selection => ({ nodes: new Set(), edges: new Set() })
 
 export class EditorState {
   readonly base: Graph
@@ -20,7 +26,7 @@ export class EditorState {
   graph: Graph
   nodeIndex: Map<number, GraphNode>
   tool: Tool = 'select'
-  selection: Selection = null
+  selection: Selection = emptySelection()
   onChange: () => void = () => {}
 
   private nextNodeId: number
