@@ -150,7 +150,7 @@ function setupUI(
   panel.className = 'panel'
   panel.innerHTML =
     '<button type="button" class="sheet-handle" id="sheet-handle" aria-label="Expand or collapse the panel"></button>' +
-    '<div class="brand">DukeMaps</div>' +
+    '<div class="brandrow"><span class="brand">DukeMaps</span><button type="button" class="about-link" id="about-open">About</button></div>' +
     '<div class="field"><input id="from" placeholder="From — search or tap the map" autocomplete="off" /><div class="ac" id="ac-from"></div></div>' +
     '<div class="field"><input id="to" placeholder="To — search or tap the map" autocomplete="off" /><div class="ac" id="ac-to"></div></div>' +
     '<button type="button" class="disclosure" id="opt-toggle" aria-expanded="false">Options</button>' +
@@ -191,6 +191,42 @@ function setupUI(
   document.body.appendChild(panel)
   // Mobile bottom-sheet: the grab handle collapses/expands the sheet so the map stays visible.
   panel.querySelector('#sheet-handle')?.addEventListener('click', () => panel.classList.toggle('collapsed'))
+
+  // About modal — what DukeMaps is, the algorithms (mechanism-first), the article, and OSM/ODbL credit.
+  const about = document.createElement('div')
+  about.className = 'about-backdrop'
+  about.hidden = true
+  about.innerHTML =
+    '<div class="about-card" role="dialog" aria-modal="true" aria-label="About DukeMaps">' +
+    '<button type="button" class="about-close" id="about-close" aria-label="Close">×</button>' +
+    '<h2 class="about-title">DukeMaps</h2>' +
+    '<p>Walking directions across Duke’s campus — and a live look at the search algorithms behind modern routing engines like Google Maps. Search two places, watch each algorithm explore the map, then see its route.</p>' +
+    '<p class="about-h">The algorithms, in the order they appear</p>' +
+    '<ul class="about-list">' +
+    '<li><b>BFS</b> — explores in rings of equal hop-count: fewest turns, rarely the fastest walk.</li>' +
+    '<li><b>DFS</b> — plunges down one branch until stuck; finds a path, almost never a good one.</li>' +
+    '<li><b>Dijkstra</b> — always expands the cheapest-so-far node: optimal, but fans out in every direction.</li>' +
+    '<li><b>A*</b> — Dijkstra plus a straight-line hint toward the goal: same route, far fewer nodes.</li>' +
+    '<li><b>Bidirectional</b> — two searches meet in the middle; two small frontiers beat one big one.</li>' +
+    '<li><b>Contraction Hierarchies</b> — precomputed shortcuts let the search leap up to important paths and back down.</li>' +
+    '<li><b>Customizable CH</b> — the same hierarchy, re-weighted cheaply when crowding or a step-free toggle changes.</li>' +
+    '</ul>' +
+    '<p>The inset tree shows how CH and CCH climb from both ends to a meeting node, then unpack back down to the street-level route.</p>' +
+    '<p class="about-cta"><a href="https://fundamentalstack.substack.com" target="_blank" rel="noopener">Read “How Google Maps Works” on Fundamental Stack →</a></p>' +
+    '<p class="about-attr">Map data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors (ODbL) · tiles <a href="https://protomaps.com" target="_blank" rel="noopener">Protomaps</a>. The graph, every algorithm, and the spatial index are hand-written in TypeScript.</p>' +
+    '</div>'
+  document.body.appendChild(about)
+  const closeAbout = (): void => {
+    about.hidden = true
+  }
+  panel.querySelector('#about-open')?.addEventListener('click', () => (about.hidden = false))
+  about.querySelector('#about-close')?.addEventListener('click', closeAbout)
+  about.addEventListener('click', (e) => {
+    if (e.target === about) closeAbout() // click the backdrop (outside the card) to dismiss
+  })
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !about.hidden) closeAbout()
+  })
 
   const showEl = panel.querySelector('#show') as HTMLDivElement
   const chipsEl = panel.querySelector('#chips') as HTMLDivElement
