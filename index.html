@@ -13,6 +13,31 @@
         box-shadow: 0 1px 6px rgba(0, 0, 0, 0.2); z-index: 1;
       }
       .legend code { background: #f4f4f4; padding: 0 3px; border-radius: 3px; }
+      .panel {
+        position: absolute; top: 10px; left: 10px; width: 300px; max-width: calc(100vw - 20px);
+        background: #fff; border-radius: 10px; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.18);
+        padding: 12px; font: 14px/1.4 system-ui, sans-serif; z-index: 2;
+      }
+      .panel .brand { font-weight: 700; font-size: 15px; margin-bottom: 8px; }
+      .panel .field { position: relative; margin-bottom: 8px; }
+      .panel input {
+        width: 100%; box-sizing: border-box; padding: 8px 10px; border: 1px solid #d0d5dd;
+        border-radius: 8px; font: inherit;
+      }
+      .panel input:focus { outline: 2px solid #2e6fd6; border-color: #2e6fd6; }
+      .ac {
+        position: absolute; left: 0; right: 0; top: calc(100% + 2px); background: #fff;
+        border: 1px solid #e4e7ec; border-radius: 8px; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.14);
+        max-height: 240px; overflow: auto; display: none; z-index: 3;
+      }
+      .ac .hit {
+        display: block; width: 100%; text-align: left; border: 0; background: none;
+        padding: 8px 10px; font: inherit; cursor: pointer;
+      }
+      .ac .hit:hover { background: #f2f6fc; }
+      .info { margin-top: 4px; color: #344054; font-size: 13px; }
+      .info .dim { color: #98a2b3; }
+      .info .ready { color: #2e9e5b; }
     </style>
   </head>
   <body>
