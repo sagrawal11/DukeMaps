@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url'
 import { haversineM } from '../src/graph/geo'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
-const MAX_M = 70 // a door should sit within this of its building's centroid; farther = orphan (warned)
+const MAX_M = 95 // a door should sit within this of its building's centroid (big quads put doors ~80m out); farther = orphan
 
 interface Icon { id: string; name: string; lat: number | null; lon: number | null }
 const icons = (JSON.parse(readFileSync(resolve(ROOT, 'config/building-icons.json'), 'utf8')) as Icon[]).filter(

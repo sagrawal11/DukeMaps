@@ -20,7 +20,16 @@
   "area": "West Campus",
   "nickname": "Gray",
   "tier": 3,
-  "doors": [],
+  "doors": [
+   [
+    -78.93960589010096,
+    36.001922648143776
+   ],
+   [
+    -78.9397755371761,
+    36.00166982980606
+   ]
+  ],
   "lat": 36.00191145,
   "lon": -78.93936746923076,
   "place": "Gray Building",
@@ -48,7 +57,12 @@
   "area": "West Campus",
   "nickname": "Languages",
   "tier": 3,
-  "doors": [],
+  "doors": [
+   [
+    -78.93841316814697,
+    36.00163059798996
+   ]
+  ],
   "lat": 36.00212153571429,
   "lon": -78.93814942857144,
   "place": "Languages Building",
@@ -132,7 +146,20 @@
   "area": "West Campus",
   "nickname": "Crowell",
   "tier": 1,
-  "doors": [],
+  "doors": [
+   [
+    -78.93973455691545,
+    35.99885680030056
+   ],
+   [
+    -78.9401183881594,
+    35.999058225233085
+   ],
+   [
+    -78.94023872444114,
+    35.99890212095502
+   ]
+  ],
   "lat": 35.99894,
   "lon": -78.93994,
   "place": null,
@@ -146,7 +173,16 @@
   "area": "West Campus",
   "nickname": "Kilgo",
   "tier": 1,
-  "doors": [],
+  "doors": [
+   [
+    -78.93943995820622,
+    36.0003137623563
+   ],
+   [
+    -78.93936111719445,
+    36.000411116005836
+   ]
+  ],
   "lat": 36.00022101538461,
   "lon": -78.93951006153846,
   "place": "Kilgo House P",
@@ -160,7 +196,28 @@
   "area": "West Campus",
   "nickname": "WU",
   "tier": 1,
-  "doors": [],
+  "doors": [
+   [
+    -78.93913512185853,
+    36.000931350598464
+   ],
+   [
+    -78.93936957013183,
+    36.001038774467204
+   ],
+   [
+    -78.93942348598557,
+    36.00053522382525
+   ],
+   [
+    -78.9397886443583,
+    36.000698038887435
+   ],
+   [
+    -78.93967025695272,
+    36.00065114259425
+   ]
+  ],
   "lat": 36.00083289414892,
   "lon": -78.93943119414902,
   "place": "Richard H. Brodhead Center, West Union",
@@ -174,7 +231,12 @@
   "area": "West Campus",
   "nickname": "Flowers",
   "tier": 3,
-  "doors": [],
+  "doors": [
+   [
+    -78.93966839164676,
+    36.00127071193303
+   ]
+  ],
   "lat": 36.00123999444443,
   "lon": -78.93987555555555,
   "place": "Flowers Building",
@@ -235,7 +297,16 @@
   "area": "West Campus",
   "nickname": "Fitz",
   "tier": 2,
-  "doors": [],
+  "doors": [
+   [
+    -78.93975148932479,
+    36.00337659995746
+   ],
+   [
+    -78.93981590164992,
+    36.003297538845615
+   ]
+  ],
   "lat": 36.003345521568626,
   "lon": -78.93989077647056,
   "place": "Fitzpatrick Center for Interdisciplinary Engineering, Medicine and Applied Sciences (FCIEMAS)",
@@ -263,7 +334,12 @@
   "area": "West Campus",
   "nickname": "French",
   "tier": 2,
-  "doors": [],
+  "doors": [
+   [
+    -78.94319626635246,
+    36.00294389466846
+   ]
+  ],
   "lat": 36.002817058823524,
   "lon": -78.94337824411764,
   "place": "French Family Science Center",
@@ -291,7 +367,20 @@
   "area": "West Campus",
   "nickname": "Few",
   "tier": 1,
-  "doors": [],
+  "doors": [
+   [
+    -78.93768476416433,
+    36.00004722398258
+   ],
+   [
+    -78.93846466931842,
+    36.00050710330996
+   ],
+   [
+    -78.93762554000983,
+    36.00013372639799
+   ]
+  ],
   "lat": 36.000319,
   "lon": -78.938514,
   "place": null,
@@ -319,7 +408,16 @@
   "area": "West Campus",
   "nickname": "Hudson",
   "tier": 1,
-  "doors": [],
+  "doors": [
+   [
+    -78.94028455684094,
+    36.00387791743722
+   ],
+   [
+    -78.94044465859751,
+    36.00488148728786
+   ]
+  ],
   "lat": 36.0042305891892,
   "lon": -78.94055548378378,
   "place": "Hudson Hall",
@@ -333,7 +431,12 @@
   "area": "West Campus",
   "nickname": "Physics",
   "tier": 2,
-  "doors": [],
+  "doors": [
+   [
+    -78.94223378611585,
+    36.003165957530314
+   ]
+  ],
   "lat": 36.003295,
   "lon": -78.942503,
   "place": null,
@@ -347,7 +450,16 @@
   "area": "West Campus",
   "nickname": "Wilkinson",
   "tier": 2,
-  "doors": [],
+  "doors": [
+   [
+    -78.93836852420239,
+    36.00348159553836
+   ],
+   [
+    -78.93788636935835,
+    36.003185442687865
+   ]
+  ],
   "lat": 36.00346627692308,
   "lon": -78.9380287,
   "place": "Wilkinson Building",
@@ -389,7 +501,12 @@
   "area": "West Campus",
   "nickname": "BioSci",
   "tier": 2,
-  "doors": [],
+  "doors": [
+   [
+    -78.94292463292415,
+    36.002156385724064
+   ]
+  ],
   "lat": 36.00225716785714,
   "lon": -78.94315093928572,
   "place": "Biological Sciences Building",
@@ -431,7 +548,12 @@
   "area": "West Campus",
   "nickname": "Gross Hall",
   "tier": 1,
-  "doors": [],
+  "doors": [
+   [
+    -78.94454345761163,
+    36.00118600995812
+   ]
+  ],
   "lat": 36.00129107567568,
   "lon": -78.94478765675672,
   "place": "Paul M. Gross Hall",
@@ -445,7 +567,12 @@
   "area": "West Campus",
   "nickname": "Teer",
   "tier": 2,
-  "doors": [],
+  "doors": [
+   [
+    -78.94089758448493,
+    36.00368026576534
+   ]
+  ],
   "lat": 36.00378896666667,
   "lon": -78.94101039333333,
   "place": "Teer Engineering Building",
@@ -487,7 +614,12 @@
   "area": "West Campus",
   "nickname": "LSRC",
   "tier": 1,
-  "doors": [],
+  "doors": [
+   [
+    -78.9412249866772,
+    36.0045587640239
+   ]
+  ],
   "lat": 36.004496743076906,
   "lon": -78.94168034153844,
   "place": "Levine Science Research Center",
@@ -632,7 +764,16 @@
   "area": "West Campus",
   "nickname": "BC",
   "tier": 1,
-  "doors": [],
+  "doors": [
+   [
+    -78.94073616849101,
+    36.000987956689045
+   ],
+   [
+    -78.94108938695435,
+    36.00122729270919
+   ]
+  ],
   "lat": 36.001025537333334,
   "lon": -78.94110090000004,
   "place": "Bryan Center",
@@ -646,7 +787,12 @@
   "area": "West Campus",
   "nickname": "Keohane",
   "tier": 1,
-  "doors": [],
+  "doors": [
+   [
+    -78.93769886519668,
+    35.999402210608324
+   ]
+  ],
   "lat": 35.99885883636363,
   "lon": -78.93730064545454,
   "place": "Keohane 4E",
@@ -726,7 +872,16 @@
   "area": "West Campus",
   "nickname": "Bostock",
   "tier": 1,
-  "doors": [],
+  "doors": [
+   [
+    -78.93834843443771,
+    36.002593127533416
+   ],
+   [
+    -78.93823682451956,
+    36.00275023432752
+   ]
+  ],
   "lat": 36.00291228,
   "lon": -78.93826625999999,
   "place": "Bostock Library",
@@ -759,7 +914,12 @@
   "area": "West Campus",
   "nickname": "von der Heyden Pavilion",
   "tier": 3,
-  "doors": [],
+  "doors": [
+   [
+    -78.93816316197402,
+    36.00230780634881
+   ]
+  ],
   "lat": 36.002210309999995,
   "lon": -78.93827698999999,
   "place": "Von Der Heyden Pavilion",
@@ -1862,7 +2022,12 @@
   "area": "Athletics Precinct",
   "nickname": "Card Gymnasium",
   "tier": 3,
-  "doors": [],
+  "doors": [
+   [
+    -78.94111780607838,
+    35.997286996468446
+   ]
+  ],
   "lat": 35.997377988888886,
   "lon": -78.94139163333334,
   "place": "Card Gymnasium",
@@ -2563,7 +2728,12 @@
   "area": "West Campus",
   "nickname": "Pitch",
   "tier": 2,
-  "doors": [],
+  "doors": [
+   [
+    -78.93691363049007,
+    35.99914294064064
+   ]
+  ],
   "lat": 35.999219,
   "lon": -78.936892,
   "place": null,
