@@ -9,8 +9,10 @@ import { Protocol } from 'pmtiles'
 import themeLayers from 'protomaps-themes-base'
 import type { Graph } from '../src/graph/types'
 import type { EditOp } from '../src/graph/edits'
-import { applyEdits } from '../src/graph/edits'
 import { addGraphLayers } from './layers'
+import { EditorState } from './state'
+import { Overlay } from './overlay'
+import { installTools } from './tools'
 
 // Panel is built first so it renders even if the map can't initialize (no WebGL).
 const panel = document.getElementById('panel')!
@@ -29,11 +31,10 @@ async function loadJSON<T>(url: string): Promise<T> {
   return (await res.json()) as T
 }
 
-// base graph (OSM, pre-edit, pre-prune) + edit log -> live merged graph.
-async function loadMerged(): Promise<{ graph: Graph; ops: EditOp[]; dangling: number }> {
+// base graph (OSM, pre-edit, pre-prune) + edit log; EditorState replays the log to the live graph.
+async function loadBaseAndLog(): Promise<{ base: Graph; ops: EditOp[] }> {
   const [base, ops] = await Promise.all([loadJSON<Graph>('/__base'), loadJSON<EditOp[]>('/__edits')])
-  const { graph, dangling } = applyEdits(base, ops)
-  return { graph, ops, dangling: dangling.length }
+  return { base, ops }
 }
 
 function initMap(): maplibregl.Map {
@@ -75,17 +76,15 @@ map.on('error', (e) => console.error('[editor] map error:', e.error?.message ?? 
 
 map.on('load', () => {
   setStatus('Loading graph…')
-  loadMerged()
-    .then(({ graph, ops, dangling }) => {
-      addGraphLayers(map, graph)
+  loadBaseAndLog()
+    .then(({ base, ops }) => {
+      const state = new EditorState(base, ops)
+      addGraphLayers(map, state.graph)
+      const overlay = new Overlay(map)
+      installTools(map, state, overlay) // builds the toolbar + takes over the status line
       const bounds = new maplibregl.LngLatBounds()
-      for (const n of graph.nodes) bounds.extend([n.lon, n.lat])
+      for (const n of state.graph.nodes) bounds.extend([n.lon, n.lat])
       if (!bounds.isEmpty()) map.fitBounds(bounds, { padding: 30, duration: 0 })
-      setStatus(
-        `<b>${graph.edges.length.toLocaleString()} edges · ${graph.nodes.length.toLocaleString()} nodes</b>` +
-          `<div style="color:#666">${ops.length} edit(s) replayed${dangling ? ` · <span style="color:#b00">${dangling} dangling ref(s)</span>` : ''}</div>` +
-          `<div style="color:#666">colored by connected component — islands are drawn thick</div>`,
-      )
     })
     .catch((err: unknown) => {
       setStatus(
