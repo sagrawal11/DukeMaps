@@ -39,7 +39,11 @@ command that produced it. Keep this honest — measured, not estimated.
 | CH query vs Dijkstra — avg over 300 random pairs, settled | **134 vs 2,965 (22× fewer)** | `npm run bench:ch` | 2026-10-29 |
 | CH query vs Dijkstra — avg query time | **0.067 ms vs 0.974 ms (~15× faster)** | `npm run bench:ch` | 2026-10-29 |
 | CH correctness | CH == Dijkstra cost on every sampled real pair (0 mismatches) | `npm run build:ch` / `bench:ch` | 2026-10-29 |
-| Unit tests (graph + editor + time + spatial + algorithms + CH) | 90 passing | `npm test` | 2026-10-29 |
+| CCH structure (nested dissection + unconditional contraction) | 0.05 s · 45,240 shortcuts · `cch.json` 0.35 MB | `npm run build:cch` | 2026-10-29 |
+| CCH customization (re-weight the WHOLE hierarchy per metric) | ~22–41 ms/metric (base / step-free / crowding snapshot) | `npm run build:cch` / `bench:cch` | 2026-10-29 |
+| CCH shortcuts vs CH | 45,240 vs 11,110 (**4.1×** — the metric-independence trade) | `npm run bench:cch` | 2026-10-29 |
+| CCH correctness (3 metrics) | CCH == Dijkstra on every sampled pair; step-free routes stay step-free inside shortcuts | `npm test` / `build:cch` | 2026-10-29 |
+| Unit tests (graph + editor + time + spatial + algorithms + CH + CCH) | 96 passing | `npm test` | 2026-10-29 |
 
 Phase 2 (the editor) is complete: the dev-only editor edits the base graph and autosaves a
 replayable edit log (`data/my_edits.json`); `npm run build:graph` replays it, then prunes to
@@ -128,8 +132,38 @@ Takeaways for the article:
   Customizable CH buys in 5c. Numbers above are off-peak/base-weight, directly comparable to the 5a
   table.
 
+Phase 5c (Customizable CH + nested dissection): the mechanism, not a speed race. The showcase is the
+*separation* — build the hierarchy's structure once from the graph's shape, then re-weight it per
+metric cheaply, without re-contracting.
+
+| step | what | number |
+|------|------|--------|
+| nested dissection + contraction | metric-INDEPENDENT structure (built once) | 0.05 s · 45,240 shortcuts · `cch.json` **0.35 MB** |
+| customization | re-weight the WHOLE hierarchy for a metric | **~22–41 ms** (base / step-free / crowding snapshot) |
+| query | same bidirectional upward search as CH | CCH == Dijkstra cost on every sampled pair |
+
+Takeaways for the article:
+- **Structure vs weights is the whole idea.** CH bakes the metric into its shortcuts (edge-difference
+  ordering + witness searches both need the weights), so a new metric means re-contracting. CCH orders
+  nodes by graph *structure* alone — **nested dissection**: recursively split the map with a small
+  separator, rank the separator highest — then contracts without weights. The weights arrive later, in
+  **customization**: a bottom-up triangle pass fills every shortcut's weight in ~tens of ms. Swap the
+  metric, re-run customization, done.
+- **This is the honest answer to "how does a router handle crowding / a toggle / a different time?"**
+  One structure, customized three ways here (base, step-free, a 09:45 class-change crowding snapshot),
+  each verified == Dijkstra. Changing the "Leave at" time in Phase 6 is a re-customization, not a
+  rebuild. (Time is handled as a **departure-time snapshot** — frozen at departure, the user-approved
+  approach; the arrival-time-accurate router stays the unidirectional Dijkstra/A*.)
+- **The step-free access-safety test lands here** (deferred from 5b): customize with the step-free
+  metric and every route — including the edges hidden inside unpacked shortcuts — is step-free, because
+  a non-step-free edge is priced at Infinity and never survives customization.
+- **The trade CCH makes:** 45,240 shortcuts vs plain CH's 11,110 (4.1×), because it adds shortcuts
+  unconditionally (no witness pruning) on a structure-only order. That's the cost of metric
+  independence — and at campus scale it's cheap (a 0.35 MB structure). Per the project's framing, the
+  point is the mechanism, not shaving query time.
+
 ## What to capture
 - **Phase 4 — spatial index:** captured above.
-- **Phase 5 — algorithms:** captured above (5a). CCH still to come in 5c.
-- **Phase 5 — contraction hierarchies:** captured above (5b, single static metric). Per-profile/CCH + time-dependent weights in 5c.
+- **Phase 5 — algorithms:** captured above (5a).
+- **Phase 5 — contraction hierarchies:** captured above — plain CH (5b) + Customizable CH & nested dissection (5c, mechanism-focused).
 - **Phase 6 — the show:** animation frame rate on a mid-range phone.
