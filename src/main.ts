@@ -1,10 +1,11 @@
 // DukeMaps app — the show. Search two campus places (fuzzy autocomplete) or tap to drop a pin; each
 // endpoint snaps to the nearest point on the walk network. With both pinned, the seven hand-written
-// searches replay their exploration over the map in turn, then draw their route. Two live route
-// options — "Leave at" (class-change crowding) and "Step-free" — rebuild the cost metric and
-// re-customize the CCH on the fly (the Phase 5c payoff), while prebuilt CH is disabled under a
-// changed metric because its shortcuts bake the base weights in. Data is fetched at runtime, not
-// bundled, so the map paints immediately and a visible status covers the loading/error states.
+// searches replay their exploration over the map in turn, then draw their route and its step-by-step
+// directions. Two live route options — "Leave at" (class-change crowding) and "Step-free" — rebuild
+// the cost metric and re-customize the CCH on the fly (the Phase 5c payoff); prebuilt CH is disabled
+// under a changed metric because its shortcuts bake the base weights in. An "Instant" toggle skips the
+// show for people who just want directions. Data is fetched at runtime, not bundled, so the map paints
+// immediately and a visible status covers the loading/error states.
 import * as maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { Protocol } from 'pmtiles'
@@ -16,9 +17,11 @@ import { buildEdgeIndex, type EdgeIndex } from './spatial/snap'
 import { buildRoutingGraph, makeWeight, type WeightFn } from './algorithms/routing'
 import { customize, type CCHStructure } from './algorithms/cch'
 import type { CHData } from './algorithms/ch'
+import type { RouteResult } from './algorithms/trace'
 import { dijkstra } from './algorithms/dijkstra'
 import { crowdingMultiplier, hmsToSec, type Schedule } from './graph/time'
 import { createOverlay } from './map/overlay'
+import { makeDirections } from './directions'
 import { makePlayer, type Player } from './anim/player'
 import { ALGORITHMS, runAlgo, type AlgoDef } from './anim/algos'
 import aliasesConfig from '../config/aliases.json'
@@ -118,6 +121,14 @@ function setupUI(
     stepFree: localStorage.getItem('dukemaps.stepFree') === '1',
     leaveAt: localStorage.getItem('dukemaps.leaveAt') || nowHHMM(),
   }
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  // "Instant" = skip the walk-through, just draw the optimal route + directions. Remembered locally;
+  // defaults on when the visitor prefers reduced motion.
+  let instant = ((): boolean => {
+    const s = localStorage.getItem('dukemaps.instant')
+    return s == null ? prefersReducedMotion : s === '1'
+  })()
+
   const buildWeight = (): WeightFn =>
     makeWeight(rg, {
       stepFreeOnly: metricOpts.stepFree,
@@ -131,6 +142,7 @@ function setupUI(
   let weight = buildWeight() // reassigned whenever the options change
   let cchData: CHData | null = null // populated by applyMetric() below (one customize at startup)
   const overlay = createOverlay(map, graph) // canvas layer the animation draws on
+  const toDirections = makeDirections(graph) // route -> turn-by-turn steps (built once)
   let player: Player | null = null
 
   const panel = document.createElement('div')
@@ -142,6 +154,7 @@ function setupUI(
     '<div class="options">' +
     '<label class="leaveat">Leave at <input type="time" id="leaveat" /></label>' +
     '<button type="button" class="opt" id="stepfree" aria-pressed="false">Step-free</button>' +
+    '<button type="button" class="opt" id="instant" aria-pressed="false">Instant</button>' +
     '</div>' +
     '<div class="metric" id="metric"></div>' +
     '<div class="info" id="info"></div>' +
@@ -156,6 +169,7 @@ function setupUI(
     '</div>' +
     '<div class="stats" id="stats"></div>' +
     '<div class="result" id="result"></div>' +
+    '<div class="directions" id="directions"></div>' +
     '<div class="whatif" id="whatif"></div>' +
     '<div class="compare" id="compare"></div>' +
     '</div>'
@@ -166,11 +180,13 @@ function setupUI(
   const captionEl = panel.querySelector('#caption') as HTMLDivElement
   const statsEl = panel.querySelector('#stats') as HTMLDivElement
   const resultEl = panel.querySelector('#result') as HTMLDivElement
+  const directionsEl = panel.querySelector('#directions') as HTMLDivElement
   const compareEl = panel.querySelector('#compare') as HTMLDivElement
   const whatifEl = panel.querySelector('#whatif') as HTMLDivElement
   const metricEl = panel.querySelector('#metric') as HTMLDivElement
   const leaveatEl = panel.querySelector('#leaveat') as HTMLInputElement
   const stepfreeBtn = panel.querySelector('#stepfree') as HTMLButtonElement
+  const instantBtn = panel.querySelector('#instant') as HTMLButtonElement
   const playAllBtn = panel.querySelector('#playall') as HTMLButtonElement
   const playBtn = panel.querySelector('#playpause') as HTMLButtonElement
   const skipBtn = panel.querySelector('#skip') as HTMLButtonElement
@@ -193,14 +209,52 @@ function setupUI(
   const fmtTime = (s: number): string => (s < 90 ? `${Math.round(s)} s` : `${Math.round(s / 60)} min`)
   const fmtDist = (m: number): string => (m < 950 ? `${Math.round(m)} m` : `${(m / 1000).toFixed(2)} km`)
 
+  // Step-by-step directions for a drawn route. Shown in every mode (animated / instant / reduced
+  // motion) because it hangs off the final route, not the animation.
+  const GLYPH: Record<string, string> = {
+    depart: '◉',
+    continue: '↑',
+    'slight-left': '↖',
+    left: '←',
+    'sharp-left': '↙',
+    'slight-right': '↗',
+    right: '→',
+    'sharp-right': '↘',
+    uturn: '↩',
+    stairs: '⌁',
+    arrive: '⚑',
+  }
+  const renderDirections = (route: RouteResult | null): void => {
+    if (!route) {
+      directionsEl.textContent = ''
+      return
+    }
+    directionsEl.innerHTML = toDirections(route)
+      .map(
+        (s) =>
+          `<div class="step"><span class="mv">${GLYPH[s.maneuver] ?? '•'}</span><span class="tx">${esc(s.text)}</span>${
+            s.distanceM >= 1 ? `<span class="ds">${fmtDist(s.distanceM)}</span>` : ''
+          }</div>`,
+      )
+      .join('')
+  }
+
   // The seven algorithms to walk through. CH/CCH need their prebuilt data; drop them if it didn't load.
   const algos: AlgoDef[] = ALGORITHMS.filter((a) => (a.key !== 'ch' && a.key !== 'cch') || !!(chData && cchStructure))
   chipsEl.innerHTML = algos.map((a, i) => `<button type="button" class="chip" data-i="${i}">${esc(a.name)}</button>`).join('')
   const chipEls = Array.from(chipsEl.querySelectorAll('.chip')) as HTMLButtonElement[]
   const chChipIdx = algos.findIndex((a) => a.key === 'ch')
+  // The one optimal algorithm Instant mode runs (CCH if the hierarchy loaded, else Dijkstra).
+  const optimalIdx = ((): number => {
+    const i = algos.findIndex((a) => a.key === 'cch')
+    return i >= 0 ? i : algos.findIndex((a) => a.key === 'dijkstra')
+  })()
   leaveatEl.value = metricOpts.leaveAt
   stepfreeBtn.classList.toggle('on', metricOpts.stepFree)
   stepfreeBtn.setAttribute('aria-pressed', String(metricOpts.stepFree))
+  instantBtn.classList.toggle('on', instant)
+  instantBtn.setAttribute('aria-pressed', String(instant))
+  showEl.classList.toggle('instant', instant)
 
   let curIdx = 0
   let playAll = false
@@ -221,7 +275,7 @@ function setupUI(
       : ''
   }
 
-  // Run one algorithm, animate its exploration, draw its route, record its stats.
+  // Run one algorithm, animate its exploration, draw its route + directions, record its stats.
   const playAlgo = (i: number): void => {
     if (!chosen.from || !chosen.to || i < 0 || i >= algos.length) return
     // CH's shortcuts bake the base metric in — never animate/draw it under a changed metric (its route
@@ -248,20 +302,21 @@ function setupUI(
       if (trace.route) {
         overlay.drawRoute(trace.route)
         resultEl.innerHTML = `<b>${fmtTime(trace.route.costS)}</b> · ${fmtDist(trace.route.distanceM)} walk · explored ${trace.stats.nodesSettled} nodes`
+        renderDirections(trace.route)
       } else {
         resultEl.textContent = 'No route found.'
+        renderDirections(null)
       }
       if (playAll && curIdx < algos.length - 1) advanceTimer = window.setTimeout(() => playAlgo(curIdx + 1), 1100)
       else playAll = false
     }
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     player = makePlayer(
       trace,
       (s) => {
         overlay.redraw(s)
         statsEl.innerHTML = `settled <b>${s.settled.size + s.settledB.size}</b> · relaxed <b>${s.relaxed.size}</b>`
       },
-      { speed: Number(speedEl.value) || 1, reducedMotion: reduced, onDone },
+      { speed: Number(speedEl.value) || 1, reducedMotion: instant || prefersReducedMotion, onDone },
     )
     playBtn.textContent = 'Pause'
     player.play()
@@ -357,13 +412,19 @@ function setupUI(
     }
   }
 
-  // Both pinned (or "Play all") → walk through all seven in order, accumulating the comparison.
+  // Both pinned (or "Play all") → walk through all seven in order; or, in Instant mode, just the
+  // optimal route + its directions, no animation.
   const startShow = (): void => {
     results.clear()
     renderCompare()
     renderWhatIf()
-    playAll = true
-    playAlgo(0)
+    if (instant) {
+      playAll = false
+      playAlgo(optimalIdx)
+    } else {
+      playAll = true
+      playAlgo(0)
+    }
   }
 
   chipsEl.addEventListener('click', (e) => {
@@ -397,6 +458,14 @@ function setupUI(
     stepfreeBtn.setAttribute('aria-pressed', String(metricOpts.stepFree))
     applyMetric({ rerun: true })
   })
+  instantBtn.addEventListener('click', () => {
+    instant = !instant
+    localStorage.setItem('dukemaps.instant', instant ? '1' : '0')
+    instantBtn.classList.toggle('on', instant)
+    instantBtn.setAttribute('aria-pressed', String(instant))
+    showEl.classList.toggle('instant', instant)
+    if (chosen.from && chosen.to) startShow() // switch modes immediately
+  })
 
   const setEndpoint = (w: Which, lonLat: [number, number], label: string): void => {
     const snap = edgeIndex.snap(lonLat[0], lonLat[1])
@@ -405,7 +474,7 @@ function setupUI(
     const m = markers[w] ?? new maplibregl.Marker({ color: colors[w] })
     markers[w] = m.setLngLat(snap.point).addTo(map)
     renderInfo()
-    if (chosen.from && chosen.to) startShow() // both pinned → walk through all seven
+    if (chosen.from && chosen.to) startShow() // both pinned → run the show (or Instant)
   }
 
   const clearEndpoint = (w: Which): void => {
@@ -419,6 +488,7 @@ function setupUI(
     player = null
     window.clearTimeout(advanceTimer)
     whatifEl.textContent = ''
+    directionsEl.textContent = ''
   }
 
   const wireField = (w: Which): void => {

@@ -15,6 +15,17 @@ export function haversineM(aLat: number, aLon: number, bLat: number, bLon: numbe
   return 2 * EARTH_RADIUS_M * Math.asin(Math.min(1, Math.sqrt(h)))
 }
 
+// Initial great-circle bearing A→B, degrees clockwise from north (0 = N, 90 = E). Used by the
+// directions builder to turn a route's geometry into "head northeast" / "turn left" maneuvers.
+export function bearingDeg(aLat: number, aLon: number, bLat: number, bLon: number): number {
+  const lat1 = toRad(aLat)
+  const lat2 = toRad(bLat)
+  const dLon = toRad(bLon - aLon)
+  const y = Math.sin(dLon) * Math.cos(lat2)
+  const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon)
+  return ((Math.atan2(y, x) * 180) / Math.PI + 360) % 360
+}
+
 // Summed haversine length of a [lon, lat] polyline.
 export function polylineLengthM(coords: [number, number][]): number {
   let total = 0
