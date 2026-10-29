@@ -48,7 +48,9 @@ export interface CHData {
 }
 
 const EPS = 1e-9
-const encodeShortcut = (sc: number): number => -sc - 1
+// Provenance encoding, shared with CCH (src/algorithms/cch.ts) so a customized hierarchy is a valid
+// CHData the query below can consume unchanged.
+export const encodeShortcut = (sc: number): number => -sc - 1
 const isShortcut = (r: number): boolean => r < 0
 const shortcutIndex = (r: number): number => -r - 1
 
