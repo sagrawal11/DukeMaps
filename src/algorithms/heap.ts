@@ -15,6 +15,12 @@ export class MinHeap {
     return this.pos.has(item)
   }
 
+  // The minimum priority currently in the heap, or Infinity if empty. The bidirectional stop
+  // condition compares the two frontiers' minimum keys.
+  peekPriority(): number {
+    return this.items.length > 0 ? this.prio[0] : Infinity
+  }
+
   // Insert item, or lower its key if it's already present and the new priority is smaller. This one
   // method doubles as push and decrease-key, which is all Dijkstra/A* need.
   push(item: number, priority: number): void {

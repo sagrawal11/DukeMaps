@@ -5,6 +5,7 @@ import { bfs } from '../src/algorithms/bfs'
 import { dfs } from '../src/algorithms/dfs'
 import { dijkstra } from '../src/algorithms/dijkstra'
 import { astar } from '../src/algorithms/astar'
+import { biDijkstra, biAStar } from '../src/algorithms/bidirectional'
 import { haversineM } from '../src/graph/geo'
 import type { Graph, GraphEdge, GraphNode } from '../src/graph/types'
 
@@ -190,6 +191,60 @@ describe('A* equals Dijkstra (optimality)', () => {
       const a = astar(rg, s, t, { weight: w, heuristic: makeHeuristic(rg, t) })
       expect(!!a.route).toBe(!!d.route)
       if (d.route && a.route) expect(a.route.costS).toBeCloseTo(d.route.costS, 6)
+    }
+  })
+})
+
+describe('bidirectional Dijkstra (hand graph)', () => {
+  it('finds the cheapest path', () => {
+    const rg = buildRoutingGraph(hopGraph)
+    const bd = biDijkstra(rg, 1, 5, { weight: makeWeight(rg) })
+    expect(bd.route?.costS).toBe(9)
+    expect(bd.route?.nodes.at(0)).toBe(1)
+    expect(bd.route?.nodes.at(-1)).toBe(5)
+    expect(isValidPath(hopGraph, bd.route?.nodes ?? [])).toBe(true)
+  })
+})
+
+describe('all four optimal algorithms agree (equal-cost)', () => {
+  it('Dijkstra == A* == bidirectional Dijkstra == bidirectional A* on random pairs', () => {
+    const rg = buildRoutingGraph(randomGraph(90, 170))
+    const w = makeWeight(rg)
+    let compared = 0
+    for (let trial = 0; trial < 500; trial++) {
+      const s = 1 + Math.floor(Math.random() * 90)
+      const t = 1 + Math.floor(Math.random() * 90)
+      if (s === t) continue
+      const d = dijkstra(rg, s, t, { weight: w })
+      const bd = biDijkstra(rg, s, t, { weight: w })
+      const ba = biAStar(rg, s, t, { weight: w })
+      expect(!!bd.route).toBe(!!d.route)
+      expect(!!ba.route).toBe(!!d.route)
+      if (d.route) {
+        expect(bd.route!.costS).toBeCloseTo(d.route.costS, 6)
+        expect(ba.route!.costS).toBeCloseTo(d.route.costS, 6) // validates the balanced-potential stop
+        compared++
+      }
+    }
+    expect(compared).toBeGreaterThan(0)
+  })
+
+  it('still agree under the step-free toggle', () => {
+    const rg = buildRoutingGraph(randomGraph(90, 170))
+    const w = makeWeight(rg, { stepFreeOnly: true })
+    for (let trial = 0; trial < 300; trial++) {
+      const s = 1 + Math.floor(Math.random() * 90)
+      const t = 1 + Math.floor(Math.random() * 90)
+      if (s === t) continue
+      const d = dijkstra(rg, s, t, { weight: w })
+      const bd = biDijkstra(rg, s, t, { weight: w })
+      const ba = biAStar(rg, s, t, { weight: w })
+      expect(!!bd.route).toBe(!!d.route)
+      expect(!!ba.route).toBe(!!d.route)
+      if (d.route) {
+        expect(bd.route!.costS).toBeCloseTo(d.route.costS, 6)
+        expect(ba.route!.costS).toBeCloseTo(d.route.costS, 6)
+      }
     }
   })
 })
