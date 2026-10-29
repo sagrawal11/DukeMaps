@@ -55,8 +55,8 @@ export type SplitResult = { ops: EditOp[] } | { error: string }
 
 // Split an edge at the point on it nearest to p, into two edges meeting at a new node. Returns the
 // composite EditOps (delete original, add node, add the two halves) — no new EditOp kind needed.
-// Interior shape points are distributed to the correct half. Attributes (kind/stepFree/requires/
-// hours) are copied to both halves; requires/hours are spread-copied so the halves don't alias.
+// Interior shape points are distributed to the correct half. Attributes (kind/stepFree/hours) are
+// copied to both halves; hours is spread-copied so the halves don't alias.
 // Refuses a split within `epsM` meters of an endpoint (that would create a zero-length half).
 export function splitEdgeOps(
   edge: GraphEdge,
@@ -76,7 +76,7 @@ export function splitEdgeOps(
   const geomA: [number, number][] = [...geom.slice(0, segIndex + 1).map((c) => [c[0], c[1]] as [number, number]), point]
   const geomB: [number, number][] = [point, ...geom.slice(segIndex + 1).map((c) => [c[0], c[1]] as [number, number])]
 
-  // Both halves copy the original's attributes, each with FRESH requires/hours arrays so a later
+  // Both halves copy the original's attributes, each with a FRESH hours array so a later
   // update_edge on one half never mutates the other (no aliasing).
   const hoursCopy = (): { hours?: { start: string; end: string }[] } =>
     edge.hours ? { hours: edge.hours.map((h) => ({ ...h })) } : {}
@@ -84,20 +84,18 @@ export function splitEdgeOps(
     ops: [
       { op: 'delete_edge', id: edge.id },
       { op: 'add_node', id: newNodeId, lat: point[1], lon: point[0] },
-      { op: 'add_edge', id: idA, from: edge.from, to: newNodeId, kind: edge.kind, stepFree: edge.stepFree, requires: [...edge.requires], geometry: geomA, ...hoursCopy() },
-      { op: 'add_edge', id: idB, from: newNodeId, to: edge.to, kind: edge.kind, stepFree: edge.stepFree, requires: [...edge.requires], geometry: geomB, ...hoursCopy() },
+      { op: 'add_edge', id: idA, from: edge.from, to: newNodeId, kind: edge.kind, stepFree: edge.stepFree, geometry: geomA, ...hoursCopy() },
+      { op: 'add_edge', id: idB, from: newNodeId, to: edge.to, kind: edge.kind, stepFree: edge.stepFree, geometry: geomB, ...hoursCopy() },
     ],
   }
 }
 
 // Audit flag for the "missing attributes" view — does this edge look incomplete or mis-tagged?
-// These are the four conditions chosen for the audit; it's a toggle-on review aid, so a little
-// over-flagging is fine (better to eyeball an edge than miss one).
+// It's a toggle-on review aid, so a little over-flagging is fine (better to eyeball an edge than
+// miss one).
 export function missingAttrs(edge: GraphEdge): boolean {
   if (edge.kind === 'unknown') return true // OSM tags didn't classify it
-  if ((edge.kind === 'passage' || edge.kind === 'indoor') && edge.requires.length === 0) return true // building/dorm passage with no access rule
   if (edge.kind === 'stairs' && edge.stepFree) return true // stairs can't be step-free (contradiction)
-  if (edge.source === 'mine' && edge.requires.length === 0) return true // an edge I added that's still public — confirm it's meant to be
   return false
 }
 

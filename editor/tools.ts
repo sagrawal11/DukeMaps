@@ -284,7 +284,7 @@ export function installTools(map: maplibregl.Map, state: EditorState, overlay: O
     } else if (state.tool === 'passage') {
       // Door-to-door: click the first door, then the second. Snap to an existing node or drop a new
       // door node. The passage edge (kind=passage) is auto-selected so the inspector opens to set
-      // requires/hours/step-free — "all in one panel" per the brief.
+      // hours/step-free — "all in one panel" per the brief.
       let id = nearestNode(px)
       if (id == null) {
         id = state.newNodeId()
@@ -388,8 +388,7 @@ export function installTools(map: maplibregl.Map, state: EditorState, overlay: O
       case '1':
       case '2':
       case '3':
-      case '4':
-      case '5': {
+      case '4': {
         const mode = AUDIT_ORDER[Number(ev.key) - 1]
         if (mode) audit.setMode(mode)
         break

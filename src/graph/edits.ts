@@ -16,12 +16,11 @@ export type EditOp =
       from: number
       to: number
       kind: EdgeKind
-      requires?: string[]
       stepFree?: boolean
       hours?: OpenInterval[]
       geometry?: [number, number][]
     }
-  | { op: 'update_edge'; id: string; set: Partial<Pick<GraphEdge, 'kind' | 'requires' | 'stepFree' | 'hours'>> }
+  | { op: 'update_edge'; id: string; set: Partial<Pick<GraphEdge, 'kind' | 'stepFree' | 'hours'>> }
   | { op: 'delete_edge'; id: string }
 
 export interface Dangling {
@@ -91,7 +90,6 @@ export function applyEdits(graph: Graph, ops: EditOp[]): EditResult {
           from: op.from,
           to: op.to,
           kind: op.kind,
-          requires: op.requires ?? [],
           stepFree: op.stepFree ?? true,
           hours: op.hours,
           geometry,

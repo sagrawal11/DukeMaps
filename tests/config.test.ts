@@ -17,7 +17,6 @@ describe('config placeholders', () => {
   const cases: Array<[string, string[]]> = [
     ['campus.json', ['areas']],
     ['schedule.json', ['classEndTimes', 'crowding', 'academicBuildings']],
-    ['access.json', ['permissions', 'housingProfiles', 'toggles']],
     ['aliases.json', ['aliases']],
     ['presets.json', ['presets']],
   ]

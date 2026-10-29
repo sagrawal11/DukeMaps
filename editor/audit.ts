@@ -1,36 +1,23 @@
 // editor/audit.ts — the audit view modes. Each mode recolors the edge layer by a different
 // attribute (a cheap setPaintProperty swap on precomputed feature properties from graphToGeoJSON),
-// so you can eyeball the graph by source, required permission, step-free status, connected
-// component, or "missing attributes". Includes a dropdown (keys 1–5) and a swatch legend.
+// so you can eyeball the graph by source, step-free status, connected component, or "missing
+// attributes". Includes a dropdown (keys 1–4) and a swatch legend.
 import type { ExpressionSpecification } from 'maplibre-gl'
 import type * as maplibregl from 'maplibre-gl'
-import access from '../config/access.json'
 import { EDGES_SRC } from './layers'
 
-export type AuditMode = 'component' | 'source' | 'requires' | 'stepFree' | 'missing'
-export const AUDIT_ORDER: AuditMode[] = ['component', 'source', 'requires', 'stepFree', 'missing']
+export type AuditMode = 'component' | 'source' | 'stepFree' | 'missing'
+export const AUDIT_ORDER: AuditMode[] = ['component', 'source', 'stepFree', 'missing']
 const LABELS: Record<AuditMode, string> = {
   component: 'Connected component',
   source: 'Source (OSM / mine)',
-  requires: 'Required permission',
   stepFree: 'Step-free',
   missing: 'Missing attributes',
-}
-
-// Distinct hues for per-permission coloring in the "requires" mode.
-const PALETTE = ['#e6194b', '#3cb44b', '#4363d8', '#f58231', '#911eb4', '#42d4f4', '#f032e6', '#bfef45']
-
-function requiresExpr(): ExpressionSpecification {
-  const pairs: string[] = []
-  access.permissions.forEach((p, i) => pairs.push(p, PALETTE[i % PALETTE.length]))
-  // match: '' (public) -> grey, each permission -> a hue, 'multi' -> black, fallback grey.
-  return ['match', ['get', 'requiresKey'], '', '#bbbbbb', ...pairs, 'multi', '#000000', '#888888'] as ExpressionSpecification
 }
 
 const EXPR: Record<AuditMode, ExpressionSpecification> = {
   component: ['get', 'color'] as ExpressionSpecification, // color precomputed per component in graphToGeoJSON
   source: ['match', ['get', 'source'], 'osm', '#1f77b4', 'mine', '#d62728', '#999999'] as ExpressionSpecification,
-  requires: requiresExpr(),
   stepFree: ['case', ['get', 'stepFree'], '#2ca02c', '#ff7f0e'] as ExpressionSpecification,
   missing: ['case', ['get', 'missingAttrs'], '#e377c2', '#dddddd'] as ExpressionSpecification,
 }
@@ -46,12 +33,6 @@ function legendItems(mode: AuditMode): { color: string; label: string }[] {
       return [
         { color: '#1f77b4', label: 'OSM' },
         { color: '#d62728', label: 'mine' },
-      ]
-    case 'requires':
-      return [
-        { color: '#bbbbbb', label: 'public' },
-        ...access.permissions.map((p, i) => ({ color: PALETTE[i % PALETTE.length], label: p })),
-        { color: '#000000', label: 'multiple' },
       ]
     case 'stepFree':
       return [
@@ -71,7 +52,7 @@ export function installAudit(map: maplibregl.Map): { setMode: (m: AuditMode) => 
   panel.insertAdjacentHTML(
     'beforeend',
     `<div style="margin-top:12px;border-top:1px solid #eee;padding-top:10px">
-       <label style="display:block">Audit view <kbd>1–5</kbd>
+       <label style="display:block">Audit view <kbd>1–4</kbd>
          <select id="audit-mode" style="width:100%">
            ${AUDIT_ORDER.map((m, i) => `<option value="${m}">${i + 1}. ${LABELS[m]}</option>`).join('')}
          </select>

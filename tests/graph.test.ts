@@ -84,10 +84,6 @@ describe('buildGraph', () => {
     expect(footway.stepFree).toBe(true)
   })
 
-  it('all OSM edges start public (no requires)', () => {
-    expect(graph.edges.every((e) => e.requires.length === 0)).toBe(true)
-  })
-
   it('extracts named buildings as places', () => {
     expect(places).toHaveLength(1)
     expect(places[0].name).toBe('Test Hall')
@@ -122,8 +118,8 @@ describe('applyEdits', () => {
   it('replays add/update/delete and reports dangling refs', () => {
     const ops: EditOp[] = [
       { op: 'add_node', id: -1, lat: 36.0, lon: -78.898 },
-      { op: 'add_edge', id: 'mine:0', from: 5, to: -1, kind: 'passage', requires: ['duke_card'] },
-      { op: 'update_edge', id: '100:0', set: { requires: ['east_dorm_access'] } },
+      { op: 'add_edge', id: 'mine:0', from: 5, to: -1, kind: 'passage' },
+      { op: 'update_edge', id: '100:0', set: { kind: 'stairs', stepFree: false } },
       { op: 'delete_edge', id: '102:0' },
       { op: 'update_edge', id: 'does-not-exist', set: { stepFree: false } },
     ]
@@ -132,8 +128,10 @@ describe('applyEdits', () => {
     expect(merged.nodes.find((n) => n.id === -1)).toBeDefined()
     const mine = merged.edges.find((e) => e.id === 'mine:0')!
     expect(mine.source).toBe('mine')
-    expect(mine.requires).toEqual(['duke_card'])
-    expect(merged.edges.find((e) => e.id === '100:0')!.requires).toEqual(['east_dorm_access'])
+    expect(mine.kind).toBe('passage')
+    const updated = merged.edges.find((e) => e.id === '100:0')!
+    expect(updated.kind).toBe('stairs')
+    expect(updated.stepFree).toBe(false)
     expect(merged.edges.find((e) => e.id === '102:0')).toBeUndefined()
 
     expect(dangling).toHaveLength(1)

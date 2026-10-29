@@ -80,7 +80,6 @@ export function buildGraph(osm: OsmResponse, areas: AreaBBox[] = []): BuildResul
           from: a,
           to: b,
           kind,
-          requires: [],
           stepFree,
           geometry: coords,
           lengthM,

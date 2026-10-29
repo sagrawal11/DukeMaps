@@ -23,7 +23,6 @@ const edge2: GraphEdge = {
   from: 1,
   to: 2,
   kind: 'footway',
-  requires: ['duke_card'],
   stepFree: true,
   geometry: geom2,
   lengthM: polylineLengthM(geom2),
@@ -73,11 +72,9 @@ describe('splitEdgeOps', () => {
     const split: [number, number] = [node.lon, node.lat]
     expect(adds[0].geometry![adds[0].geometry!.length - 1]).toEqual(split)
     expect(adds[1].geometry![0]).toEqual(split)
-    // Attributes copied, with independent requires arrays (no aliasing).
-    expect(adds[0].requires).toEqual(['duke_card'])
-    expect(adds[1].requires).toEqual(['duke_card'])
-    expect(adds[0].requires).not.toBe(adds[1].requires)
+    // Attributes copied to both halves.
     expect(adds[0].kind).toBe('footway')
+    expect(adds[1].kind).toBe('footway')
   })
 
   it('replays through applyEdits: original gone, two halves, lengths sum to the original', () => {
@@ -144,7 +141,6 @@ describe('missingAttrs', () => {
     from: 1,
     to: 2,
     kind: 'footway',
-    requires: [],
     stepFree: true,
     geometry: [
       [0, 0],
@@ -155,16 +151,10 @@ describe('missingAttrs', () => {
     ...over,
   })
   it('flags unknown kind', () => expect(missingAttrs(mk({ kind: 'unknown' }))).toBe(true))
-  it('flags a passage/indoor edge with no requires', () => {
-    expect(missingAttrs(mk({ kind: 'passage' }))).toBe(true)
-    expect(missingAttrs(mk({ kind: 'indoor' }))).toBe(true)
-  })
   it('flags stairs marked step-free', () => expect(missingAttrs(mk({ kind: 'stairs', stepFree: true }))).toBe(true))
-  it('flags a mine edge still public (no requires)', () =>
-    expect(missingAttrs(mk({ source: 'mine', requires: [] }))).toBe(true))
-  it('passes a complete public OSM footway', () => expect(missingAttrs(mk({}))).toBe(false))
-  it('passes a passage that has an access rule', () =>
-    expect(missingAttrs(mk({ kind: 'passage', requires: ['duke_card'] }))).toBe(false))
+  it('passes a complete OSM footway', () => expect(missingAttrs(mk({}))).toBe(false))
+  it('passes a passage edge (no access gating anymore)', () =>
+    expect(missingAttrs(mk({ kind: 'passage' }))).toBe(false))
 })
 
 describe('parseGpx', () => {

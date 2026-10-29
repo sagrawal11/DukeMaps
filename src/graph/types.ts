@@ -35,7 +35,6 @@ export interface GraphEdge {
   from: number // node id
   to: number // node id
   kind: EdgeKind
-  requires: string[] // permissions needed to traverse; empty = public
   hours?: OpenInterval[] // if set, usable only inside these intervals (Phase 3)
   stepFree: boolean
   geometry: [number, number][] // [lon, lat] polyline incl. intermediate shape points
