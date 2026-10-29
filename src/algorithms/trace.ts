@@ -16,6 +16,11 @@ export interface TraceEvent {
   node?: number // node id (push / settle / meet / found)
   edge?: string // edge id (relax / skip)
   side?: 'f' | 'b' // search direction, for the bidirectional algorithms
+  // CH/CCH relax only: the relaxed up-arc has no single graph edge, so it carries its endpoint node
+  // ids and whether it's a shortcut — the UI draws these as the hierarchy's "leaps" over skipped nodes.
+  from?: number
+  to?: number
+  shortcut?: boolean
 }
 
 export interface AlgoStats {

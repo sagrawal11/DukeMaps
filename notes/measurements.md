@@ -176,4 +176,9 @@ exists via `scripts/find-presets.ts` (21 pairs whose best route changes at class
 - **Phase 4 — spatial index:** captured above.
 - **Phase 5 — algorithms:** captured above (5a).
 - **Phase 5 — contraction hierarchies:** captured above — plain CH (5b) + Customizable CH & nested dissection (5c, mechanism-focused).
-- **Phase 6 — the show:** live CCH re-customization time in the browser (on-device) + animation frame rate on a mid-range phone.
+- **Phase 6 — the show:** feature-complete. The seven searches animate in sequence; CH/CCH now draw
+  their shortcut **leaps** (dashed lines where the query jumps over skipped nodes); route options
+  re-customize the CCH live; the end state shows turn-by-turn directions, with an Instant mode.
+  **Race mode was deliberately cut** — a side-by-side speed race undercuts the mechanism-not-speedup
+  framing at campus scale (nothing is actually slow). Remaining capture (Phase 7 / real device): live
+  CCH re-customization time in the browser (on-device) + animation frame rate on a mid-range phone.

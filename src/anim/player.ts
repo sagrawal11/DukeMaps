@@ -13,6 +13,8 @@ export interface RenderState {
   discoveredB: Set<number> // backward frontier
   settledB: Set<number> // backward settled
   relaxed: Set<string> // edge ids that improved a neighbour (the explored "tree")
+  // CH/CCH up-arc relaxations keyed "from>to" — the hierarchy's leaps; shortcut ones are drawn boldest.
+  leaps: Map<string, { from: number; to: number; shortcut: boolean }>
   skipped: Set<string> // edge ids dropped for access (drawn faded, not red)
   current: number | null // the node just settled (highlighted)
   done: boolean // all events folded
@@ -25,6 +27,7 @@ export function emptyState(): RenderState {
     discoveredB: new Set(),
     settledB: new Set(),
     relaxed: new Set(),
+    leaps: new Map(),
     skipped: new Set(),
     current: null,
     done: false,
@@ -45,7 +48,8 @@ export function applyEvent(s: RenderState, e: TraceEvent): void {
       }
       break
     case 'relax':
-      if (e.edge != null) s.relaxed.add(e.edge)
+      if (e.edge != null) s.relaxed.add(e.edge) // plain searches: a real graph edge
+      else if (e.from != null && e.to != null) s.leaps.set(`${e.from}>${e.to}`, { from: e.from, to: e.to, shortcut: !!e.shortcut }) // CH/CCH up-arc
       break
     case 'skip':
       if (e.edge != null) s.skipped.add(e.edge)

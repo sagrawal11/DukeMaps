@@ -160,6 +160,7 @@ function setupUI(
     '<div class="info" id="info"></div>' +
     '<div class="show" id="show" hidden>' +
     '<div class="chips" id="chips"></div>' +
+    '<div class="chipnote" id="chipnote"></div>' +
     '<div class="caption" id="caption"></div>' +
     '<div class="controls">' +
     '<button type="button" id="playall">▶ Play all</button>' +
@@ -177,6 +178,7 @@ function setupUI(
 
   const showEl = panel.querySelector('#show') as HTMLDivElement
   const chipsEl = panel.querySelector('#chips') as HTMLDivElement
+  const chipnoteEl = panel.querySelector('#chipnote') as HTMLDivElement
   const captionEl = panel.querySelector('#caption') as HTMLDivElement
   const statsEl = panel.querySelector('#stats') as HTMLDivElement
   const resultEl = panel.querySelector('#result') as HTMLDivElement
@@ -402,6 +404,9 @@ function setupUI(
       chip.disabled = dis
       chip.title = dis
         ? 'Contraction Hierarchies bake the weights into their shortcuts — a changed metric needs a full rebuild. Customizable CH re-customizes instead.'
+        : ''
+      chipnoteEl.innerHTML = dis
+        ? 'Contraction Hierarchies is greyed out — it bakes the weights into its shortcuts, so it can’t react to this metric. Customizable CH re-customizes instead.'
         : ''
     }
     if (opt.rerun && chosen.from && chosen.to) {

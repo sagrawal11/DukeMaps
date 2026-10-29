@@ -258,7 +258,9 @@ export function ch(rg: RoutingGraph, chData: CHData, sourceId: number, targetId:
         heap.push(arc.to, nd)
         stats.edgesRelaxed++
         stats.pushes++
-        events.push({ type: 'relax', side })
+        // Carry the arc's endpoints + shortcut flag so the UI can draw the "leap" (a shortcut has no
+        // single graph edge). arc.r < 0 is a shortcut per the provenance encoding.
+        events.push({ type: 'relax', side, from: chData.nodeIds[u], to: chData.nodeIds[arc.to], shortcut: arc.r < 0 })
         events.push({ type: 'push', node: chData.nodeIds[arc.to], side })
       }
     }

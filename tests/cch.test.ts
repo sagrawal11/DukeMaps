@@ -181,4 +181,28 @@ describe('CCH — customization + query (reuses ch())', () => {
     }
     expect(checked).toBeGreaterThan(0)
   })
+
+  it('ch() emits up-arc leaps with endpoints, including shortcut arcs (the Phase 6 animation input)', () => {
+    const g = randomGraph(90, 180)
+    const rg = buildRoutingGraph(g)
+    const weight = makeWeight(rg)
+    const chData = customize(buildCCH(rg), rg, weight)
+    let sawEndpoints = false
+    let sawShortcut = false
+    for (let k = 0; k < 80 && !sawShortcut; k++) {
+      const s = 1 + Math.floor(Math.random() * 90)
+      const t = 1 + Math.floor(Math.random() * 90)
+      if (s === t) continue
+      for (const e of ch(rg, chData, s, t, { weight }).events) {
+        if (e.type !== 'relax') continue
+        expect(e.edge).toBeUndefined() // CH up-arcs have no single graph edge...
+        expect(typeof e.from).toBe('number') // ...so they carry their endpoints instead
+        expect(typeof e.to).toBe('number')
+        sawEndpoints = true
+        if (e.shortcut) sawShortcut = true
+      }
+    }
+    expect(sawEndpoints).toBe(true)
+    expect(sawShortcut).toBe(true) // the hierarchy's leaps actually get exercised
+  })
 })

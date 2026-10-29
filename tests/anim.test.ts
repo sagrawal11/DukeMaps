@@ -57,4 +57,16 @@ describe('trace player — event folding', () => {
     expect([...s.settledB]).toEqual([2])
     expect(s.settled.size).toBe(0)
   })
+
+  it('folds CH/CCH up-arc relaxes into leaps; edge relaxes still land in relaxed', () => {
+    const s = emptyState()
+    applyEvent(s, { type: 'relax', edge: 'a' }) // plain search: a real graph edge
+    applyEvent(s, { type: 'relax', from: 1, to: 9, shortcut: true }) // a shortcut leap
+    applyEvent(s, { type: 'relax', from: 1, to: 2, shortcut: false }) // a local up-arc
+    applyEvent(s, { type: 'relax', from: 1, to: 9, shortcut: true }) // duplicate → deduped by key
+    expect([...s.relaxed]).toEqual(['a'])
+    expect(s.leaps.size).toBe(2)
+    expect(s.leaps.get('1>9')).toEqual({ from: 1, to: 9, shortcut: true })
+    expect(s.leaps.get('1>2')).toEqual({ from: 1, to: 2, shortcut: false })
+  })
 })
