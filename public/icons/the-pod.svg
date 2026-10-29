@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="216" viewBox="0 0 256 216" color="#183956" role="img" aria-labelledby="pod-title pod-desc">
+  <title id="pod-title">The Pod</title>
+  <desc id="pod-desc">A symbolic design workspace icon: a workbench with a project, drawing tools and a wall-mounted hammer. Simple line art, not an exterior portrait or official logo.</desc>
+  <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M48 109V54H208V109"/>
+    <path d="M68 67H96V78H68ZM80 78V103H86V78"/>
+    <path d="M127 103V67L163 103ZM137 93V87L143 93Z"/>
+    <path d="M181 101V72L186 65L191 72V101ZM181 76H191"/>
+    <path d="M66 135V119L83 110L100 119V135M66 119L83 128L100 119M83 128V135"/>
+    <path d="M132 135L143 115H191L180 135M153 124H175"/>
+    <rect x="32" y="135" width="192" height="10" rx="1"/>
+    <path d="M46 145V190M210 145V190M46 172H210"/>
+    <path d="M21 196H235"/>
+  </g>
+</svg>

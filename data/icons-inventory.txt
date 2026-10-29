@@ -165,3 +165,5 @@ component-146 | Morris Williams Track & Field Stadium | Athletics Precinct | Ref
 7764 | Lemur Center | Outlying And Perimeter | Reference-informed draft | svg/7764-lemur-center.svg
 7853 | Sarah P. Duke Gardens | Outlying And Perimeter | Reference-informed draft | svg/7853-sarah-p-duke-gardens.svg
 component-167 | Karcher-Ingram Golf Center | Outlying And Perimeter | Provisional schematic | svg/component-167-karcher-ingram-golf-center.svg
+pod | The Pod | West Campus | user-provided | svg/the-pod.svg
+pitch | Pitchforks | West Campus | user-provided | svg/pitchforks.svg

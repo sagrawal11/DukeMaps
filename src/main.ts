@@ -69,12 +69,15 @@ async function loadJSON<T>(path: string): Promise<T | null> {
   }
 }
 
-// Frame the map on the campus graph. The network itself is intentionally NOT drawn — the always-on
-// grey lines were clutter; the animation draws the live frontier/leaps/route on demand instead.
-function fitToGraph(m: maplibregl.Map, graph: Graph): void {
+// Open framed on the Duke CORE — the placed building icons minus the far "Outlying" ones (Lemur Center,
+// golf) — instead of the whole fetched graph, which reached into surrounding Durham and opened too zoomed
+// out. Falls back to the graph extent if no icons are placed. The network itself is intentionally NOT
+// drawn; the animation draws the live frontier/route on demand.
+function fitToCampus(m: maplibregl.Map, icons: BuildingIcon[], graph: Graph): void {
   const bounds = new maplibregl.LngLatBounds()
-  for (const n of graph.nodes) bounds.extend([n.lon, n.lat])
-  if (!bounds.isEmpty()) m.fitBounds(bounds, { padding: 40, duration: 0 })
+  for (const i of icons) if (i.lat != null && i.lon != null && i.area !== 'Outlying And Perimeter') bounds.extend([i.lon, i.lat])
+  if (bounds.isEmpty()) for (const n of graph.nodes) bounds.extend([n.lon, n.lat])
+  if (!bounds.isEmpty()) m.fitBounds(bounds, { padding: 30, duration: 0 })
 }
 
 const esc = (s: string): string =>
@@ -651,7 +654,7 @@ map.on('load', () => {
       setStatus('<b>DukeMaps</b><div style="color:#b00">Could not load the graph. Run <code>npm run build:graph</code>.</div>')
       return
     }
-    fitToGraph(map, graph)
+    fitToCampus(map, buildingIconsConfig as BuildingIcon[], graph)
     const aliases = (aliasesConfig as { aliases?: Record<string, string> }).aliases ?? {}
     const placeIndex = buildPlaceIndex(places ?? [], aliases)
     const edgeIndex = buildEdgeIndex(graph)

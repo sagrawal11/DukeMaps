@@ -271,10 +271,10 @@
   "area": "West Campus",
   "nickname": "Few",
   "tier": 1,
-  "lat": null,
-  "lon": null,
+  "lat": 36.000319,
+  "lon": -78.938514,
   "place": null,
-  "confidence": "none",
+  "confidence": "override",
   "suggestion": null
  },
  {
@@ -310,10 +310,10 @@
   "area": "West Campus",
   "nickname": "Physics",
   "tier": 2,
-  "lat": null,
-  "lon": null,
+  "lat": 36.003295,
+  "lon": -78.942503,
   "place": null,
-  "confidence": "none",
+  "confidence": "override",
   "suggestion": null
  },
  {
@@ -808,10 +808,10 @@
   "area": "East Campus",
   "nickname": "West House",
   "tier": 1,
-  "lat": null,
-  "lon": null,
+  "lat": 36.005781,
+  "lon": -78.915335,
   "place": null,
-  "confidence": "none",
+  "confidence": "override",
   "suggestion": null
  },
  {
@@ -832,12 +832,12 @@
   "name": "Crowell Building",
   "file": "icons/7206-crowell-building.svg",
   "area": "East Campus",
-  "nickname": "Crowell",
+  "nickname": "Crowell Bldg",
   "tier": 3,
-  "lat": 36.00666961428571,
-  "lon": -78.91347457142857,
-  "place": "Crowell Building",
-  "confidence": "exact",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
   "suggestion": null
  },
  {
@@ -2105,16 +2105,11 @@
   "area": "Central Campus And Gardens",
   "nickname": "Blue Light",
   "tier": 1,
-  "lat": null,
-  "lon": null,
+  "lat": 36.005655,
+  "lon": -78.922027,
   "place": null,
-  "confidence": "none",
-  "suggestion": {
-   "name": "The Living Room",
-   "lat": 36.000631874999996,
-   "lon": -78.9108323875,
-   "score": 0.25
-  }
+  "confidence": "override",
+  "suggestion": null
  },
  {
   "id": "7034",
@@ -2193,16 +2188,11 @@
   "area": "Central Campus And Gardens",
   "nickname": "300 Swift",
   "tier": 1,
-  "lat": null,
-  "lon": null,
+  "lat": 36.002858,
+  "lon": -78.922204,
   "place": null,
-  "confidence": "none",
-  "suggestion": {
-   "name": "301 Swift",
-   "lat": 36.002385838461535,
-   "lon": -78.92034196923078,
-   "score": 0.33
-  }
+  "confidence": "override",
+  "suggestion": null
  },
  {
   "id": "7137",
@@ -2361,16 +2351,11 @@
   "area": "Outlying And Perimeter",
   "nickname": "Gardens",
   "tier": 1,
-  "lat": null,
-  "lon": null,
+  "lat": 36.001293,
+  "lon": -78.934837,
   "place": null,
-  "confidence": "none",
-  "suggestion": {
-   "name": "Kilgo House P",
-   "lat": 36.00022101538461,
-   "lon": -78.93951006153846,
-   "score": 0.25
-  }
+  "confidence": "override",
+  "suggestion": null
  },
  {
   "id": "component-167",
@@ -2389,5 +2374,31 @@
    "lon": -78.94780677042253,
    "score": 0.17
   }
+ },
+ {
+  "id": "pod",
+  "name": "The Pod",
+  "file": "icons/the-pod.svg",
+  "area": "West Campus",
+  "nickname": "The Pod",
+  "tier": 2,
+  "lat": 36.004213,
+  "lon": -78.941765,
+  "place": null,
+  "confidence": "override",
+  "suggestion": null
+ },
+ {
+  "id": "pitch",
+  "name": "Pitchforks",
+  "file": "icons/pitchforks.svg",
+  "area": "West Campus",
+  "nickname": "Pitch",
+  "tier": 2,
+  "lat": 35.999219,
+  "lon": -78.936892,
+  "place": null,
+  "confidence": "override",
+  "suggestion": null
  }
 ]

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="216" viewBox="0 0 256 216" color="#183956" role="img" aria-labelledby="pitchforks-title pitchforks-desc">
+  <title id="pitchforks-title">Pitchforks</title>
+  <desc id="pitchforks-desc">A symbolic restaurant icon: a plate, three-pronged fork and knife. Simple line art, not an exterior portrait or official logo.</desc>
+  <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="130" cy="119" r="55"/>
+    <circle cx="130" cy="119" r="40"/>
+    <path d="M39 64V100Q39 112 51 112Q63 112 63 100V64M51 64V100M51 112V174"/>
+    <path d="M211 64Q194 89 194 120H211M211 64V174"/>
+    <path d="M21 196H235"/>
+  </g>
+</svg>
