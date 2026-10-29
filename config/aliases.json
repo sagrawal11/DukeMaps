@@ -1,7 +1,7 @@
 {
-  "_comment": "Campus nicknames mapped to places for the search box (Phase 4). FILL IN. Keys are what users type; values reference a place (building name or place id) from the place index. The two entries below are illustrative only.",
+  "_comment": "Campus nicknames mapped to places for the search box. Keys are what users type (matched case-insensitively); each value is an exact building name (or place id) from data/processed/places.json. Add more freely.",
   "aliases": {
-    "WU": "<place id or building name>",
-    "the Chapel": "<place id or building name>"
+    "wu": "Richard H. Brodhead Center, West Union",
+    "bc": "Bryan Center"
   }
 }

@@ -11,7 +11,6 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 import { Protocol } from 'pmtiles'
 import themeLayers from 'protomaps-themes-base'
 import type { Graph, GraphNode, Place } from './graph/types'
-import { graphToGeoJSON } from './map/render'
 import { buildPlaceIndex, type PlaceIndex } from './places/search'
 import { buildEdgeIndex, type EdgeIndex } from './spatial/snap'
 import { buildRoutingGraph, makeWeight, type WeightFn } from './algorithms/routing'
@@ -70,16 +69,9 @@ async function loadJSON<T>(path: string): Promise<T | null> {
   }
 }
 
-// The walk network, drawn muted so the search pins and their snapped positions read clearly on top.
-function addGraphLayer(m: maplibregl.Map, graph: Graph): void {
-  if (graph.edges.length === 0) return
-  m.addSource('graph', { type: 'geojson', data: graphToGeoJSON(graph) })
-  m.addLayer({
-    id: 'graph-edges',
-    type: 'line',
-    source: 'graph',
-    paint: { 'line-color': '#9aa5b1', 'line-width': 1.1, 'line-opacity': 0.75 },
-  })
+// Frame the map on the campus graph. The network itself is intentionally NOT drawn — the always-on
+// grey lines were clutter; the animation draws the live frontier/leaps/route on demand instead.
+function fitToGraph(m: maplibregl.Map, graph: Graph): void {
   const bounds = new maplibregl.LngLatBounds()
   for (const n of graph.nodes) bounds.extend([n.lon, n.lat])
   if (!bounds.isEmpty()) m.fitBounds(bounds, { padding: 40, duration: 0 })
@@ -148,6 +140,7 @@ function setupUI(
   const panel = document.createElement('div')
   panel.className = 'panel'
   panel.innerHTML =
+    '<button type="button" class="sheet-handle" id="sheet-handle" aria-label="Expand or collapse the panel"></button>' +
     '<div class="brand">DukeMaps</div>' +
     '<div class="field"><input id="from" placeholder="From — search or tap the map" autocomplete="off" /><div class="ac" id="ac-from"></div></div>' +
     '<div class="field"><input id="to" placeholder="To — search or tap the map" autocomplete="off" /><div class="ac" id="ac-to"></div></div>' +
@@ -175,6 +168,8 @@ function setupUI(
     '<div class="compare" id="compare"></div>' +
     '</div>'
   document.body.appendChild(panel)
+  // Mobile bottom-sheet: the grab handle collapses/expands the sheet so the map stays visible.
+  panel.querySelector('#sheet-handle')?.addEventListener('click', () => panel.classList.toggle('collapsed'))
 
   const showEl = panel.querySelector('#show') as HTMLDivElement
   const chipsEl = panel.querySelector('#chips') as HTMLDivElement
@@ -206,6 +201,16 @@ function setupUI(
         ? `<b>${name}:</b> ${esc(chosen[w]!.label)} <span class="dim">· snapped ${Math.round(chosen[w]!.distM)} m</span>`
         : `<b>${name}:</b> <span class="dim">—</span>`
     infoEl.innerHTML = `${line('from', 'From')}<br>${line('to', 'To')}`
+  }
+
+  // A tap far from any campus path isn't routable — reject it with a transient notice instead of
+  // snapping hundreds of metres to the nearest edge. Tunable; search picks (Duke buildings) skip this.
+  const MAX_SNAP_M = 120
+  let noticeTimer = 0
+  const flashNotice = (msg: string): void => {
+    window.clearTimeout(noticeTimer)
+    infoEl.innerHTML = `<span class="notice">${esc(msg)}</span>`
+    noticeTimer = window.setTimeout(renderInfo, 2800)
   }
 
   const fmtTime = (s: number): string => (s < 90 ? `${Math.round(s)} s` : `${Math.round(s / 60)} min`)
@@ -472,9 +477,13 @@ function setupUI(
     if (chosen.from && chosen.to) startShow() // switch modes immediately
   })
 
-  const setEndpoint = (w: Which, lonLat: [number, number], label: string): void => {
+  const setEndpoint = (w: Which, lonLat: [number, number], label: string, enforceOnCampus = false): void => {
     const snap = edgeIndex.snap(lonLat[0], lonLat[1])
     if (!snap) return
+    if (enforceOnCampus && snap.distM > MAX_SNAP_M) {
+      flashNotice("That spot isn't on Duke's campus — tap a path or building on campus.")
+      return
+    }
     chosen[w] = { label, point: snap.point, distM: snap.distM, node: snap.node }
     const m = markers[w] ?? new maplibregl.Marker({ color: colors[w] })
     markers[w] = m.setLngLat(snap.point).addTo(map)
@@ -546,8 +555,8 @@ function setupUI(
       clearEndpoint('to')
     }
     const w: Which = chosen.from ? 'to' : 'from'
-    input(w).value = 'Dropped pin'
-    setEndpoint(w, lonLat, 'Dropped pin')
+    setEndpoint(w, lonLat, 'Dropped pin', true) // enforce: reject taps off the campus network
+    if (chosen[w]) input(w).value = 'Dropped pin' // only label the field if the pin was accepted
   })
   map.getCanvas().style.cursor = 'crosshair'
 
@@ -582,7 +591,7 @@ map.on('load', () => {
       setStatus('<b>DukeMaps</b><div style="color:#b00">Could not load the graph. Run <code>npm run build:graph</code>.</div>')
       return
     }
-    addGraphLayer(map, graph)
+    fitToGraph(map, graph)
     const aliases = (aliasesConfig as { aliases?: Record<string, string> }).aliases ?? {}
     const placeIndex = buildPlaceIndex(places ?? [], aliases)
     const edgeIndex = buildEdgeIndex(graph)
