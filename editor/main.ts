@@ -13,6 +13,7 @@ import { addGraphLayers } from './layers'
 import { EditorState } from './state'
 import { Overlay } from './overlay'
 import { installTools } from './tools'
+import { installGpx } from './gpx'
 
 // Panel is built first so it renders even if the map can't initialize (no WebGL).
 const panel = document.getElementById('panel')!
@@ -82,6 +83,7 @@ map.on('load', () => {
       addGraphLayers(map, state.graph)
       const overlay = new Overlay(map)
       installTools(map, state, overlay) // builds the toolbar + takes over the status line
+      installGpx(map, state) // GPX import panel + preview layer
       const bounds = new maplibregl.LngLatBounds()
       for (const n of state.graph.nodes) bounds.extend([n.lon, n.lat])
       if (!bounds.isEmpty()) map.fitBounds(bounds, { padding: 30, duration: 0 })

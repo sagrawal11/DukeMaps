@@ -1,7 +1,7 @@
 // Pure geometry + edit helpers for the editor. No DOM, no MapLibre — unit-tested in
 // tests/editing.test.ts. The editor UI (editor/*) calls these; applyEdits recomputes lengths and
 // weights on replay, so these helpers only ever produce intent (coords, geometry, EditOps).
-import type { GraphEdge, GraphNode } from './types'
+import type { Graph, GraphEdge, GraphNode } from './types'
 import type { EditOp } from './edits'
 import { haversineM } from './geo'
 
@@ -120,4 +120,44 @@ export function snapToNearestNode(
     }
   }
   return best
+}
+
+// Parse a GPX track into one [lon, lat] array per <trkseg> (or one array if there are trackpoints
+// but no segments). Regex-based and order-agnostic on the lat/lon attributes — no XML dependency,
+// and pure so it's unit-testable. ponytail: regex over flat GPX; swap for a real parser only if a
+// track uses namespaced/exotic trkpt attributes.
+export function parseGpx(xml: string): [number, number][][] {
+  const blocks = xml.match(/<trkseg[\s\S]*?<\/trkseg>/g) ?? (xml.includes('<trkpt') ? [xml] : [])
+  const tracks: [number, number][][] = []
+  for (const block of blocks) {
+    const pts: [number, number][] = []
+    for (const tag of block.match(/<trkpt\b[^>]*>/g) ?? []) {
+      const lat = /\blat="(-?\d+(?:\.\d+)?)"/.exec(tag)
+      const lon = /\blon="(-?\d+(?:\.\d+)?)"/.exec(tag)
+      if (lat && lon) pts.push([Number(lon[1]), Number(lat[1])])
+    }
+    if (pts.length) tracks.push(pts)
+  }
+  return tracks
+}
+
+export interface DivergencePoint {
+  point: [number, number] // [lon, lat]
+  nearestDistM: number // distance to the nearest existing edge
+  diverged: boolean // nearestDistM > threshold → not on the known graph
+}
+
+// For each track point, the distance to the nearest existing edge, flagged if beyond threshold.
+// Drives the GPX "where does this diverge from the graph?" preview. One-shot O(points × edges)
+// linear scan — fine for an import; the Phase 4 spatial index would speed it up if needed.
+export function trackDivergence(track: [number, number][], graph: Graph, thresholdM: number): DivergencePoint[] {
+  return track.map((p) => {
+    let nearest = Infinity
+    for (const e of graph.edges) {
+      const d = projectPointOnPolyline(e.geometry, p).distM
+      if (d < nearest) nearest = d
+      if (nearest === 0) break
+    }
+    return { point: p, nearestDistM: nearest, diverged: nearest > thresholdM }
+  })
 }

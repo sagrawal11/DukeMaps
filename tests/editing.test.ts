@@ -1,5 +1,13 @@
 import { describe, it, expect } from 'vitest'
-import { projectPointOnSegment, projectPointOnPolyline, splitEdgeOps, snapToNearestNode, missingAttrs } from '../src/graph/editing'
+import {
+  projectPointOnSegment,
+  projectPointOnPolyline,
+  splitEdgeOps,
+  snapToNearestNode,
+  missingAttrs,
+  parseGpx,
+  trackDivergence,
+} from '../src/graph/editing'
 import { polylineLengthM } from '../src/graph/geo'
 import { applyEdits, type EditOp } from '../src/graph/edits'
 import type { Graph, GraphEdge, GraphNode } from '../src/graph/types'
@@ -157,4 +165,53 @@ describe('missingAttrs', () => {
   it('passes a complete public OSM footway', () => expect(missingAttrs(mk({}))).toBe(false))
   it('passes a passage that has an access rule', () =>
     expect(missingAttrs(mk({ kind: 'passage', requires: ['duke_card'] }))).toBe(false))
+})
+
+describe('parseGpx', () => {
+  it('parses a single-segment track as [lon, lat] (order-agnostic attrs)', () => {
+    const gpx = `<gpx><trk><trkseg>
+      <trkpt lat="36.0" lon="-78.9"></trkpt>
+      <trkpt lat="36.001" lon="-78.9"/>
+      <trkpt lon="-78.9" lat="36.002"/>
+    </trkseg></trk></gpx>`
+    const t = parseGpx(gpx)
+    expect(t).toHaveLength(1)
+    expect(t[0]).toHaveLength(3)
+    expect(t[0][0]).toEqual([-78.9, 36.0])
+    expect(t[0][2]).toEqual([-78.9, 36.002])
+  })
+  it('parses multiple segments', () => {
+    const t = parseGpx('<trkseg><trkpt lat="1" lon="2"/></trkseg><trkseg><trkpt lat="3" lon="4"/><trkpt lat="5" lon="6"/></trkseg>')
+    expect(t).toHaveLength(2)
+    expect(t[1]).toHaveLength(2)
+  })
+  it('returns [] for empty / trackless input', () => {
+    expect(parseGpx('')).toEqual([])
+    expect(parseGpx('<gpx></gpx>')).toEqual([])
+  })
+})
+
+describe('trackDivergence', () => {
+  const graph: Graph = {
+    nodes: [
+      { id: 1, lat: 36.0, lon: -78.9 },
+      { id: 2, lat: 36.002, lon: -78.9 },
+    ],
+    edges: [edge2],
+    meta: { nodeCount: 2, edgeCount: 1 },
+  }
+  it('flags points far from any edge but not points on it', () => {
+    const track: [number, number][] = [
+      [-78.9, 36.001], // on edge2
+      [-78.8, 36.001], // ~9 km east
+    ]
+    const d = trackDivergence(track, graph, 20)
+    expect(d[0].diverged).toBe(false)
+    expect(d[1].diverged).toBe(true)
+  })
+  it('flags everything against an empty graph', () => {
+    const d = trackDivergence([[-78.9, 36.0]], { nodes: [], edges: [], meta: { nodeCount: 0, edgeCount: 0 } }, 20)
+    expect(d[0].diverged).toBe(true)
+    expect(d[0].nearestDistM).toBe(Infinity)
+  })
 })
