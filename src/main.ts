@@ -320,7 +320,7 @@ function setupUI(
     player = makePlayer(
       trace,
       (s) => {
-        overlay.redraw(s)
+        if (!instant) overlay.redraw(s) // Instant = clean route only; skip the exploration/leaps viz
         statsEl.innerHTML = `settled <b>${s.settled.size + s.settledB.size}</b> · relaxed <b>${s.relaxed.size}</b>`
       },
       { speed: Number(speedEl.value) || 1, reducedMotion: instant || prefersReducedMotion, onDone },
