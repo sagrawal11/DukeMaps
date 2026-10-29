@@ -53,6 +53,19 @@
       .stats { font-size: 12.5px; color: #344054; }
       .stats b { color: #101828; }
       .result { margin-top: 5px; font-size: 14px; color: #1b5e20; }
+      .chips { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 7px; }
+      .chips .chip {
+        border: 1px solid #d0d5dd; background: #fff; border-radius: 999px; padding: 3px 9px;
+        font: inherit; font-size: 11.5px; color: #475467; cursor: pointer;
+      }
+      .chips .chip:hover { background: #f2f6fc; }
+      .chips .chip.on { background: #2e6fd6; border-color: #2e6fd6; color: #fff; }
+      .compare { margin-top: 7px; }
+      .compare table { width: 100%; border-collapse: collapse; font-size: 12px; }
+      .compare th { color: #98a2b3; font-weight: 600; padding: 2px 0; text-align: left; }
+      .compare td { padding: 2px 0; color: #344054; }
+      .compare th:nth-child(n + 2), .compare td:nth-child(n + 2) { text-align: right; }
+      .compare .dim { color: #98a2b3; font-size: 11px; margin-top: 2px; }
     </style>
   </head>
   <body>

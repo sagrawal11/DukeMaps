@@ -12,9 +12,11 @@ import { graphToGeoJSON } from './map/render'
 import { buildPlaceIndex, type PlaceIndex } from './places/search'
 import { buildEdgeIndex, type EdgeIndex } from './spatial/snap'
 import { buildRoutingGraph, makeWeight } from './algorithms/routing'
-import { dijkstra } from './algorithms/dijkstra'
+import { customize, type CCHStructure } from './algorithms/cch'
+import type { CHData } from './algorithms/ch'
 import { createOverlay } from './map/overlay'
 import { makePlayer, type Player } from './anim/player'
+import { ALGORITHMS, runAlgo, type AlgoDef } from './anim/algos'
 import aliasesConfig from '../config/aliases.json'
 
 const statusEl = document.createElement('div')
@@ -88,9 +90,17 @@ interface Endpoint {
 
 // Pick From and To by searching a building (fuzzy autocomplete) or tapping the map. Each endpoint
 // snaps to the nearest point on the walk network via the Phase-4 edge index.
-function setupUI(map: maplibregl.Map, graph: Graph, placeIndex: PlaceIndex, edgeIndex: EdgeIndex): void {
+function setupUI(
+  map: maplibregl.Map,
+  graph: Graph,
+  placeIndex: PlaceIndex,
+  edgeIndex: EdgeIndex,
+  chData: CHData | null,
+  cchStructure: CCHStructure | null,
+): void {
   const rg = buildRoutingGraph(graph) // the algorithms' view of the graph, built once
   const weight = makeWeight(rg) // base walking-time metric (step-free + "Leave at" come in 6c)
+  const cchData = cchStructure ? customize(cchStructure, rg, weight) : null // customize the CCH once (base metric)
   const overlay = createOverlay(map, graph) // canvas layer the animation draws on
   let player: Player | null = null
 
@@ -102,21 +112,27 @@ function setupUI(map: maplibregl.Map, graph: Graph, placeIndex: PlaceIndex, edge
     '<div class="field"><input id="to" placeholder="To — search or tap the map" autocomplete="off" /><div class="ac" id="ac-to"></div></div>' +
     '<div class="info" id="info"></div>' +
     '<div class="show" id="show" hidden>' +
+    '<div class="chips" id="chips"></div>' +
     '<div class="caption" id="caption"></div>' +
     '<div class="controls">' +
+    '<button type="button" id="playall">▶ Play all</button>' +
     '<button type="button" id="playpause">Pause</button>' +
-    '<button type="button" id="skip">Skip to result</button>' +
+    '<button type="button" id="skip">Skip</button>' +
     '<label class="spd">Speed <input type="range" id="speed" min="0.25" max="4" step="0.25" value="1" /></label>' +
     '</div>' +
     '<div class="stats" id="stats"></div>' +
     '<div class="result" id="result"></div>' +
+    '<div class="compare" id="compare"></div>' +
     '</div>'
   document.body.appendChild(panel)
 
   const showEl = panel.querySelector('#show') as HTMLDivElement
+  const chipsEl = panel.querySelector('#chips') as HTMLDivElement
   const captionEl = panel.querySelector('#caption') as HTMLDivElement
   const statsEl = panel.querySelector('#stats') as HTMLDivElement
   const resultEl = panel.querySelector('#result') as HTMLDivElement
+  const compareEl = panel.querySelector('#compare') as HTMLDivElement
+  const playAllBtn = panel.querySelector('#playall') as HTMLButtonElement
   const playBtn = panel.querySelector('#playpause') as HTMLButtonElement
   const skipBtn = panel.querySelector('#skip') as HTMLButtonElement
   const speedEl = panel.querySelector('#speed') as HTMLInputElement
@@ -138,31 +154,62 @@ function setupUI(map: maplibregl.Map, graph: Graph, placeIndex: PlaceIndex, edge
   const fmtTime = (s: number): string => (s < 90 ? `${Math.round(s)} s` : `${Math.round(s / 60)} min`)
   const fmtDist = (m: number): string => (m < 950 ? `${Math.round(m)} m` : `${(m / 1000).toFixed(2)} km`)
 
-  // Route between the two snapped anchors with Dijkstra and animate its exploration, then draw the
-  // route. (Phase 6b adds the other algorithms in sequence; 6c adds step-free + "Leave at" options.)
-  const runShow = (): void => {
-    if (!chosen.from || !chosen.to) return
+  // The seven algorithms to walk through. CH/CCH need their prebuilt data; drop them if it didn't load.
+  const algos: AlgoDef[] = ALGORITHMS.filter((a) => (a.key !== 'ch' && a.key !== 'cch') || !!(chData && cchData))
+  chipsEl.innerHTML = algos.map((a, i) => `<button type="button" class="chip" data-i="${i}">${esc(a.name)}</button>`).join('')
+  const chipEls = Array.from(chipsEl.querySelectorAll('.chip')) as HTMLButtonElement[]
+
+  let curIdx = 0
+  let playAll = false
+  let advanceTimer = 0
+  const results = new Map<string, { settled: number; costS: number; found: boolean; optimal: boolean }>()
+
+  // A small table that accumulates as each algorithm finishes — the mechanism contrast, side by side.
+  const renderCompare = (): void => {
+    const rows = algos
+      .filter((a) => results.has(a.key))
+      .map((a) => {
+        const r = results.get(a.key)!
+        return `<tr><td>${esc(a.name)}</td><td>${r.settled}</td><td>${r.found ? fmtTime(r.costS) : '—'}${r.optimal ? '' : '*'}</td></tr>`
+      })
+      .join('')
+    compareEl.innerHTML = rows
+      ? `<table><tr><th>algorithm</th><th>settled</th><th>time</th></tr>${rows}</table><div class="dim">* not the fastest route</div>`
+      : ''
+  }
+
+  // Run one algorithm, animate its exploration, draw its route, record its stats.
+  const playAlgo = (i: number): void => {
+    if (!chosen.from || !chosen.to || i < 0 || i >= algos.length) return
+    window.clearTimeout(advanceTimer)
     player?.dispose()
     overlay.clear()
     resultEl.textContent = ''
-    const trace = dijkstra(rg, chosen.from.node.id, chosen.to.node.id, { weight })
+    curIdx = i
+    chipEls.forEach((c, k) => c.classList.toggle('on', k === i))
+    const def = algos[i]
+    const trace = runAlgo(def.key, rg, weight, chData as CHData, cchData as CHData, chosen.from.node.id, chosen.to.node.id)
     showEl.hidden = false
-    captionEl.textContent = 'Dijkstra — always expands the node reachable in the least walking time so far.'
+    captionEl.textContent = def.caption
     const onDone = (): void => {
       playBtn.textContent = 'Replay'
+      results.set(def.key, { settled: trace.stats.nodesSettled, costS: trace.route?.costS ?? Infinity, found: trace.stats.found, optimal: def.optimal })
+      renderCompare()
       if (trace.route) {
         overlay.drawRoute(trace.route)
-        resultEl.innerHTML = `<b>${fmtTime(trace.route.costS)}</b> · ${fmtDist(trace.route.distanceM)} walk`
+        resultEl.innerHTML = `<b>${fmtTime(trace.route.costS)}</b> · ${fmtDist(trace.route.distanceM)} walk · explored ${trace.stats.nodesSettled} nodes`
       } else {
         resultEl.textContent = 'No route found.'
       }
+      if (playAll && curIdx < algos.length - 1) advanceTimer = window.setTimeout(() => playAlgo(curIdx + 1), 1100)
+      else playAll = false
     }
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     player = makePlayer(
       trace,
       (s) => {
         overlay.redraw(s)
-        statsEl.innerHTML = `settled <b>${s.settled.size}</b> · edges relaxed <b>${s.relaxed.size}</b>`
+        statsEl.innerHTML = `settled <b>${s.settled.size}</b> · relaxed <b>${s.relaxed.size}</b>`
       },
       { speed: Number(speedEl.value) || 1, reducedMotion: reduced, onDone },
     )
@@ -170,9 +217,25 @@ function setupUI(map: maplibregl.Map, graph: Graph, placeIndex: PlaceIndex, edge
     player.play()
   }
 
+  // Both pinned (or "Play all") → walk through all seven in order, accumulating the comparison.
+  const startShow = (): void => {
+    results.clear()
+    renderCompare()
+    playAll = true
+    playAlgo(0)
+  }
+
+  chipsEl.addEventListener('click', (e) => {
+    const btn = (e.target as HTMLElement).closest('.chip') as HTMLButtonElement | null
+    if (!btn) return
+    playAll = false
+    window.clearTimeout(advanceTimer)
+    playAlgo(Number(btn.dataset.i))
+  })
+  playAllBtn.addEventListener('click', startShow)
   playBtn.addEventListener('click', () => {
     if (!player) return
-    if (playBtn.textContent === 'Replay') runShow()
+    if (playBtn.textContent === 'Replay') playAlgo(curIdx)
     else if (player.playing) {
       player.pause()
       playBtn.textContent = 'Play'
@@ -191,7 +254,7 @@ function setupUI(map: maplibregl.Map, graph: Graph, placeIndex: PlaceIndex, edge
     const m = markers[w] ?? new maplibregl.Marker({ color: colors[w] })
     markers[w] = m.setLngLat(snap.point).addTo(map)
     renderInfo()
-    if (chosen.from && chosen.to) runShow() // both pinned → start the show
+    if (chosen.from && chosen.to) startShow() // both pinned → walk through all seven
   }
 
   const clearEndpoint = (w: Which): void => {
@@ -203,6 +266,7 @@ function setupUI(map: maplibregl.Map, graph: Graph, placeIndex: PlaceIndex, edge
     overlay.clear()
     player?.dispose()
     player = null
+    window.clearTimeout(advanceTimer)
   }
 
   const wireField = (w: Which): void => {
@@ -279,7 +343,12 @@ map.on('error', (e) => console.error('[dukemaps] map error:', e.error?.message ?
 
 map.on('load', () => {
   setStatus('Loading graph…')
-  void Promise.all([loadJSON<Graph>('data/graph.json'), loadJSON<Place[]>('data/places.json')]).then(([graph, places]) => {
+  void Promise.all([
+    loadJSON<Graph>('data/graph.json'),
+    loadJSON<Place[]>('data/places.json'),
+    loadJSON<CHData>('data/ch.json'), // prebuilt contraction hierarchy (base metric)
+    loadJSON<CCHStructure>('data/cch.json'), // metric-independent CCH structure (customized at runtime)
+  ]).then(([graph, places, chData, cchStructure]) => {
     if (!graph) {
       setStatus('<b>DukeMaps</b><div style="color:#b00">Could not load the graph. Run <code>npm run build:graph</code>.</div>')
       return
@@ -288,6 +357,6 @@ map.on('load', () => {
     const aliases = (aliasesConfig as { aliases?: Record<string, string> }).aliases ?? {}
     const placeIndex = buildPlaceIndex(places ?? [], aliases)
     const edgeIndex = buildEdgeIndex(graph)
-    setupUI(map, graph, placeIndex, edgeIndex)
+    setupUI(map, graph, placeIndex, edgeIndex, chData, cchStructure)
   })
 })
