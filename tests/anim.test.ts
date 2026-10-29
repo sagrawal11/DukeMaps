@@ -58,15 +58,13 @@ describe('trace player — event folding', () => {
     expect(s.settled.size).toBe(0)
   })
 
-  it('folds CH/CCH up-arc relaxes into leaps; edge relaxes still land in relaxed', () => {
+  it('folds a meet event into met (the CH/CCH apex touch); CH up-arc relaxes carry no edge', () => {
     const s = emptyState()
+    expect(s.met).toBe(false)
     applyEvent(s, { type: 'relax', edge: 'a' }) // plain search: a real graph edge
-    applyEvent(s, { type: 'relax', from: 1, to: 9, shortcut: true }) // a shortcut leap
-    applyEvent(s, { type: 'relax', from: 1, to: 2, shortcut: false }) // a local up-arc
-    applyEvent(s, { type: 'relax', from: 1, to: 9, shortcut: true }) // duplicate → deduped by key
+    applyEvent(s, { type: 'relax', side: 'f' }) // a CH up-arc relax carries no graph edge
     expect([...s.relaxed]).toEqual(['a'])
-    expect(s.leaps.size).toBe(2)
-    expect(s.leaps.get('1>9')).toEqual({ from: 1, to: 9, shortcut: true })
-    expect(s.leaps.get('1>2')).toEqual({ from: 1, to: 2, shortcut: false })
+    applyEvent(s, { type: 'meet', node: 7, side: 'f' })
+    expect(s.met).toBe(true)
   })
 })

@@ -19,6 +19,8 @@ import { crowdingMultiplier, hmsToSec, type Schedule } from './graph/time'
 import { createOverlay } from './map/overlay'
 import { makePlayer, type Player } from './anim/player'
 import { ALGORITHMS, runAlgo, type AlgoDef } from './anim/algos'
+import { elimPaths, layoutElimTree } from './anim/elimtree'
+import { createElimTreeView } from './anim/elimtree-view'
 import aliasesConfig from '../config/aliases.json'
 import scheduleConfig from '../config/schedule.json'
 
@@ -131,6 +133,10 @@ function setupUI(
   let weight = buildWeight() // reassigned whenever the options change
   let cchData: CHData | null = null // populated by applyMetric() below (one customize at startup)
   const overlay = createOverlay(map, graph) // canvas layer the animation draws on
+  const elimInset = document.createElement('div')
+  elimInset.className = 'elim-inset'
+  document.body.appendChild(elimInset)
+  const elimView = createElimTreeView(elimInset) // CH/CCH elimination-tree inset (bottom-right of the map)
   let player: Player | null = null
 
   const panel = document.createElement('div')
@@ -277,6 +283,7 @@ function setupUI(
     window.clearTimeout(advanceTimer)
     player?.dispose()
     overlay.clear()
+    elimView.hide() // re-shown just below, only for the hierarchy searches
     resultEl.textContent = ''
     curIdx = i
     chipEls.forEach((c, k) => c.classList.toggle('on', k === i))
@@ -284,6 +291,17 @@ function setupUI(
     const trace = runAlgo(def.key, rg, weight, chData as CHData, cchData as CHData, chosen.from.node.id, chosen.to.node.id)
     showEl.hidden = false
     captionEl.textContent = def.caption
+    // The elimination-tree inset tells the "climb to the apex, unpack back down" story — only for CH/CCH,
+    // and not in Instant (it's educational chrome). Derived structurally from the active hierarchy; the
+    // algorithms stay pure. CH uses the prebuilt data, CCH its live-customized data — both are CHData.
+    const isHierarchy = def.key === 'ch' || def.key === 'cch'
+    if (isHierarchy && !instant) {
+      const activeCH = def.key === 'ch' ? chData : cchData
+      const sIdx = rg.indexOf.get(chosen.from.node.id)
+      const tIdx = rg.indexOf.get(chosen.to.node.id)
+      const paths = activeCH && sIdx !== undefined && tIdx !== undefined ? elimPaths(activeCH, sIdx, tIdx) : null
+      if (paths && activeCH) elimView.show(layoutElimTree(paths, activeCH), { algoName: def.name })
+    }
     const onDone = (): void => {
       playBtn.textContent = 'Replay'
       results.set(def.key, { settled: trace.stats.nodesSettled, costS: trace.route?.costS ?? Infinity, found: trace.stats.found, optimal: def.optimal })
@@ -300,7 +318,10 @@ function setupUI(
     player = makePlayer(
       trace,
       (s) => {
-        if (!instant) overlay.redraw(s) // Instant = clean route only; skip the exploration/leaps viz
+        if (!instant) {
+          overlay.redraw(s) // Instant = clean route only; skip the exploration viz
+          if (isHierarchy) elimView.update(s) // climb the chains / pulse the apex / descend, in sync
+        }
         statsEl.innerHTML = `settled <b>${s.settled.size + s.settledB.size}</b> · relaxed <b>${s.relaxed.size}</b>`
       },
       { speed: Number(speedEl.value) || 1, reducedMotion: instant || prefersReducedMotion, onDone },
@@ -499,6 +520,7 @@ function setupUI(
     input(w).value = ''
     showEl.hidden = true
     overlay.clear()
+    elimView.hide()
     player?.dispose()
     player = null
     window.clearTimeout(advanceTimer)

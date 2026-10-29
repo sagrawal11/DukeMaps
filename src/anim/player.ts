@@ -13,8 +13,7 @@ export interface RenderState {
   discoveredB: Set<number> // backward frontier
   settledB: Set<number> // backward settled
   relaxed: Set<string> // edge ids that improved a neighbour (the explored "tree")
-  // CH/CCH up-arc relaxations keyed "from>to" — the hierarchy's leaps; shortcut ones are drawn boldest.
-  leaps: Map<string, { from: number; to: number; shortcut: boolean }>
+  met: boolean // CH/CCH: the two upward searches have touched the same node — drives the elim-tree apex pulse
   skipped: Set<string> // edge ids dropped for access (drawn faded, not red)
   current: number | null // the node just settled (highlighted)
   done: boolean // all events folded
@@ -27,15 +26,14 @@ export function emptyState(): RenderState {
     discoveredB: new Set(),
     settledB: new Set(),
     relaxed: new Set(),
-    leaps: new Map(),
+    met: false,
     skipped: new Set(),
     current: null,
     done: false,
   }
 }
 
-// Fold one event into the state. meet/shortcut carry no 6a visual (they arrive with bidirectional/CH
-// styling in 6b); folding them is a harmless no-op here.
+// Fold one event into the state. `shortcut` (the unpack marker) has no visual here, so it's a no-op.
 export function applyEvent(s: RenderState, e: TraceEvent): void {
   switch (e.type) {
     case 'push':
@@ -48,8 +46,10 @@ export function applyEvent(s: RenderState, e: TraceEvent): void {
       }
       break
     case 'relax':
-      if (e.edge != null) s.relaxed.add(e.edge) // plain searches: a real graph edge
-      else if (e.from != null && e.to != null) s.leaps.set(`${e.from}>${e.to}`, { from: e.from, to: e.to, shortcut: !!e.shortcut }) // CH/CCH up-arc
+      if (e.edge != null) s.relaxed.add(e.edge) // plain searches: a real graph edge (CH up-arcs carry none)
+      break
+    case 'meet':
+      s.met = true // the two upward searches reached the same node
       break
     case 'skip':
       if (e.edge != null) s.skipped.add(e.edge)
