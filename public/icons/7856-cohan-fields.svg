@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="216" viewBox="0 0 256 216" role="img" aria-labelledby="duke-7856-title duke-7856-desc"><title id="duke-7856-title">Cohan Fields</title><desc id="duke-7856-desc">Provisional schematic. Simplified architectural illustration for a 100–250 px campus map. Approximate proportions; not a measured elevation.</desc>
+<rect x="33" y="80" width="90" height="106" fill="#A6BDA5" stroke="#183956" stroke-width="1.5"/>
+<rect x="38" y="85" width="80" height="96" fill="none" stroke="#F8F5EC" stroke-width="1.2"/>
+<line x1="38" y1="133.0" x2="118" y2="133.0" stroke="#F8F5EC" stroke-width="1" stroke-linecap="round"/>
+<ellipse cx="78.0" cy="133.0" rx="12" ry="12" fill="none" stroke="#183956" stroke-width="1"/>
+<rect x="58.2" y="85" width="39.6" height="19" fill="none" stroke="#F8F5EC" stroke-width="1"/>
+<rect x="58.2" y="162" width="39.6" height="19" fill="none" stroke="#F8F5EC" stroke-width="1"/>
+<rect x="133" y="80" width="90" height="106" fill="#A6BDA5" stroke="#183956" stroke-width="1.5"/>
+<rect x="138" y="85" width="80" height="96" fill="none" stroke="#F8F5EC" stroke-width="1.2"/>
+<line x1="138" y1="133.0" x2="218" y2="133.0" stroke="#F8F5EC" stroke-width="1" stroke-linecap="round"/>
+<ellipse cx="178.0" cy="133.0" rx="12" ry="12" fill="none" stroke="#183956" stroke-width="1"/>
+<rect x="158.2" y="85" width="39.6" height="19" fill="none" stroke="#F8F5EC" stroke-width="1"/>
+<rect x="158.2" y="162" width="39.6" height="19" fill="none" stroke="#F8F5EC" stroke-width="1"/>
+<line x1="21" y1="196" x2="235" y2="196" stroke="#183956" stroke-width="1.6" stroke-linecap="round"/>
+</svg>

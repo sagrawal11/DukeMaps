@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="216" viewBox="0 0 256 216" role="img" aria-labelledby="duke-7219-title duke-7219-desc"><title id="duke-7219-title">Baldwin Auditorium</title><desc id="duke-7219-desc">Reference-informed draft. Simplified architectural illustration for a 100–250 px campus map. Approximate proportions; not a measured elevation.</desc>
+<rect x="36" y="105" width="184" height="84" fill="#B98170" stroke="#183956" stroke-width="1.7"/>
+<rect x="44" y="95" width="168" height="12" fill="#F1EADB" stroke="#183956" stroke-width="1.7"/>
+<path d="M75,91C75,32 181,32 181,91Z" fill="#60788A" stroke="#183956" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="70" y="89" width="116" height="10" fill="#F1EADB" stroke="#183956" stroke-width="1.7"/>
+<rect x="60.3" y="118.3" width="14.4" height="45.4" fill="#F1EADB" stroke="#183956" stroke-width="0.8"/>
+<path d="M62,162V126.05Q62,122.2 67.5,120Q73,122.2 73,126.05V162Z" fill="#BAD7DC" stroke="#183956" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+<line x1="67.5" y1="122" x2="67.5" y2="162" stroke="#183956" stroke-width="0.75" stroke-linecap="round"/>
+<line x1="62" y1="141.84" x2="73" y2="141.84" stroke="#183956" stroke-width="0.75" stroke-linecap="round"/>
+<rect x="183.3" y="118.3" width="14.4" height="45.4" fill="#F1EADB" stroke="#183956" stroke-width="0.8"/>
+<path d="M185,162V126.05Q185,122.2 190.5,120Q196,122.2 196,126.05V162Z" fill="#BAD7DC" stroke="#183956" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+<line x1="190.5" y1="122" x2="190.5" y2="162" stroke="#183956" stroke-width="0.75" stroke-linecap="round"/>
+<line x1="185" y1="141.84" x2="196" y2="141.84" stroke="#183956" stroke-width="0.75" stroke-linecap="round"/>
+<rect x="87" y="110" width="83" height="78" fill="#B98170" stroke="#183956" stroke-width="1.7"/>
+<path d="M94,166V127.5A8.5,8.5 0 0 1 111,127.5V166Z" fill="#416782" stroke="#183956" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M119,166V127.5A8.5,8.5 0 0 1 136,127.5V166Z" fill="#416782" stroke="#183956" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M144,166V127.5A8.5,8.5 0 0 1 161,127.5V166Z" fill="#416782" stroke="#183956" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="70,112 128,83 186,112" fill="#F1EADB" stroke="#183956" stroke-width="1.7" stroke-linejoin="round"/>
+<polygon points="83,108 128,91 173,108" fill="#B98170" stroke="#183956" stroke-width="1" stroke-linejoin="round"/>
+<rect x="80.0" y="115" width="5" height="70" fill="#F1EADB" stroke="#183956" stroke-width="1"/>
+<rect x="78.0" y="113" width="9" height="4" fill="#F1EADB" stroke="#183956" stroke-width="0.9"/>
+<rect x="78.0" y="184" width="9" height="4" fill="#F1EADB" stroke="#183956" stroke-width="0.9"/>
+<rect x="99.2" y="115" width="5" height="70" fill="#F1EADB" stroke="#183956" stroke-width="1"/>
+<rect x="97.2" y="113" width="9" height="4" fill="#F1EADB" stroke="#183956" stroke-width="0.9"/>
+<rect x="97.2" y="184" width="9" height="4" fill="#F1EADB" stroke="#183956" stroke-width="0.9"/>
+<rect x="118.4" y="115" width="5" height="70" fill="#F1EADB" stroke="#183956" stroke-width="1"/>
+<rect x="116.4" y="113" width="9" height="4" fill="#F1EADB" stroke="#183956" stroke-width="0.9"/>
+<rect x="116.4" y="184" width="9" height="4" fill="#F1EADB" stroke="#183956" stroke-width="0.9"/>
+<rect x="137.6" y="115" width="5" height="70" fill="#F1EADB" stroke="#183956" stroke-width="1"/>
+<rect x="135.6" y="113" width="9" height="4" fill="#F1EADB" stroke="#183956" stroke-width="0.9"/>
+<rect x="135.6" y="184" width="9" height="4" fill="#F1EADB" stroke="#183956" stroke-width="0.9"/>
+<rect x="156.8" y="115" width="5" height="70" fill="#F1EADB" stroke="#183956" stroke-width="1"/>
+<rect x="154.8" y="113" width="9" height="4" fill="#F1EADB" stroke="#183956" stroke-width="0.9"/>
+<rect x="154.8" y="184" width="9" height="4" fill="#F1EADB" stroke="#183956" stroke-width="0.9"/>
+<rect x="176.0" y="115" width="5" height="70" fill="#F1EADB" stroke="#183956" stroke-width="1"/>
+<rect x="174.0" y="113" width="9" height="4" fill="#F1EADB" stroke="#183956" stroke-width="0.9"/>
+<rect x="174.0" y="184" width="9" height="4" fill="#F1EADB" stroke="#183956" stroke-width="0.9"/>
+<rect x="70" y="189" width="116" height="3" fill="#F1EADB" stroke="#183956" stroke-width="1"/>
+<rect x="67" y="192" width="122" height="3" fill="#F1EADB" stroke="#183956" stroke-width="1"/>
+<line x1="21" y1="196" x2="235" y2="196" stroke="#183956" stroke-width="1.6" stroke-linecap="round"/>
+</svg>

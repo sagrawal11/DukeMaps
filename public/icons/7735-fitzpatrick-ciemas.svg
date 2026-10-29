@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="216" viewBox="0 0 256 216" role="img" aria-labelledby="duke-7735-title duke-7735-desc"><title id="duke-7735-title">Fitzpatrick CIEMAS</title><desc id="duke-7735-desc">Reference-informed draft. Simplified architectural illustration for a 100–250 px campus map. Approximate proportions; not a measured elevation.</desc>
+<rect x="26" y="82" width="76" height="108" fill="#B98170" stroke="#183956" stroke-width="1.7"/>
+<rect x="39" y="90" width="50" height="89" fill="#BAD7DC" stroke="#183956" stroke-width="1.5"/>
+<line x1="51.5" y1="90" x2="51.5" y2="179" stroke="#183956" stroke-width="0.85" stroke-linecap="round"/>
+<line x1="64.0" y1="90" x2="64.0" y2="179" stroke="#183956" stroke-width="0.85" stroke-linecap="round"/>
+<line x1="76.5" y1="90" x2="76.5" y2="179" stroke="#183956" stroke-width="0.85" stroke-linecap="round"/>
+<line x1="39" y1="112.25" x2="89" y2="112.25" stroke="#183956" stroke-width="0.85" stroke-linecap="round"/>
+<line x1="39" y1="134.5" x2="89" y2="134.5" stroke="#183956" stroke-width="0.85" stroke-linecap="round"/>
+<line x1="39" y1="156.75" x2="89" y2="156.75" stroke="#183956" stroke-width="0.85" stroke-linecap="round"/>
+<path d="M42,176L69.0,93" fill="none" stroke="#F8F5EC" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="23" y="77" width="82" height="5" fill="#F1EADB" stroke="#183956" stroke-width="1.7"/>
+<rect x="154" y="82" width="76" height="108" fill="#B98170" stroke="#183956" stroke-width="1.7"/>
+<rect x="167" y="90" width="50" height="89" fill="#BAD7DC" stroke="#183956" stroke-width="1.5"/>
+<line x1="179.5" y1="90" x2="179.5" y2="179" stroke="#183956" stroke-width="0.85" stroke-linecap="round"/>
+<line x1="192.0" y1="90" x2="192.0" y2="179" stroke="#183956" stroke-width="0.85" stroke-linecap="round"/>
+<line x1="204.5" y1="90" x2="204.5" y2="179" stroke="#183956" stroke-width="0.85" stroke-linecap="round"/>
+<line x1="167" y1="112.25" x2="217" y2="112.25" stroke="#183956" stroke-width="0.85" stroke-linecap="round"/>
+<line x1="167" y1="134.5" x2="217" y2="134.5" stroke="#183956" stroke-width="0.85" stroke-linecap="round"/>
+<line x1="167" y1="156.75" x2="217" y2="156.75" stroke="#183956" stroke-width="0.85" stroke-linecap="round"/>
+<path d="M170,176L197.0,93" fill="none" stroke="#F8F5EC" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="151" y="77" width="82" height="5" fill="#F1EADB" stroke="#183956" stroke-width="1.7"/>
+<rect x="98" y="110" width="60" height="28" fill="#BAD7DC" stroke="#183956" stroke-width="1.5"/>
+<line x1="110.0" y1="110" x2="110.0" y2="138" stroke="#183956" stroke-width="0.85" stroke-linecap="round"/>
+<line x1="122.0" y1="110" x2="122.0" y2="138" stroke="#183956" stroke-width="0.85" stroke-linecap="round"/>
+<line x1="134.0" y1="110" x2="134.0" y2="138" stroke="#183956" stroke-width="0.85" stroke-linecap="round"/>
+<line x1="146.0" y1="110" x2="146.0" y2="138" stroke="#183956" stroke-width="0.85" stroke-linecap="round"/>
+<path d="M101,135L134.0,113" fill="none" stroke="#F8F5EC" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<line x1="112" y1="138" x2="112" y2="190" stroke="#183956" stroke-width="2" stroke-linecap="round"/>
+<line x1="145" y1="138" x2="145" y2="190" stroke="#183956" stroke-width="2" stroke-linecap="round"/>
+<line x1="21" y1="196" x2="235" y2="196" stroke="#183956" stroke-width="1.6" stroke-linecap="round"/>
+</svg>

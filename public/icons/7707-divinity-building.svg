@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="216" viewBox="0 0 256 216" role="img" aria-labelledby="duke-7707-title duke-7707-desc"><title id="duke-7707-title">Divinity Building</title><desc id="duke-7707-desc">Provisional schematic. Simplified architectural illustration for a 100–250 px campus map. Approximate proportions; not a measured elevation.</desc>
+<rect x="43.0" y="112" width="170" height="77" fill="#DDD4C3" stroke="#183956" stroke-width="1.7"/>
+<rect x="40.0" y="107" width="176" height="5" fill="#60788A" stroke="#183956" stroke-width="1.7"/>
+<rect x="43.0" y="173" width="170" height="4" fill="#F1EADB" stroke="#183956" stroke-width="0.8"/>
+<rect x="47.0" y="116" width="6" height="73" fill="#F1EADB" stroke="#183956" stroke-width="1"/>
+<rect x="203.0" y="116" width="6" height="73" fill="#F1EADB" stroke="#183956" stroke-width="1"/>
+<rect x="62.17" y="122.61" width="10" height="14.280000000000001" fill="#BAD7DC" stroke="#183956" stroke-width="1.1"/>
+<line x1="67.17" y1="124.61" x2="67.17" y2="136.89" stroke="#183956" stroke-width="0.75" stroke-linecap="round"/>
+<line x1="62.17" y1="130.0356" x2="72.17" y2="130.0356" stroke="#183956" stroke-width="0.75" stroke-linecap="round"/>
+<rect x="86.5" y="122.61" width="10" height="14.280000000000001" fill="#BAD7DC" stroke="#183956" stroke-width="1.1"/>
+<line x1="91.5" y1="124.61" x2="91.5" y2="136.89" stroke="#183956" stroke-width="0.75" stroke-linecap="round"/>
+<line x1="86.5" y1="130.0356" x2="96.5" y2="130.0356" stroke="#183956" stroke-width="0.75" stroke-linecap="round"/>
+<rect x="110.83" y="122.61" width="10" height="14.280000000000001" fill="#BAD7DC" stroke="#183956" stroke-width="1.1"/>
+<line x1="115.83" y1="124.61" x2="115.83" y2="136.89" stroke="#183956" stroke-width="0.75" stroke-linecap="round"/>
+<line x1="110.83" y1="130.0356" x2="120.83" y2="130.0356" stroke="#183956" stroke-width="0.75" stroke-linecap="round"/>
+<rect x="135.17" y="122.61" width="10" height="14.280000000000001" fill="#BAD7DC" stroke="#183956" stroke-width="1.1"/>
+<line x1="140.17" y1="124.61" x2="140.17" y2="136.89" stroke="#183956" stroke-width="0.75" stroke-linecap="round"/>
+<line x1="135.17" y1="130.0356" x2="145.17" y2="130.0356" stroke="#183956" stroke-width="0.75" stroke-linecap="round"/>
+<rect x="159.5" y="122.61" width="10" height="14.280000000000001" fill="#BAD7DC" stroke="#183956" stroke-width="1.1"/>
+<line x1="164.5" y1="124.61" x2="164.5" y2="136.89" stroke="#183956" stroke-width="0.75" stroke-linecap="round"/>
+<line x1="159.5" y1="130.0356" x2="169.5" y2="130.0356" stroke="#183956" stroke-width="0.75" stroke-linecap="round"/>
+<rect x="183.83" y="122.61" width="10" height="14.280000000000001" fill="#BAD7DC" stroke="#183956" stroke-width="1.1"/>
+<line x1="188.83" y1="124.61" x2="188.83" y2="136.89" stroke="#183956" stroke-width="0.75" stroke-linecap="round"/>
+<line x1="183.83" y1="130.0356" x2="193.83" y2="130.0356" stroke="#183956" stroke-width="0.75" stroke-linecap="round"/>
+<rect x="62.17" y="148.11" width="10" height="14.280000000000001" fill="#BAD7DC" stroke="#183956" stroke-width="1.1"/>
+<line x1="67.17" y1="150.11" x2="67.17" y2="162.39000000000001" stroke="#183956" stroke-width="0.75" stroke-linecap="round"/>
+<line x1="62.17" y1="155.53560000000002" x2="72.17" y2="155.53560000000002" stroke="#183956" stroke-width="0.75" stroke-linecap="round"/>
+<rect x="86.5" y="148.11" width="10" height="14.280000000000001" fill="#BAD7DC" stroke="#183956" stroke-width="1.1"/>
+<line x1="91.5" y1="150.11" x2="91.5" y2="162.39000000000001" stroke="#183956" stroke-width="0.75" stroke-linecap="round"/>
+<line x1="86.5" y1="155.53560000000002" x2="96.5" y2="155.53560000000002" stroke="#183956" stroke-width="0.75" stroke-linecap="round"/>
+<rect x="110.83" y="148.11" width="10" height="14.280000000000001" fill="#BAD7DC" stroke="#183956" stroke-width="1.1"/>
+<line x1="115.83" y1="150.11" x2="115.83" y2="162.39000000000001" stroke="#183956" stroke-width="0.75" stroke-linecap="round"/>
+<line x1="110.83" y1="155.53560000000002" x2="120.83" y2="155.53560000000002" stroke="#183956" stroke-width="0.75" stroke-linecap="round"/>
+<rect x="135.17" y="148.11" width="10" height="14.280000000000001" fill="#BAD7DC" stroke="#183956" stroke-width="1.1"/>
+<line x1="140.17" y1="150.11" x2="140.17" y2="162.39000000000001" stroke="#183956" stroke-width="0.75" stroke-linecap="round"/>
+<line x1="135.17" y1="155.53560000000002" x2="145.17" y2="155.53560000000002" stroke="#183956" stroke-width="0.75" stroke-linecap="round"/>
+<rect x="159.5" y="148.11" width="10" height="14.280000000000001" fill="#BAD7DC" stroke="#183956" stroke-width="1.1"/>
+<line x1="164.5" y1="150.11" x2="164.5" y2="162.39000000000001" stroke="#183956" stroke-width="0.75" stroke-linecap="round"/>
+<line x1="159.5" y1="155.53560000000002" x2="169.5" y2="155.53560000000002" stroke="#183956" stroke-width="0.75" stroke-linecap="round"/>
+<rect x="183.83" y="148.11" width="10" height="14.280000000000001" fill="#BAD7DC" stroke="#183956" stroke-width="1.1"/>
+<line x1="188.83" y1="150.11" x2="188.83" y2="162.39000000000001" stroke="#183956" stroke-width="0.75" stroke-linecap="round"/>
+<line x1="183.83" y1="155.53560000000002" x2="193.83" y2="155.53560000000002" stroke="#183956" stroke-width="0.75" stroke-linecap="round"/>
+<path d="M48,189V163.35Q48,157.4 56.5,154Q65,157.4 65,163.35V189Z" fill="#416782" stroke="#183956" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M73,189V163.35Q73,157.4 81.5,154Q90,157.4 90,163.35V189Z" fill="#416782" stroke="#183956" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M98,189V163.35Q98,157.4 106.5,154Q115,157.4 115,163.35V189Z" fill="#416782" stroke="#183956" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M123,189V163.35Q123,157.4 131.5,154Q140,157.4 140,163.35V189Z" fill="#416782" stroke="#183956" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M148,189V163.35Q148,157.4 156.5,154Q165,157.4 165,163.35V189Z" fill="#416782" stroke="#183956" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M173,189V163.35Q173,157.4 181.5,154Q190,157.4 190,163.35V189Z" fill="#416782" stroke="#183956" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M198,189V163.35Q198,157.4 206.5,154Q215,157.4 215,163.35V189Z" fill="#416782" stroke="#183956" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="113" y="182" width="30" height="3" fill="#F1EADB" stroke="#183956" stroke-width="1"/>
+<rect x="110" y="185" width="36" height="3" fill="#F1EADB" stroke="#183956" stroke-width="1"/>
+<rect x="107" y="188" width="42" height="3" fill="#F1EADB" stroke="#183956" stroke-width="1"/>
+<line x1="21" y1="196" x2="235" y2="196" stroke="#183956" stroke-width="1.6" stroke-linecap="round"/>
+</svg>

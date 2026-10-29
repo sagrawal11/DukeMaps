@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="216" viewBox="0 0 256 216" role="img" aria-labelledby="duke-component-92-title duke-component-92-desc"><title id="duke-component-92-title">Williams Field at Jack Katz Stadium</title><desc id="duke-component-92-desc">Reference-informed draft. Simplified architectural illustration for a 100–250 px campus map. Approximate proportions; not a measured elevation.</desc>
+<rect x="39" y="73" width="178" height="112" fill="#416782" stroke="#183956" stroke-width="1.7"/>
+<rect x="45" y="79" width="166" height="100" fill="none" stroke="#F8F5EC" stroke-width="1"/>
+<line x1="128" y1="79" x2="128" y2="179" stroke="#F8F5EC" stroke-width="1" stroke-linecap="round"/>
+<path d="M45,101Q83,129 45,157M211,101Q173,129 211,157" fill="none" stroke="#F8F5EC" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="55" y="58" width="147" height="3" fill="#F1EADB" stroke="#183956" stroke-width="0.8"/>
+<rect x="55" y="61" width="147" height="3" fill="#F1EADB" stroke="#183956" stroke-width="0.8"/>
+<rect x="55" y="64" width="147" height="3" fill="#F1EADB" stroke="#183956" stroke-width="0.8"/>
+<rect x="55" y="67" width="147" height="3" fill="#F1EADB" stroke="#183956" stroke-width="0.8"/>
+<line x1="21" y1="196" x2="235" y2="196" stroke="#183956" stroke-width="1.6" stroke-linecap="round"/>
+</svg>

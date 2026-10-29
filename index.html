@@ -202,6 +202,17 @@
       @keyframes elim-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.55); } }
       .elim-cap { font-size: 11px; color: var(--muted); margin-top: 6px; line-height: 1.35; min-height: 2.7em; }
 
+      /* ── Clickable building icons ───────────────────────────────────────────────── */
+      .bicon {
+        width: 34px; height: 34px; padding: 0; border: 0; background: none; cursor: pointer;
+        display: block; line-height: 0; filter: drop-shadow(0 1px 1.5px rgba(26, 24, 23, 0.28));
+        transition: transform 0.12s ease;
+      }
+      .bicon img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; display: block; }
+      .bicon:hover { transform: scale(1.22); z-index: 5; }
+      .bicon:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+      .bicon-hidden { display: none; }
+
       /* ── Mobile: the panel becomes a bottom sheet ──────────────────────────────── */
       @media (max-width: 640px) {
         .panel {

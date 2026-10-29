@@ -21,8 +21,10 @@ import { makePlayer, type Player } from './anim/player'
 import { ALGORITHMS, runAlgo, type AlgoDef } from './anim/algos'
 import { elimPaths, layoutElimTree } from './anim/elimtree'
 import { createElimTreeView } from './anim/elimtree-view'
+import { createBuildingIcons, type BuildingIcon } from './map/building-icons'
 import aliasesConfig from '../config/aliases.json'
 import scheduleConfig from '../config/schedule.json'
+import buildingIconsConfig from '../config/building-icons.json'
 
 const statusEl = document.createElement('div')
 statusEl.className = 'legend'
@@ -568,6 +570,19 @@ function setupUI(
   }
   wireField('from')
   wireField('to')
+
+  // Clickable building icons: tap an illustration to pick it as From (then To) — same flow as a map tap,
+  // but no enforce (the committed icons are real campus buildings). Icons without a coord are skipped.
+  const pickBuilding = (name: string, lonLat: [number, number]): void => {
+    if (chosen.from && chosen.to) {
+      clearEndpoint('from')
+      clearEndpoint('to')
+    }
+    const w: Which = chosen.from ? 'to' : 'from'
+    setEndpoint(w, lonLat, name)
+    if (chosen[w]) input(w).value = name
+  }
+  createBuildingIcons(map, buildingIconsConfig as BuildingIcon[], pickBuilding)
 
   // Tap fills From, then To; a tap when both are set starts a fresh pair. The pin is labelled with the
   // building you're nearest (not "Dropped pin").

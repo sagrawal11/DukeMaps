@@ -1,0 +1,2134 @@
+[
+ {
+  "id": "7701",
+  "name": "Duke Chapel",
+  "file": "icons/7701-duke-chapel.svg",
+  "area": "West Campus",
+  "lat": 36.001864699465244,
+  "lon": -78.94022279144382,
+  "place": "Duke Chapel",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7702",
+  "name": "Gray Building",
+  "file": "icons/7702-gray-building.svg",
+  "area": "West Campus",
+  "lat": 36.00191145,
+  "lon": -78.93936746923076,
+  "place": "Gray Building",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7704",
+  "name": "Perkins Library",
+  "file": "icons/7704-perkins-library.svg",
+  "area": "West Campus",
+  "lat": 36.00225173333333,
+  "lon": -78.93851580833332,
+  "place": "Perkins Library",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7705",
+  "name": "Languages Building",
+  "file": "icons/7705-languages-building.svg",
+  "area": "West Campus",
+  "lat": 36.00212153571429,
+  "lon": -78.93814942857144,
+  "place": "Languages Building",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7706",
+  "name": "Old Chemistry Building",
+  "file": "icons/7706-old-chemistry-building.svg",
+  "area": "West Campus",
+  "lat": 36.00274113333334,
+  "lon": -78.93771084444444,
+  "place": "Old Chemistry Building",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7707",
+  "name": "Divinity Building",
+  "file": "icons/7707-divinity-building.svg",
+  "area": "West Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": null
+ },
+ {
+  "id": "7709",
+  "name": "Reuben-Cooke Building",
+  "file": "icons/7709-reuben-cooke-building.svg",
+  "area": "West Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": {
+   "name": "Rueben-Cooke",
+   "lat": 36.00238662272728,
+   "lon": -78.93678018636363,
+   "score": 0.33
+  }
+ },
+ {
+  "id": "7710",
+  "name": "Social Sciences Building",
+  "file": "icons/7710-social-sciences-building.svg",
+  "area": "West Campus",
+  "lat": 36.00176229999999,
+  "lon": -78.93738344736842,
+  "place": "Social Sciences Building",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7711",
+  "name": "Craven Quad",
+  "file": "icons/7711-craven-quad.svg",
+  "area": "West Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "weak",
+  "suggestion": {
+   "name": "Craven House C",
+   "lat": 35.9999077,
+   "lon": -78.93881299230769,
+   "score": 0.5
+  }
+ },
+ {
+  "id": "7712",
+  "name": "Crowell Quad",
+  "file": "icons/7712-crowell-quad.svg",
+  "area": "West Campus",
+  "lat": 36.00666961428571,
+  "lon": -78.91347457142857,
+  "place": "Crowell Building",
+  "confidence": "contains",
+  "suggestion": null
+ },
+ {
+  "id": "7713",
+  "name": "Kilgo Quad",
+  "file": "icons/7713-kilgo-quad.svg",
+  "area": "West Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "weak",
+  "suggestion": {
+   "name": "Kilgo House P",
+   "lat": 36.00022101538461,
+   "lon": -78.93951006153846,
+   "score": 0.5
+  }
+ },
+ {
+  "id": "7714",
+  "name": "Brodhead Center / West Union",
+  "file": "icons/7714-brodhead-center-west-union.svg",
+  "area": "West Campus",
+  "lat": 36.00083289414892,
+  "lon": -78.93943119414902,
+  "place": "Richard H. Brodhead Center, West Union",
+  "confidence": "contains",
+  "suggestion": null
+ },
+ {
+  "id": "7715",
+  "name": "Flowers Building",
+  "file": "icons/7715-flowers-building.svg",
+  "area": "West Campus",
+  "lat": 36.00123999444443,
+  "lon": -78.93987555555555,
+  "place": "Flowers Building",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7716",
+  "name": "Page Auditorium",
+  "file": "icons/7716-page-auditorium.svg",
+  "area": "West Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": {
+   "name": "Baldwin Auditorium",
+   "lat": 36.00905374166666,
+   "lon": -78.91464485416667,
+   "score": 0.33
+  }
+ },
+ {
+  "id": "7725",
+  "name": "Sanford Building",
+  "file": "icons/7725-sanford-building.svg",
+  "area": "West Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": {
+   "name": "Sanford School of Public Policy",
+   "lat": 35.999404975,
+   "lon": -78.94392721071426,
+   "score": 0.33
+  }
+ },
+ {
+  "id": "7731",
+  "name": "Penn Pavilion",
+  "file": "icons/7731-penn-pavilion.svg",
+  "area": "West Campus",
+  "lat": 36.00012893750001,
+  "lon": -78.9408776125,
+  "place": "Penn Pavilion",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7735",
+  "name": "Fitzpatrick CIEMAS",
+  "file": "icons/7735-fitzpatrick-ciemas.svg",
+  "area": "West Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": {
+   "name": "Fitzpatrick Center for Interdisciplinary Engineering, Medicine and Applied Sciences (FCIEMAS)",
+   "lat": 36.003345521568626,
+   "lon": -78.93989077647056,
+   "score": 0.13
+  }
+ },
+ {
+  "id": "7737",
+  "name": "Student Health and Wellness Center",
+  "file": "icons/7737-student-health-and-wellness-center.svg",
+  "area": "West Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "weak",
+  "suggestion": {
+   "name": "Duke Student Health Center",
+   "lat": 35.999590061904755,
+   "lon": -78.94143304285714,
+   "score": 0.67
+  }
+ },
+ {
+  "id": "7738",
+  "name": "French Family Science Center",
+  "file": "icons/7738-french-family-science-center.svg",
+  "area": "West Campus",
+  "lat": 36.002817058823524,
+  "lon": -78.94337824411764,
+  "place": "French Family Science Center",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7739",
+  "name": "Rubenstein Hall",
+  "file": "icons/7739-rubenstein-hall.svg",
+  "area": "West Campus",
+  "lat": 35.99912838333333,
+  "lon": -78.94306245000001,
+  "place": "Rubenstein Hall",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7742",
+  "name": "Few Quad",
+  "file": "icons/7742-few-quad.svg",
+  "area": "West Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": null
+ },
+ {
+  "id": "7746",
+  "name": "OIT/Telecommunications Building",
+  "file": "icons/7746-oit-telecommunications-building.svg",
+  "area": "West Campus",
+  "lat": 36.00356367777777,
+  "lon": -78.9387559111111,
+  "place": "Oit/Telecommunications Building",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7747",
+  "name": "Hudson Hall (Engineering Building)",
+  "file": "icons/7747-hudson-hall-engineering-building.svg",
+  "area": "West Campus",
+  "lat": 36.0042305891892,
+  "lon": -78.94055548378378,
+  "place": "Hudson Hall",
+  "confidence": "contains",
+  "suggestion": null
+ },
+ {
+  "id": "7749",
+  "name": "Physics Building",
+  "file": "icons/7749-physics-building.svg",
+  "area": "West Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": null
+ },
+ {
+  "id": "7752",
+  "name": "Wilkinson Engineering Building",
+  "file": "icons/7752-wilkinson-engineering-building.svg",
+  "area": "West Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "weak",
+  "suggestion": {
+   "name": "Wilkinson Building",
+   "lat": 36.00346627692308,
+   "lon": -78.9380287,
+   "score": 0.5
+  }
+ },
+ {
+  "id": "7753",
+  "name": "Allen Building",
+  "file": "icons/7753-allen-building.svg",
+  "area": "West Campus",
+  "lat": 36.00117729642857,
+  "lon": -78.93742518214286,
+  "place": "Allen Building",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7755",
+  "name": "Wannamaker Quad",
+  "file": "icons/7755-wannamaker-quad.svg",
+  "area": "West Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "weak",
+  "suggestion": {
+   "name": "Wannamaker 4",
+   "lat": 35.998906544444445,
+   "lon": -78.93896427777777,
+   "score": 0.5
+  }
+ },
+ {
+  "id": "7758",
+  "name": "Biological Sciences Building",
+  "file": "icons/7758-biological-sciences-building.svg",
+  "area": "West Campus",
+  "lat": 36.00225716785714,
+  "lon": -78.94315093928572,
+  "place": "Biological Sciences Building",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7759",
+  "name": "Law Building",
+  "file": "icons/7759-law-building.svg",
+  "area": "West Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "weak",
+  "suggestion": {
+   "name": "Duke University School of Law",
+   "lat": 35.999788168,
+   "lon": -78.945508556,
+   "score": 0.5
+  }
+ },
+ {
+  "id": "7760",
+  "name": "Thomas F. Keller Center / Fuqua School of Business",
+  "file": "icons/7760-thomas-f-keller-center-fuqua-school-of-business.svg",
+  "area": "West Campus",
+  "lat": 35.99881165652174,
+  "lon": -78.94742123913042,
+  "place": "Fuqua School of Business",
+  "confidence": "contains",
+  "suggestion": null
+ },
+ {
+  "id": "7765",
+  "name": "Gross Hall",
+  "file": "icons/7765-gross-hall.svg",
+  "area": "West Campus",
+  "lat": 36.00129107567568,
+  "lon": -78.94478765675672,
+  "place": "Paul M. Gross Hall",
+  "confidence": "contains",
+  "suggestion": null
+ },
+ {
+  "id": "7766",
+  "name": "Teer Engineering Building",
+  "file": "icons/7766-teer-engineering-building.svg",
+  "area": "West Campus",
+  "lat": 36.00378896666667,
+  "lon": -78.94101039333333,
+  "place": "Teer Engineering Building",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7768",
+  "name": "Grainger Hall",
+  "file": "icons/7768-grainger-hall.svg",
+  "area": "West Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": null
+ },
+ {
+  "id": "7771",
+  "name": "Phytotron Building",
+  "file": "icons/7771-phytotron-building.svg",
+  "area": "West Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": null
+ },
+ {
+  "id": "7776",
+  "name": "Levine Science Research Center",
+  "file": "icons/7776-levine-science-research-center.svg",
+  "area": "West Campus",
+  "lat": 36.004496743076906,
+  "lon": -78.94168034153844,
+  "place": "Levine Science Research Center",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7780",
+  "name": "Free Electron Laser Laboratory (FEL)",
+  "file": "icons/7780-free-electron-laser-laboratory-fel.svg",
+  "area": "West Campus",
+  "lat": 36.00477092727272,
+  "lon": -78.94312321818181,
+  "place": "Free Electron Laser Lab",
+  "confidence": "contains",
+  "suggestion": null
+ },
+ {
+  "id": "7782",
+  "name": "JB Duke Hotel",
+  "file": "icons/7782-jb-duke-hotel.svg",
+  "area": "West Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": {
+   "name": "AC Hotel by Marriott Durham",
+   "lat": 36.00770653846154,
+   "lon": -78.94702692307692,
+   "score": 0.17
+  }
+ },
+ {
+  "id": "7783",
+  "name": "Edens 3A / Decker Tower",
+  "file": "icons/7783-edens-3a-decker-tower.svg",
+  "area": "West Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "weak",
+  "suggestion": {
+   "name": "Edens Quad 3A",
+   "lat": 35.9984930475,
+   "lon": -78.9355631525,
+   "score": 0.5
+  }
+ },
+ {
+  "id": "7784",
+  "name": "Edens 3B / Mitchell Tower",
+  "file": "icons/7784-edens-3b-mitchell-tower.svg",
+  "area": "West Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "weak",
+  "suggestion": {
+   "name": "Edens Quad 3B",
+   "lat": 35.99828547179488,
+   "lon": -78.93519773589743,
+   "score": 0.5
+  }
+ },
+ {
+  "id": "7785",
+  "name": "Edens Quad 1B",
+  "file": "icons/7785-edens-quad-1b.svg",
+  "area": "West Campus",
+  "lat": 35.99827234666667,
+  "lon": -78.93652017333332,
+  "place": "Edens Quad 1B",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7786",
+  "name": "Edens Quad 1A",
+  "file": "icons/7786-edens-quad-1a.svg",
+  "area": "West Campus",
+  "lat": 35.9984339,
+  "lon": -78.93675979090906,
+  "place": "Edens Quad 1A",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7787",
+  "name": "Edens Quad 1C",
+  "file": "icons/7787-edens-quad-1c.svg",
+  "area": "West Campus",
+  "lat": 35.99877036956521,
+  "lon": -78.9366741826087,
+  "place": "Edens Quad 1C",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7788",
+  "name": "Edens Quad 2C",
+  "file": "icons/7788-edens-quad-2c.svg",
+  "area": "West Campus",
+  "lat": 35.99886223548387,
+  "lon": -78.93623118709678,
+  "place": "Edens Quad 2C",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7789",
+  "name": "Edens Quad 2A",
+  "file": "icons/7789-edens-quad-2a.svg",
+  "area": "West Campus",
+  "lat": 35.998834710714284,
+  "lon": -78.93586722142857,
+  "place": "Edens Quad 2A",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7791",
+  "name": "Bryan Student Center",
+  "file": "icons/7791-bryan-student-center.svg",
+  "area": "West Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "weak",
+  "suggestion": {
+   "name": "Bryan Center",
+   "lat": 36.001025537333334,
+   "lon": -78.94110090000004,
+   "score": 0.5
+  }
+ },
+ {
+  "id": "7792",
+  "name": "Keohane Quad 4E",
+  "file": "icons/7792-keohane-quad-4e.svg",
+  "area": "West Campus",
+  "lat": 35.99885883636363,
+  "lon": -78.93730064545454,
+  "place": "Keohane 4E",
+  "confidence": "contains",
+  "suggestion": null
+ },
+ {
+  "id": "7794",
+  "name": "Experimental Botany Building",
+  "file": "icons/7794-experimental-botany-building.svg",
+  "area": "West Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": null
+ },
+ {
+  "id": "7795",
+  "name": "Keohane Quad (4A, 4B, 4D and McClendon Tower)",
+  "file": "icons/7795-keohane-quad-4a-4b-4d-and-mcclendon-tower.svg",
+  "area": "West Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": {
+   "name": "Keohane 4D",
+   "lat": 35.999337915384615,
+   "lon": -78.93718379999999,
+   "score": 0.33
+  }
+ },
+ {
+  "id": "7866",
+  "name": "Hollows A Residence Hall",
+  "file": "icons/7866-hollows-a-residence-hall.svg",
+  "area": "West Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": null
+ },
+ {
+  "id": "7867",
+  "name": "Hollows B Residence Hall",
+  "file": "icons/7867-hollows-b-residence-hall.svg",
+  "area": "West Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "weak",
+  "suggestion": {
+   "name": "House B",
+   "lat": 36.00019706923077,
+   "lon": -78.93861728461538,
+   "score": 0.5
+  }
+ },
+ {
+  "id": "component-51",
+  "name": "Bostock Library",
+  "file": "icons/component-51-bostock-library.svg",
+  "area": "West Campus",
+  "lat": 36.00291228,
+  "lon": -78.93826625999999,
+  "place": "Bostock Library",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "component-52",
+  "name": "David M. Rubenstein Rare Book & Manuscript Library",
+  "file": "icons/component-52-david-m-rubenstein-rare-book-manuscript-library.svg",
+  "area": "West Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": {
+   "name": "Rubenstein Library",
+   "lat": 36.001829757692306,
+   "lon": -78.93864754615385,
+   "score": 0.29
+  }
+ },
+ {
+  "id": "component-53",
+  "name": "von der Heyden Pavilion",
+  "file": "icons/component-53-von-der-heyden-pavilion.svg",
+  "area": "West Campus",
+  "lat": 36.002210309999995,
+  "lon": -78.93827698999999,
+  "place": "Von Der Heyden Pavilion",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "component-54",
+  "name": "Doug and Josie Breeden Hall",
+  "file": "icons/component-54-doug-and-josie-breeden-hall.svg",
+  "area": "West Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": null
+ },
+ {
+  "id": "component-55",
+  "name": "Lafe P. and Rita D. Fox Student Center",
+  "file": "icons/component-55-lafe-p-and-rita-d-fox-student-center.svg",
+  "area": "West Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": {
+   "name": "Craven House D",
+   "lat": 35.99960007999999,
+   "lon": -78.93907586,
+   "score": 0.14
+  }
+ },
+ {
+  "id": "component-56",
+  "name": "Wesley Alexander Magat Academic Center",
+  "file": "icons/component-56-wesley-alexander-magat-academic-center.svg",
+  "area": "West Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": {
+   "name": "Alexander H Sands Jr Building",
+   "lat": 36.00622851000001,
+   "lon": -78.94008805,
+   "score": 0.14
+  }
+ },
+ {
+  "id": "7201",
+  "name": "East Duke Building",
+  "file": "icons/7201-east-duke-building.svg",
+  "area": "East Campus",
+  "lat": 36.00495905333334,
+  "lon": -78.91415289333335,
+  "place": "East Duke Building",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7202",
+  "name": "West Duke Building",
+  "file": "icons/7202-west-duke-building.svg",
+  "area": "East Campus",
+  "lat": 36.004990069230765,
+  "lon": -78.91538774615385,
+  "place": "West Duke Building",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7203",
+  "name": "East House",
+  "file": "icons/7203-east-house.svg",
+  "area": "East Campus",
+  "lat": 36.00575486923078,
+  "lon": -78.91406406153848,
+  "place": "East House Residence Hall",
+  "confidence": "contains",
+  "suggestion": null
+ },
+ {
+  "id": "7204",
+  "name": "West House",
+  "file": "icons/7204-west-house.svg",
+  "area": "East Campus",
+  "lat": 36.004990069230765,
+  "lon": -78.91538774615385,
+  "place": "West Duke Building",
+  "confidence": "contains",
+  "suggestion": null
+ },
+ {
+  "id": "7205",
+  "name": "Epworth Residence Hall",
+  "file": "icons/7205-epworth-residence-hall.svg",
+  "area": "East Campus",
+  "lat": 36.006052804545455,
+  "lon": -78.91326416363637,
+  "place": "Epworth Residence Hall",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7206",
+  "name": "Crowell Building",
+  "file": "icons/7206-crowell-building.svg",
+  "area": "East Campus",
+  "lat": 36.00666961428571,
+  "lon": -78.91347457142857,
+  "place": "Crowell Building",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7207",
+  "name": "The Ark",
+  "file": "icons/7207-the-ark.svg",
+  "area": "East Campus",
+  "lat": 36.00716568,
+  "lon": -78.91356296000001,
+  "place": "The Ark",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7209",
+  "name": "Bishop's House",
+  "file": "icons/7209-bishop-s-house.svg",
+  "area": "East Campus",
+  "lat": 36.00879011111111,
+  "lon": -78.91326325555556,
+  "place": "Bishop's House",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7213",
+  "name": "Richard White Lecture Hall",
+  "file": "icons/7213-richard-white-lecture-hall.svg",
+  "area": "East Campus",
+  "lat": 36.00530514285715,
+  "lon": -78.91395665714286,
+  "place": "Richard White Lecture Hall",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7214",
+  "name": "Classroom Building",
+  "file": "icons/7214-classroom-building.svg",
+  "area": "East Campus",
+  "lat": 36.006443676923084,
+  "lon": -78.91526615384616,
+  "place": "Classroom Building",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7215",
+  "name": "Giles Residence Hall",
+  "file": "icons/7215-giles-residence-hall.svg",
+  "area": "East Campus",
+  "lat": 36.00707316153846,
+  "lon": -78.91524646153847,
+  "place": "Giles Residence Hall",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7216",
+  "name": "Lilly Library",
+  "file": "icons/7216-lilly-library.svg",
+  "area": "East Campus",
+  "lat": 36.007614322222224,
+  "lon": -78.91530184999999,
+  "place": "Lilly Library",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7217",
+  "name": "Alspaugh Residence Hall",
+  "file": "icons/7217-alspaugh-residence-hall.svg",
+  "area": "East Campus",
+  "lat": 36.00817211578947,
+  "lon": -78.91519927368421,
+  "place": "Alspaugh Residence Hall",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7218",
+  "name": "Pegram Residence Hall",
+  "file": "icons/7218-pegram-residence-hall.svg",
+  "area": "East Campus",
+  "lat": 36.008773676190486,
+  "lon": -78.91517537619046,
+  "place": "Pegram Residence Hall",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7219",
+  "name": "Baldwin Auditorium",
+  "file": "icons/7219-baldwin-auditorium.svg",
+  "area": "East Campus",
+  "lat": 36.00905374166666,
+  "lon": -78.91464485416667,
+  "place": "Baldwin Auditorium",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7220",
+  "name": "Bassett Residence Hall",
+  "file": "icons/7220-bassett-residence-hall.svg",
+  "area": "East Campus",
+  "lat": 36.00874615263158,
+  "lon": -78.91412111578946,
+  "place": "Bassett Residence Hall",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7221",
+  "name": "Brown Residence Hall",
+  "file": "icons/7221-brown-residence-hall.svg",
+  "area": "East Campus",
+  "lat": 36.00811529473684,
+  "lon": -78.91410654736843,
+  "place": "Brown Residence Hall",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7222",
+  "name": "Wall Center for Student Life / East Campus Union",
+  "file": "icons/7222-wall-center-for-student-life-east-campus-union.svg",
+  "area": "East Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "weak",
+  "suggestion": {
+   "name": "East Campus Union Building",
+   "lat": 36.00758218,
+   "lon": -78.91408377,
+   "score": 0.4
+  }
+ },
+ {
+  "id": "7223",
+  "name": "Wilson Residence Hall",
+  "file": "icons/7223-wilson-residence-hall.svg",
+  "area": "East Campus",
+  "lat": 36.00703268125,
+  "lon": -78.91419398750001,
+  "place": "Wilson Residence Hall",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7224",
+  "name": "Friedl Building",
+  "file": "icons/7224-friedl-building.svg",
+  "area": "East Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "weak",
+  "suggestion": {
+   "name": "Friedl Science Building",
+   "lat": 36.006412875,
+   "lon": -78.9141221625,
+   "score": 0.5
+  }
+ },
+ {
+  "id": "7225",
+  "name": "Southgate Residence Hall",
+  "file": "icons/7225-southgate-residence-hall.svg",
+  "area": "East Campus",
+  "lat": 36.00598544333332,
+  "lon": -78.91796638333332,
+  "place": "Southgate Residence Hall",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7226",
+  "name": "Brodie Recreational Center",
+  "file": "icons/7226-brodie-recreational-center.svg",
+  "area": "East Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": {
+   "name": "Brodie Recreation Center",
+   "lat": 36.00753421162791,
+   "lon": -78.91699274651162,
+   "score": 0.33
+  }
+ },
+ {
+  "id": "7227",
+  "name": "East Campus Tennis Court",
+  "file": "icons/7227-east-campus-tennis-court.svg",
+  "area": "East Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": {
+   "name": "East House Residence Hall",
+   "lat": 36.00575486923078,
+   "lon": -78.91406406153848,
+   "score": 0.33
+  }
+ },
+ {
+  "id": "7228",
+  "name": "Bivins Building",
+  "file": "icons/7228-bivins-building.svg",
+  "area": "East Campus",
+  "lat": 36.00888108421052,
+  "lon": -78.91745578947368,
+  "place": "Bivins Building",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7230",
+  "name": "Gilbert-Addoms Residence Hall",
+  "file": "icons/7230-gilbert-addoms-residence-hall.svg",
+  "area": "East Campus",
+  "lat": 36.005702126086966,
+  "lon": -78.91694392173915,
+  "place": "Gilbert-Addoms Residence Hall",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7231",
+  "name": "Academic Advising Center",
+  "file": "icons/7231-academic-advising-center.svg",
+  "area": "East Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": {
+   "name": "Pre-Major Advising Center",
+   "lat": 36.008227340000005,
+   "lon": -78.91340994,
+   "score": 0.25
+  }
+ },
+ {
+  "id": "7232",
+  "name": "Mary Duke Biddle Music Building",
+  "file": "icons/7232-mary-duke-biddle-music-building.svg",
+  "area": "East Campus",
+  "lat": 36.009132828571424,
+  "lon": -78.91588202857143,
+  "place": "Mary Duke Biddle Music Building",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7234",
+  "name": "Blackwell Residence Hall",
+  "file": "icons/7234-blackwell-residence-hall.svg",
+  "area": "East Campus",
+  "lat": 36.00645143962264,
+  "lon": -78.91647553207545,
+  "place": "Blackwell Residence Hall",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7235",
+  "name": "Randolph Residence Hall",
+  "file": "icons/7235-randolph-residence-hall.svg",
+  "area": "East Campus",
+  "lat": 36.00671786734694,
+  "lon": -78.9171444265306,
+  "place": "Randolph Residence Hall",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7236",
+  "name": "Bell Tower Residence Hall",
+  "file": "icons/7236-bell-tower-residence-hall.svg",
+  "area": "East Campus",
+  "lat": 36.00696226190477,
+  "lon": -78.91816117619048,
+  "place": "Bell Tower Residence Hall",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7237",
+  "name": "Trinity Residence Hall",
+  "file": "icons/7237-trinity-residence-hall.svg",
+  "area": "East Campus",
+  "lat": 36.006526472881355,
+  "lon": -78.91872082542373,
+  "place": "Trinity Residence Hall",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7251",
+  "name": "Art Building",
+  "file": "icons/7251-art-building.svg",
+  "area": "East Campus",
+  "lat": 36.009349871428576,
+  "lon": -78.91710988571428,
+  "place": "Art Building",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7261",
+  "name": "Smith Warehouse",
+  "file": "icons/7261-smith-warehouse.svg",
+  "area": "East Campus",
+  "lat": 36.00211672,
+  "lon": -78.91500538,
+  "place": "Smith Warehouse",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7272",
+  "name": "Jim Sabiston Fieldhouse",
+  "file": "icons/7272-jim-sabiston-fieldhouse.svg",
+  "area": "East Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": null
+ },
+ {
+  "id": "7274",
+  "name": "Smith Family Stadium",
+  "file": "icons/7274-smith-family-stadium.svg",
+  "area": "East Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": {
+   "name": "Smith Warehouse",
+   "lat": 36.00211672,
+   "lon": -78.91500538,
+   "score": 0.25
+  }
+ },
+ {
+  "id": "component-92",
+  "name": "Williams Field at Jack Katz Stadium",
+  "file": "icons/component-92-williams-field-at-jack-katz-stadium.svg",
+  "area": "East Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": {
+   "name": "Pascal Field House",
+   "lat": 35.99338116666667,
+   "lon": -78.94223804666666,
+   "score": 0.17
+  }
+ },
+ {
+  "id": "7510",
+  "name": "John Hope Franklin Center",
+  "file": "icons/7510-john-hope-franklin-center.svg",
+  "area": "Medical And Hospital Campus",
+  "lat": 36.00818584545454,
+  "lon": -78.93442668181818,
+  "place": "John Hope Franklin Center",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7511",
+  "name": "Hanes House",
+  "file": "icons/7511-hanes-house.svg",
+  "area": "Medical And Hospital Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": null
+ },
+ {
+  "id": "7512",
+  "name": "Trent Drive Hall",
+  "file": "icons/7512-trent-drive-hall.svg",
+  "area": "Medical And Hospital Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "weak",
+  "suggestion": {
+   "name": "Trent Hall",
+   "lat": 36.00707773571428,
+   "lon": -78.93358037142858,
+   "score": 0.5
+  }
+ },
+ {
+  "id": "7513",
+  "name": "Nanaline H Duke Building",
+  "file": "icons/7513-nanaline-h-duke-building.svg",
+  "area": "Medical And Hospital Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "weak",
+  "suggestion": {
+   "name": "Nanaline Duke",
+   "lat": 36.00569207142857,
+   "lon": -78.9396886142857,
+   "score": 0.5
+  }
+ },
+ {
+  "id": "7514",
+  "name": "Medical Science Research Bldg II",
+  "file": "icons/7514-medical-science-research-bldg-ii.svg",
+  "area": "Medical And Hospital Campus",
+  "lat": 36.00772364,
+  "lon": -78.943234844,
+  "place": "Medical Science Research Building II",
+  "confidence": "contains",
+  "suggestion": null
+ },
+ {
+  "id": "7515",
+  "name": "Marshall I Pickens Building",
+  "file": "icons/7515-marshall-i-pickens-building.svg",
+  "area": "Medical And Hospital Campus",
+  "lat": 36.00813418,
+  "lon": -78.93327325999999,
+  "place": "Pickens Building",
+  "confidence": "contains",
+  "suggestion": null
+ },
+ {
+  "id": "7516",
+  "name": "Medical Science Research Building",
+  "file": "icons/7516-medical-science-research-building.svg",
+  "area": "Medical And Hospital Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "weak",
+  "suggestion": {
+   "name": "Medical Science Research Building II",
+   "lat": 36.00772364,
+   "lon": -78.943234844,
+   "score": 0.75
+  }
+ },
+ {
+  "id": "7524",
+  "name": "Vivarium",
+  "file": "icons/7524-vivarium.svg",
+  "area": "Medical And Hospital Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": null
+ },
+ {
+  "id": "7525",
+  "name": "Surgical Research Pavilion",
+  "file": "icons/7525-surgical-research-pavilion.svg",
+  "area": "Medical And Hospital Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "weak",
+  "suggestion": {
+   "name": "Surgical Oncology Research Facility",
+   "lat": 36.00617914000001,
+   "lon": -78.94357584000001,
+   "score": 0.4
+  }
+ },
+ {
+  "id": "7526",
+  "name": "Genome Science Research Building II",
+  "file": "icons/7526-genome-science-research-building-ii.svg",
+  "area": "Medical And Hospital Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "weak",
+  "suggestion": {
+   "name": "Medical Science Research Building II",
+   "lat": 36.00772364,
+   "lon": -78.943234844,
+   "score": 0.6
+  }
+ },
+ {
+  "id": "7527",
+  "name": "Civitan Building",
+  "file": "icons/7527-civitan-building.svg",
+  "area": "Medical And Hospital Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": null
+ },
+ {
+  "id": "7530",
+  "name": "Alexander H Sands Building",
+  "file": "icons/7530-alexander-h-sands-building.svg",
+  "area": "Medical And Hospital Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "weak",
+  "suggestion": {
+   "name": "Alexander H Sands Jr Building",
+   "lat": 36.00622851000001,
+   "lon": -78.94008805,
+   "score": 0.75
+  }
+ },
+ {
+  "id": "7531",
+  "name": "Joseph Wadsworth Eye Center",
+  "file": "icons/7531-joseph-wadsworth-eye-center.svg",
+  "area": "Medical And Hospital Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": {
+   "name": "Duke Eye Center",
+   "lat": 36.00759535915494,
+   "lon": -78.93920886197184,
+   "score": 0.33
+  }
+ },
+ {
+  "id": "7532",
+  "name": "Seeley G Mudd Building",
+  "file": "icons/7532-seeley-g-mudd-building.svg",
+  "area": "Medical And Hospital Campus",
+  "lat": 36.00575940476191,
+  "lon": -78.9382072047619,
+  "place": "Seeley G. Mudd Building",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7534",
+  "name": "Albert Eye Research Institute",
+  "file": "icons/7534-albert-eye-research-institute.svg",
+  "area": "Medical And Hospital Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": {
+   "name": "Duke Eye Center",
+   "lat": 36.00759535915494,
+   "lon": -78.93920886197184,
+   "score": 0.25
+  }
+ },
+ {
+  "id": "7540",
+  "name": "Snyderman Genome Science Res Bldg",
+  "file": "icons/7540-snyderman-genome-science-res-bldg.svg",
+  "area": "Medical And Hospital Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "weak",
+  "suggestion": {
+   "name": "Snyderman Genome Science Research Building",
+   "lat": 36.00710761999999,
+   "lon": -78.94464472000001,
+   "score": 0.6
+  }
+ },
+ {
+  "id": "7541",
+  "name": "Surgical Oncology Research Facility",
+  "file": "icons/7541-surgical-oncology-research-facility.svg",
+  "area": "Medical And Hospital Campus",
+  "lat": 36.00617914000001,
+  "lon": -78.94357584000001,
+  "place": "Surgical Oncology Research Facility",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7542",
+  "name": "Cancer Center Isolation Facility",
+  "file": "icons/7542-cancer-center-isolation-facility.svg",
+  "area": "Medical And Hospital Campus",
+  "lat": 36.00656238571428,
+  "lon": -78.94386858571428,
+  "place": "Cancer Center Isolation Facility",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7549",
+  "name": "Edwin L Jones Building",
+  "file": "icons/7549-edwin-l-jones-building.svg",
+  "area": "Medical And Hospital Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "weak",
+  "suggestion": {
+   "name": "Edwin L. Jones Cancer Research Building",
+   "lat": 36.0066625,
+   "lon": -78.94037905454546,
+   "score": 0.6
+  }
+ },
+ {
+  "id": "7550",
+  "name": "Christine Siegler Pearson Bldg",
+  "file": "icons/7550-christine-siegler-pearson-bldg.svg",
+  "area": "Medical And Hospital Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": null
+ },
+ {
+  "id": "7555",
+  "name": "Global Health Research Bldg",
+  "file": "icons/7555-global-health-research-bldg.svg",
+  "area": "Medical And Hospital Campus",
+  "lat": 36.0080109,
+  "lon": -78.94337635714285,
+  "place": "Global Health Research Building",
+  "confidence": "contains",
+  "suggestion": null
+ },
+ {
+  "id": "7558",
+  "name": "Duke Medicine Pavilion",
+  "file": "icons/7558-duke-medicine-pavilion.svg",
+  "area": "Medical And Hospital Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": {
+   "name": "Stagg Pavilion",
+   "lat": 36.00405731111111,
+   "lon": -78.91367205555555,
+   "score": 0.33
+  }
+ },
+ {
+  "id": "7559",
+  "name": "Duke Cancer Center",
+  "file": "icons/7559-duke-cancer-center.svg",
+  "area": "Medical And Hospital Campus",
+  "lat": 36.00496961428572,
+  "lon": -78.93697921142858,
+  "place": "Duke Cancer Center",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7560",
+  "name": "Trent Semans Center for Health Education",
+  "file": "icons/7560-trent-semans-center-for-health-education.svg",
+  "area": "Medical And Hospital Campus",
+  "lat": 36.00541852777778,
+  "lon": -78.93809912222224,
+  "place": "Mary Duke Biddle Trent Semans Center for Health Education",
+  "confidence": "contains",
+  "suggestion": null
+ },
+ {
+  "id": "7561",
+  "name": "Hudson Building at Duke Eye Center",
+  "file": "icons/7561-hudson-building-at-duke-eye-center.svg",
+  "area": "Medical And Hospital Campus",
+  "lat": 36.00759535915494,
+  "lon": -78.93920886197184,
+  "place": "Duke Eye Center",
+  "confidence": "contains",
+  "suggestion": null
+ },
+ {
+  "id": "7562",
+  "name": "Medical Science Research Bldg III",
+  "file": "icons/7562-medical-science-research-bldg-iii.svg",
+  "area": "Medical And Hospital Campus",
+  "lat": 36.0072475,
+  "lon": -78.94304948000001,
+  "place": "Medical Science Research Building III",
+  "confidence": "contains",
+  "suggestion": null
+ },
+ {
+  "id": "7564",
+  "name": "InterProfessional Education Bldg",
+  "file": "icons/7564-interprofessional-education-bldg.svg",
+  "area": "Medical And Hospital Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": {
+   "name": "Mary Duke Biddle Trent Semans Center for Health Education",
+   "lat": 36.00541852777778,
+   "lon": -78.93809912222224,
+   "score": 0.14
+  }
+ },
+ {
+  "id": "7576",
+  "name": "Clinical and Research Laboratory",
+  "file": "icons/7576-clinical-and-research-laboratory.svg",
+  "area": "Medical And Hospital Campus",
+  "lat": 36.00665485,
+  "lon": -78.93953079166666,
+  "place": "Clinical and Research Laboratory",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7577",
+  "name": "Environmental Safety Building",
+  "file": "icons/7577-environmental-safety-building.svg",
+  "area": "Medical And Hospital Campus",
+  "lat": 36.006989780000005,
+  "lon": -78.94279262,
+  "place": "Environmental Safety Building",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7579",
+  "name": "Bryan Research Building",
+  "file": "icons/7579-bryan-research-building.svg",
+  "area": "Medical And Hospital Campus",
+  "lat": 36.005045137931035,
+  "lon": -78.93924220689657,
+  "place": "Bryan Research",
+  "confidence": "contains",
+  "suggestion": null
+ },
+ {
+  "id": "7593",
+  "name": "North Pavilion",
+  "file": "icons/7593-north-pavilion.svg",
+  "area": "Medical And Hospital Campus",
+  "lat": 36.0111884,
+  "lon": -78.93630468,
+  "place": "North Pavilion Clinic Wing",
+  "confidence": "contains",
+  "suggestion": null
+ },
+ {
+  "id": "7628",
+  "name": "Medical Center Grounds Building",
+  "file": "icons/7628-medical-center-grounds-building.svg",
+  "area": "Medical And Hospital Campus",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": {
+   "name": "Medical Sciences Research Building",
+   "lat": 36.00722719411764,
+   "lon": -78.94085185882352,
+   "score": 0.25
+  }
+ },
+ {
+  "id": "7717",
+  "name": "Card Gymnasium",
+  "file": "icons/7717-card-gymnasium.svg",
+  "area": "Athletics Precinct",
+  "lat": 35.997377988888886,
+  "lon": -78.94139163333334,
+  "place": "Card Gymnasium",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7718",
+  "name": "Brooks Field @ Wallace Wade Stadium",
+  "file": "icons/7718-brooks-field-wallace-wade-stadium.svg",
+  "area": "Athletics Precinct",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": {
+   "name": "Pascal Field House",
+   "lat": 35.99338116666667,
+   "lon": -78.94223804666666,
+   "score": 0.14
+  }
+ },
+ {
+  "id": "7733",
+  "name": "Krzyzewski Center",
+  "file": "icons/7733-krzyzewski-center.svg",
+  "area": "Athletics Precinct",
+  "lat": 35.997789899999994,
+  "lon": -78.94284854615384,
+  "place": "Krzyzewski Center",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7734",
+  "name": "Kennedy Tower",
+  "file": "icons/7734-kennedy-tower.svg",
+  "area": "Athletics Precinct",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": {
+   "name": "Bell Tower Residence Hall",
+   "lat": 36.00696226190477,
+   "lon": -78.91816117619048,
+   "score": 0.33
+  }
+ },
+ {
+  "id": "7741",
+  "name": "Schwartz-Butters Athletic Center",
+  "file": "icons/7741-schwartz-butters-athletic-center.svg",
+  "area": "Athletics Precinct",
+  "lat": 35.998057135135134,
+  "lon": -78.94225750000001,
+  "place": "Schwartz-Butters Athletic Center",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7743",
+  "name": "Cameron Indoor Stadium",
+  "file": "icons/7743-cameron-indoor-stadium.svg",
+  "area": "Athletics Precinct",
+  "lat": 35.99734315116279,
+  "lon": -78.94234142790697,
+  "place": "Cameron Indoor Stadium",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7769",
+  "name": "Ambler Tennis Stadium",
+  "file": "icons/7769-ambler-tennis-stadium.svg",
+  "area": "Athletics Precinct",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": {
+   "name": "Sheffield Tennis Center",
+   "lat": 35.996953818181815,
+   "lon": -78.93962917272728,
+   "score": 0.25
+  }
+ },
+ {
+  "id": "7770",
+  "name": "Blue Devil Tower",
+  "file": "icons/7770-blue-devil-tower.svg",
+  "area": "Athletics Precinct",
+  "lat": 35.99527680333334,
+  "lon": -78.94273702000001,
+  "place": "Blue Devil Tower",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7773",
+  "name": "Brooks Football Building",
+  "file": "icons/7773-brooks-football-building.svg",
+  "area": "Athletics Precinct",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": null
+ },
+ {
+  "id": "7775",
+  "name": "Intramural Building",
+  "file": "icons/7775-intramural-building.svg",
+  "area": "Athletics Precinct",
+  "lat": 35.99662135555556,
+  "lon": -78.94002683333332,
+  "place": "Intramural Building",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7777",
+  "name": "Wilson Recreation Center",
+  "file": "icons/7777-wilson-recreation-center.svg",
+  "area": "Athletics Precinct",
+  "lat": 35.99697444074075,
+  "lon": -78.94103670740742,
+  "place": "Wilson Recreation Center",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7778",
+  "name": "Sheffield Tennis Center",
+  "file": "icons/7778-sheffield-tennis-center.svg",
+  "area": "Athletics Precinct",
+  "lat": 35.996953818181815,
+  "lon": -78.93962917272728,
+  "place": "Sheffield Tennis Center",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7779",
+  "name": "Yoh Football Complex",
+  "file": "icons/7779-yoh-football-complex.svg",
+  "area": "Athletics Precinct",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": null
+ },
+ {
+  "id": "7781",
+  "name": "Murray/Scott Building",
+  "file": "icons/7781-murray-scott-building.svg",
+  "area": "Athletics Precinct",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": {
+   "name": "William D Murray Building",
+   "lat": 35.99627658181818,
+   "lon": -78.94292304545455,
+   "score": 0.25
+  }
+ },
+ {
+  "id": "7790",
+  "name": "Jack Coombs Field",
+  "file": "icons/7790-jack-coombs-field.svg",
+  "area": "Athletics Precinct",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": {
+   "name": "Pascal Field House",
+   "lat": 35.99338116666667,
+   "lon": -78.94223804666666,
+   "score": 0.25
+  }
+ },
+ {
+  "id": "7798",
+  "name": "West Campus Grounds Building",
+  "file": "icons/7798-west-campus-grounds-building.svg",
+  "area": "Athletics Precinct",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "weak",
+  "suggestion": {
+   "name": "West Duke Building",
+   "lat": 36.004990069230765,
+   "lon": -78.91538774615385,
+   "score": 0.5
+  }
+ },
+ {
+  "id": "7799",
+  "name": "Taishoff Aquatic Pavilion",
+  "file": "icons/7799-taishoff-aquatic-pavilion.svg",
+  "area": "Athletics Precinct",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": {
+   "name": "Stagg Pavilion",
+   "lat": 36.00405731111111,
+   "lon": -78.91367205555555,
+   "score": 0.25
+  }
+ },
+ {
+  "id": "7849",
+  "name": "Pascal Field House",
+  "file": "icons/7849-pascal-field-house.svg",
+  "area": "Athletics Precinct",
+  "lat": 35.99338116666667,
+  "lon": -78.94223804666666,
+  "place": "Pascal Field House",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7850",
+  "name": "Freeman Field at Koskinen Stadium",
+  "file": "icons/7850-freeman-field-at-koskinen-stadium.svg",
+  "area": "Athletics Precinct",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": {
+   "name": "Pascal Field House",
+   "lat": 35.99338116666667,
+   "lon": -78.94223804666666,
+   "score": 0.2
+  }
+ },
+ {
+  "id": "7856",
+  "name": "Cohan Fields",
+  "file": "icons/7856-cohan-fields.svg",
+  "area": "Athletics Precinct",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": null
+ },
+ {
+  "id": "7857",
+  "name": "751 Practice Field",
+  "file": "icons/7857-751-practice-field.svg",
+  "area": "Athletics Precinct",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": {
+   "name": "Pascal Field House",
+   "lat": 35.99338116666667,
+   "lon": -78.94223804666666,
+   "score": 0.25
+  }
+ },
+ {
+  "id": "component-146",
+  "name": "Morris Williams Track & Field Stadium",
+  "file": "icons/component-146-morris-williams-track-field-stadium.svg",
+  "area": "Athletics Precinct",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": {
+   "name": "Pascal Field House",
+   "lat": 35.99338116666667,
+   "lon": -78.94223804666666,
+   "score": 0.17
+  }
+ },
+ {
+  "id": "7009",
+  "name": "The Wilder Family Office Building",
+  "file": "icons/7009-the-wilder-family-office-building.svg",
+  "area": "Central Campus And Gardens",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": {
+   "name": "Family Fare",
+   "lat": 36.0103216,
+   "lon": -78.92004548,
+   "score": 0.25
+  }
+ },
+ {
+  "id": "7010",
+  "name": "Karsh Alumni and Visitors Center",
+  "file": "icons/7010-karsh-alumni-and-visitors-center.svg",
+  "area": "Central Campus And Gardens",
+  "lat": 35.99826572,
+  "lon": -78.9327198,
+  "place": "Karsh Alumni and Visitors Center",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7011",
+  "name": "The Blue Light Living",
+  "file": "icons/7011-the-blue-light-living.svg",
+  "area": "Central Campus And Gardens",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": {
+   "name": "The Living Room",
+   "lat": 36.000631874999996,
+   "lon": -78.9108323875,
+   "score": 0.25
+  }
+ },
+ {
+  "id": "7034",
+  "name": "Duke Gardens Gateway Building",
+  "file": "icons/7034-duke-gardens-gateway-building.svg",
+  "area": "Central Campus And Gardens",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": null
+ },
+ {
+  "id": "7101",
+  "name": "Laundry Building",
+  "file": "icons/7101-laundry-building.svg",
+  "area": "Central Campus And Gardens",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": null
+ },
+ {
+  "id": "7103",
+  "name": "Arts Annex",
+  "file": "icons/7103-arts-annex.svg",
+  "area": "Central Campus And Gardens",
+  "lat": 35.99968338888888,
+  "lon": -78.9187769,
+  "place": "Duke Arts Annex",
+  "confidence": "contains",
+  "suggestion": null
+ },
+ {
+  "id": "7107",
+  "name": "Doris Duke Center",
+  "file": "icons/7107-doris-duke-center.svg",
+  "area": "Central Campus And Gardens",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": null
+ },
+ {
+  "id": "7120",
+  "name": "Art Studio Building",
+  "file": "icons/7120-art-studio-building.svg",
+  "area": "Central Campus And Gardens",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "weak",
+  "suggestion": {
+   "name": "Art Building",
+   "lat": 36.009349871428576,
+   "lon": -78.91710988571428,
+   "score": 0.5
+  }
+ },
+ {
+  "id": "7124",
+  "name": "300 Swift",
+  "file": "icons/7124-300-swift.svg",
+  "area": "Central Campus And Gardens",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": {
+   "name": "301 Swift",
+   "lat": 36.002385838461535,
+   "lon": -78.92034196923078,
+   "score": 0.33
+  }
+ },
+ {
+  "id": "7137",
+  "name": "301 Swift",
+  "file": "icons/7137-301-swift.svg",
+  "area": "Central Campus And Gardens",
+  "lat": 36.002385838461535,
+  "lon": -78.92034196923078,
+  "place": "301 Swift",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7138",
+  "name": "Freeman Center for Jewish Life",
+  "file": "icons/7138-freeman-center-for-jewish-life.svg",
+  "area": "Central Campus And Gardens",
+  "lat": 36.00029848,
+  "lon": -78.92225102333333,
+  "place": "Freeman Center for Jewish Life",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7139",
+  "name": "Duke Smart House",
+  "file": "icons/7139-duke-smart-house.svg",
+  "area": "Central Campus And Gardens",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": {
+   "name": "Home Depot Smart House",
+   "lat": 36.00079634,
+   "lon": -78.92135296000001,
+   "score": 0.33
+  }
+ },
+ {
+  "id": "7189",
+  "name": "Devil's Den",
+  "file": "icons/7189-devil-s-den.svg",
+  "area": "Central Campus And Gardens",
+  "lat": 36.002854344444444,
+  "lon": -78.9251677,
+  "place": "Devil's Den",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7190",
+  "name": "CCH Tennis/BB Courts",
+  "file": "icons/7190-cch-tennis-bb-courts.svg",
+  "area": "Central Campus And Gardens",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": {
+   "name": "Sheffield Tennis Center",
+   "lat": 35.996953818181815,
+   "lon": -78.93962917272728,
+   "score": 0.2
+  }
+ },
+ {
+  "id": "7194",
+  "name": "Rubenstein Arts Center",
+  "file": "icons/7194-rubenstein-arts-center.svg",
+  "area": "Central Campus And Gardens",
+  "lat": 36.00028342631579,
+  "lon": -78.92947085789474,
+  "place": "Rubenstein Arts Center",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7195",
+  "name": "Duke Children's Campus",
+  "file": "icons/7195-duke-children-s-campus.svg",
+  "area": "Central Campus And Gardens",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "weak",
+  "suggestion": {
+   "name": "McGovern-Davison Children's Health Center",
+   "lat": 36.007630840000004,
+   "lon": -78.93657532666666,
+   "score": 0.4
+  }
+ },
+ {
+  "id": "7196",
+  "name": "HH Jordan Building",
+  "file": "icons/7196-hh-jordan-building.svg",
+  "area": "Central Campus And Gardens",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "weak",
+  "suggestion": {
+   "name": "House HH",
+   "lat": 35.999749452,
+   "lon": -78.93809432799999,
+   "score": 0.5
+  }
+ },
+ {
+  "id": "7198",
+  "name": "Nasher Museum of Art",
+  "file": "icons/7198-nasher-museum-of-art.svg",
+  "area": "Central Campus And Gardens",
+  "lat": 35.99907491851852,
+  "lon": -78.92906367037037,
+  "place": "Nasher Museum of Art",
+  "confidence": "exact",
+  "suggestion": null
+ },
+ {
+  "id": "7764",
+  "name": "Lemur Center",
+  "file": "icons/7764-lemur-center.svg",
+  "area": "Outlying And Perimeter",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": null
+ },
+ {
+  "id": "7853",
+  "name": "Sarah P. Duke Gardens",
+  "file": "icons/7853-sarah-p-duke-gardens.svg",
+  "area": "Outlying And Perimeter",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": {
+   "name": "Kilgo House P",
+   "lat": 36.00022101538461,
+   "lon": -78.93951006153846,
+   "score": 0.25
+  }
+ },
+ {
+  "id": "component-167",
+  "name": "Karcher-Ingram Golf Center",
+  "file": "icons/component-167-karcher-ingram-golf-center.svg",
+  "area": "Outlying And Perimeter",
+  "lat": null,
+  "lon": null,
+  "place": null,
+  "confidence": "none",
+  "suggestion": {
+   "name": "Washington Duke Inn & Golf Club",
+   "lat": 35.9930045084507,
+   "lon": -78.94780677042253,
+   "score": 0.17
+  }
+ }
+]

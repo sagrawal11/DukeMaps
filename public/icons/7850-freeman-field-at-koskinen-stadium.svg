@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="216" viewBox="0 0 256 216" role="img" aria-labelledby="duke-7850-title duke-7850-desc"><title id="duke-7850-title">Freeman Field at Koskinen Stadium</title><desc id="duke-7850-desc">Reference-informed draft. Simplified architectural illustration for a 100–250 px campus map. Approximate proportions; not a measured elevation.</desc>
+<rect x="63" y="73" width="132" height="112" fill="#A6BDA5" stroke="#183956" stroke-width="1.5"/>
+<rect x="68" y="78" width="122" height="102" fill="none" stroke="#F8F5EC" stroke-width="1.2"/>
+<line x1="68" y1="129.0" x2="190" y2="129.0" stroke="#F8F5EC" stroke-width="1" stroke-linecap="round"/>
+<ellipse cx="129.0" cy="129.0" rx="12" ry="12" fill="none" stroke="#183956" stroke-width="1"/>
+<rect x="99.96000000000001" y="78" width="58.08" height="19" fill="none" stroke="#F8F5EC" stroke-width="1"/>
+<rect x="99.96000000000001" y="161" width="58.08" height="19" fill="none" stroke="#F8F5EC" stroke-width="1"/>
+<rect x="38" y="82" width="3" height="93" fill="#F1EADB" stroke="#183956" stroke-width="0.8"/>
+<rect x="41" y="82" width="3" height="93" fill="#F1EADB" stroke="#183956" stroke-width="0.8"/>
+<rect x="44" y="82" width="3" height="93" fill="#F1EADB" stroke="#183956" stroke-width="0.8"/>
+<rect x="47" y="82" width="3" height="93" fill="#F1EADB" stroke="#183956" stroke-width="0.8"/>
+<rect x="50" y="82" width="3" height="93" fill="#F1EADB" stroke="#183956" stroke-width="0.8"/>
+<rect x="29" y="106" width="14" height="38" fill="#DDD4C3" stroke="#183956" stroke-width="1"/>
+<rect x="30" y="111" width="12" height="15" fill="#BAD7DC" stroke="#183956" stroke-width="1.5"/>
+<line x1="36.0" y1="111" x2="36.0" y2="126" stroke="#183956" stroke-width="0.85" stroke-linecap="round"/>
+<path d="M33,123L37.2,114" fill="none" stroke="#F8F5EC" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<line x1="38" y1="182" x2="38" y2="54" stroke="#183956" stroke-width="1.4" stroke-linecap="round"/>
+<rect x="32" y="50" width="12" height="5" fill="#F1EADB" stroke="#183956" stroke-width="1"/>
+<line x1="219" y1="182" x2="219" y2="54" stroke="#183956" stroke-width="1.4" stroke-linecap="round"/>
+<rect x="213" y="50" width="12" height="5" fill="#F1EADB" stroke="#183956" stroke-width="1"/>
+<line x1="21" y1="196" x2="235" y2="196" stroke="#183956" stroke-width="1.6" stroke-linecap="round"/>
+</svg>

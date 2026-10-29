@@ -1,0 +1,167 @@
+7701 | Duke Chapel | West Campus | Reference-informed draft | svg/7701-duke-chapel.svg
+7702 | Gray Building | West Campus | Reference-informed draft | svg/7702-gray-building.svg
+7704 | Perkins Library | West Campus | Reference-informed draft | svg/7704-perkins-library.svg
+7705 | Languages Building | West Campus | Reference-informed draft | svg/7705-languages-building.svg
+7706 | Old Chemistry Building | West Campus | Reference-informed draft | svg/7706-old-chemistry-building.svg
+7707 | Divinity Building | West Campus | Provisional schematic | svg/7707-divinity-building.svg
+7709 | Reuben-Cooke Building | West Campus | Reference-informed draft | svg/7709-reuben-cooke-building.svg
+7710 | Social Sciences Building | West Campus | Reference-informed draft | svg/7710-social-sciences-building.svg
+7711 | Craven Quad | West Campus | Reference-informed draft | svg/7711-craven-quad.svg
+7712 | Crowell Quad | West Campus | Reference-informed draft | svg/7712-crowell-quad.svg
+7713 | Kilgo Quad | West Campus | Reference-informed draft | svg/7713-kilgo-quad.svg
+7714 | Brodhead Center / West Union | West Campus | Reference-informed draft | svg/7714-brodhead-center-west-union.svg
+7715 | Flowers Building | West Campus | Reference-informed draft | svg/7715-flowers-building.svg
+7716 | Page Auditorium | West Campus | Reference-informed draft | svg/7716-page-auditorium.svg
+7725 | Sanford Building | West Campus | Reference-informed draft | svg/7725-sanford-building.svg
+7731 | Penn Pavilion | West Campus | Reference-informed draft | svg/7731-penn-pavilion.svg
+7735 | Fitzpatrick CIEMAS | West Campus | Reference-informed draft | svg/7735-fitzpatrick-ciemas.svg
+7737 | Student Health and Wellness Center | West Campus | Reference-informed draft | svg/7737-student-health-and-wellness-center.svg
+7738 | French Family Science Center | West Campus | Reference-informed draft | svg/7738-french-family-science-center.svg
+7739 | Rubenstein Hall | West Campus | Provisional schematic | svg/7739-rubenstein-hall.svg
+7742 | Few Quad | West Campus | Reference-informed draft | svg/7742-few-quad.svg
+7746 | OIT/Telecommunications Building | West Campus | Reference-informed draft | svg/7746-oit-telecommunications-building.svg
+7747 | Hudson Hall (Engineering Building) | West Campus | Reference-informed draft | svg/7747-hudson-hall-engineering-building.svg
+7749 | Physics Building | West Campus | Provisional schematic | svg/7749-physics-building.svg
+7752 | Wilkinson Engineering Building | West Campus | Reference-informed draft | svg/7752-wilkinson-engineering-building.svg
+7753 | Allen Building | West Campus | Reference-informed draft | svg/7753-allen-building.svg
+7755 | Wannamaker Quad | West Campus | Provisional schematic | svg/7755-wannamaker-quad.svg
+7758 | Biological Sciences Building | West Campus | Reference-informed draft | svg/7758-biological-sciences-building.svg
+7759 | Law Building | West Campus | Reference-informed draft | svg/7759-law-building.svg
+7760 | Thomas F. Keller Center / Fuqua School of Business | West Campus | Reference-informed draft | svg/7760-thomas-f-keller-center-fuqua-school-of-business.svg
+7765 | Gross Hall | West Campus | Reference-informed draft | svg/7765-gross-hall.svg
+7766 | Teer Engineering Building | West Campus | Reference-informed draft | svg/7766-teer-engineering-building.svg
+7768 | Grainger Hall | West Campus | Reference-informed draft | svg/7768-grainger-hall.svg
+7771 | Phytotron Building | West Campus | Provisional schematic | svg/7771-phytotron-building.svg
+7776 | Levine Science Research Center | West Campus | Reference-informed draft | svg/7776-levine-science-research-center.svg
+7780 | Free Electron Laser Laboratory (FEL) | West Campus | Provisional schematic | svg/7780-free-electron-laser-laboratory-fel.svg
+7782 | JB Duke Hotel | West Campus | Reference-informed draft | svg/7782-jb-duke-hotel.svg
+7783 | Edens 3A / Decker Tower | West Campus | Provisional schematic | svg/7783-edens-3a-decker-tower.svg
+7784 | Edens 3B / Mitchell Tower | West Campus | Provisional schematic | svg/7784-edens-3b-mitchell-tower.svg
+7785 | Edens Quad 1B | West Campus | Provisional schematic | svg/7785-edens-quad-1b.svg
+7786 | Edens Quad 1A | West Campus | Provisional schematic | svg/7786-edens-quad-1a.svg
+7787 | Edens Quad 1C | West Campus | Provisional schematic | svg/7787-edens-quad-1c.svg
+7788 | Edens Quad 2C | West Campus | Provisional schematic | svg/7788-edens-quad-2c.svg
+7789 | Edens Quad 2A | West Campus | Provisional schematic | svg/7789-edens-quad-2a.svg
+7791 | Bryan Student Center | West Campus | Reference-informed draft | svg/7791-bryan-student-center.svg
+7792 | Keohane Quad 4E | West Campus | Reference-informed draft | svg/7792-keohane-quad-4e.svg
+7794 | Experimental Botany Building | West Campus | Provisional schematic | svg/7794-experimental-botany-building.svg
+7795 | Keohane Quad (4A, 4B, 4D and McClendon Tower) | West Campus | Provisional schematic | svg/7795-keohane-quad-4a-4b-4d-and-mcclendon-tower.svg
+7866 | Hollows A Residence Hall | West Campus | Provisional schematic | svg/7866-hollows-a-residence-hall.svg
+7867 | Hollows B Residence Hall | West Campus | Provisional schematic | svg/7867-hollows-b-residence-hall.svg
+component-51 | Bostock Library | West Campus | Reference-informed draft | svg/component-51-bostock-library.svg
+component-52 | David M. Rubenstein Rare Book & Manuscript Library | West Campus | Reference-informed draft | svg/component-52-david-m-rubenstein-rare-book-manuscript-library.svg
+component-53 | von der Heyden Pavilion | West Campus | Reference-informed draft | svg/component-53-von-der-heyden-pavilion.svg
+component-54 | Doug and Josie Breeden Hall | West Campus | Reference-informed draft | svg/component-54-doug-and-josie-breeden-hall.svg
+component-55 | Lafe P. and Rita D. Fox Student Center | West Campus | Provisional schematic | svg/component-55-lafe-p-and-rita-d-fox-student-center.svg
+component-56 | Wesley Alexander Magat Academic Center | West Campus | Reference-informed draft | svg/component-56-wesley-alexander-magat-academic-center.svg
+7201 | East Duke Building | East Campus | Reference-informed draft | svg/7201-east-duke-building.svg
+7202 | West Duke Building | East Campus | Reference-informed draft | svg/7202-west-duke-building.svg
+7203 | East House | East Campus | Reference-informed draft | svg/7203-east-house.svg
+7204 | West House | East Campus | Provisional schematic | svg/7204-west-house.svg
+7205 | Epworth Residence Hall | East Campus | Reference-informed draft | svg/7205-epworth-residence-hall.svg
+7206 | Crowell Building | East Campus | Reference-informed draft | svg/7206-crowell-building.svg
+7207 | The Ark | East Campus | Reference-informed draft | svg/7207-the-ark.svg
+7209 | Bishop's House | East Campus | Provisional schematic | svg/7209-bishop-s-house.svg
+7213 | Richard White Lecture Hall | East Campus | Provisional schematic | svg/7213-richard-white-lecture-hall.svg
+7214 | Classroom Building | East Campus | Provisional schematic | svg/7214-classroom-building.svg
+7215 | Giles Residence Hall | East Campus | Reference-informed draft | svg/7215-giles-residence-hall.svg
+7216 | Lilly Library | East Campus | Reference-informed draft | svg/7216-lilly-library.svg
+7217 | Alspaugh Residence Hall | East Campus | Reference-informed draft | svg/7217-alspaugh-residence-hall.svg
+7218 | Pegram Residence Hall | East Campus | Reference-informed draft | svg/7218-pegram-residence-hall.svg
+7219 | Baldwin Auditorium | East Campus | Reference-informed draft | svg/7219-baldwin-auditorium.svg
+7220 | Bassett Residence Hall | East Campus | Reference-informed draft | svg/7220-bassett-residence-hall.svg
+7221 | Brown Residence Hall | East Campus | Reference-informed draft | svg/7221-brown-residence-hall.svg
+7222 | Wall Center for Student Life / East Campus Union | East Campus | Reference-informed draft | svg/7222-wall-center-for-student-life-east-campus-union.svg
+7223 | Wilson Residence Hall | East Campus | Reference-informed draft | svg/7223-wilson-residence-hall.svg
+7224 | Friedl Building | East Campus | Reference-informed draft | svg/7224-friedl-building.svg
+7225 | Southgate Residence Hall | East Campus | Reference-informed draft | svg/7225-southgate-residence-hall.svg
+7226 | Brodie Recreational Center | East Campus | Reference-informed draft | svg/7226-brodie-recreational-center.svg
+7227 | East Campus Tennis Court | East Campus | Provisional schematic | svg/7227-east-campus-tennis-court.svg
+7228 | Bivins Building | East Campus | Reference-informed draft | svg/7228-bivins-building.svg
+7230 | Gilbert-Addoms Residence Hall | East Campus | Reference-informed draft | svg/7230-gilbert-addoms-residence-hall.svg
+7231 | Academic Advising Center | East Campus | Reference-informed draft | svg/7231-academic-advising-center.svg
+7232 | Mary Duke Biddle Music Building | East Campus | Reference-informed draft | svg/7232-mary-duke-biddle-music-building.svg
+7234 | Blackwell Residence Hall | East Campus | Reference-informed draft | svg/7234-blackwell-residence-hall.svg
+7235 | Randolph Residence Hall | East Campus | Reference-informed draft | svg/7235-randolph-residence-hall.svg
+7236 | Bell Tower Residence Hall | East Campus | Reference-informed draft | svg/7236-bell-tower-residence-hall.svg
+7237 | Trinity Residence Hall | East Campus | Reference-informed draft | svg/7237-trinity-residence-hall.svg
+7251 | Art Building | East Campus | Provisional schematic | svg/7251-art-building.svg
+7261 | Smith Warehouse | East Campus | Reference-informed draft | svg/7261-smith-warehouse.svg
+7272 | Jim Sabiston Fieldhouse | East Campus | Provisional schematic | svg/7272-jim-sabiston-fieldhouse.svg
+7274 | Smith Family Stadium | East Campus | Reference-informed draft | svg/7274-smith-family-stadium.svg
+component-92 | Williams Field at Jack Katz Stadium | East Campus | Reference-informed draft | svg/component-92-williams-field-at-jack-katz-stadium.svg
+7510 | John Hope Franklin Center | Medical And Hospital Campus | Reference-informed draft | svg/7510-john-hope-franklin-center.svg
+7511 | Hanes House | Medical And Hospital Campus | Reference-informed draft | svg/7511-hanes-house.svg
+7512 | Trent Drive Hall | Medical And Hospital Campus | Reference-informed draft | svg/7512-trent-drive-hall.svg
+7513 | Nanaline H Duke Building | Medical And Hospital Campus | Reference-informed draft | svg/7513-nanaline-h-duke-building.svg
+7514 | Medical Science Research Bldg II | Medical And Hospital Campus | Reference-informed draft | svg/7514-medical-science-research-bldg-ii.svg
+7515 | Marshall I Pickens Building | Medical And Hospital Campus | Provisional schematic | svg/7515-marshall-i-pickens-building.svg
+7516 | Medical Science Research Building | Medical And Hospital Campus | Provisional schematic | svg/7516-medical-science-research-building.svg
+7524 | Vivarium | Medical And Hospital Campus | Provisional schematic | svg/7524-vivarium.svg
+7525 | Surgical Research Pavilion | Medical And Hospital Campus | Provisional schematic | svg/7525-surgical-research-pavilion.svg
+7526 | Genome Science Research Building II | Medical And Hospital Campus | Provisional schematic | svg/7526-genome-science-research-building-ii.svg
+7527 | Civitan Building | Medical And Hospital Campus | Reference-informed draft | svg/7527-civitan-building.svg
+7530 | Alexander H Sands Building | Medical And Hospital Campus | Reference-informed draft | svg/7530-alexander-h-sands-building.svg
+7531 | Joseph Wadsworth Eye Center | Medical And Hospital Campus | Provisional schematic | svg/7531-joseph-wadsworth-eye-center.svg
+7532 | Seeley G Mudd Building | Medical And Hospital Campus | Reference-informed draft | svg/7532-seeley-g-mudd-building.svg
+7534 | Albert Eye Research Institute | Medical And Hospital Campus | Reference-informed draft | svg/7534-albert-eye-research-institute.svg
+7540 | Snyderman Genome Science Res Bldg | Medical And Hospital Campus | Provisional schematic | svg/7540-snyderman-genome-science-res-bldg.svg
+7541 | Surgical Oncology Research Facility | Medical And Hospital Campus | Provisional schematic | svg/7541-surgical-oncology-research-facility.svg
+7542 | Cancer Center Isolation Facility | Medical And Hospital Campus | Provisional schematic | svg/7542-cancer-center-isolation-facility.svg
+7549 | Edwin L Jones Building | Medical And Hospital Campus | Reference-informed draft | svg/7549-edwin-l-jones-building.svg
+7550 | Christine Siegler Pearson Bldg | Medical And Hospital Campus | Reference-informed draft | svg/7550-christine-siegler-pearson-bldg.svg
+7555 | Global Health Research Bldg | Medical And Hospital Campus | Provisional schematic | svg/7555-global-health-research-bldg.svg
+7558 | Duke Medicine Pavilion | Medical And Hospital Campus | Reference-informed draft | svg/7558-duke-medicine-pavilion.svg
+7559 | Duke Cancer Center | Medical And Hospital Campus | Reference-informed draft | svg/7559-duke-cancer-center.svg
+7560 | Trent Semans Center for Health Education | Medical And Hospital Campus | Reference-informed draft | svg/7560-trent-semans-center-for-health-education.svg
+7561 | Hudson Building at Duke Eye Center | Medical And Hospital Campus | Reference-informed draft | svg/7561-hudson-building-at-duke-eye-center.svg
+7562 | Medical Science Research Bldg III | Medical And Hospital Campus | Reference-informed draft | svg/7562-medical-science-research-bldg-iii.svg
+7564 | InterProfessional Education Bldg | Medical And Hospital Campus | Reference-informed draft | svg/7564-interprofessional-education-bldg.svg
+7576 | Clinical and Research Laboratory | Medical And Hospital Campus | Provisional schematic | svg/7576-clinical-and-research-laboratory.svg
+7577 | Environmental Safety Building | Medical And Hospital Campus | Provisional schematic | svg/7577-environmental-safety-building.svg
+7579 | Bryan Research Building | Medical And Hospital Campus | Reference-informed draft | svg/7579-bryan-research-building.svg
+7593 | North Pavilion | Medical And Hospital Campus | Reference-informed draft | svg/7593-north-pavilion.svg
+7628 | Medical Center Grounds Building | Medical And Hospital Campus | Provisional schematic | svg/7628-medical-center-grounds-building.svg
+7717 | Card Gymnasium | Athletics Precinct | Provisional schematic | svg/7717-card-gymnasium.svg
+7718 | Brooks Field @ Wallace Wade Stadium | Athletics Precinct | Reference-informed draft | svg/7718-brooks-field-wallace-wade-stadium.svg
+7733 | Krzyzewski Center | Athletics Precinct | Reference-informed draft | svg/7733-krzyzewski-center.svg
+7734 | Kennedy Tower | Athletics Precinct | Provisional schematic | svg/7734-kennedy-tower.svg
+7741 | Schwartz-Butters Athletic Center | Athletics Precinct | Reference-informed draft | svg/7741-schwartz-butters-athletic-center.svg
+7743 | Cameron Indoor Stadium | Athletics Precinct | Reference-informed draft | svg/7743-cameron-indoor-stadium.svg
+7769 | Ambler Tennis Stadium | Athletics Precinct | Reference-informed draft | svg/7769-ambler-tennis-stadium.svg
+7770 | Blue Devil Tower | Athletics Precinct | Provisional schematic | svg/7770-blue-devil-tower.svg
+7773 | Brooks Football Building | Athletics Precinct | Provisional schematic | svg/7773-brooks-football-building.svg
+7775 | Intramural Building | Athletics Precinct | Reference-informed draft | svg/7775-intramural-building.svg
+7777 | Wilson Recreation Center | Athletics Precinct | Reference-informed draft | svg/7777-wilson-recreation-center.svg
+7778 | Sheffield Tennis Center | Athletics Precinct | Provisional schematic | svg/7778-sheffield-tennis-center.svg
+7779 | Yoh Football Complex | Athletics Precinct | Reference-informed draft | svg/7779-yoh-football-complex.svg
+7781 | Murray/Scott Building | Athletics Precinct | Reference-informed draft | svg/7781-murray-scott-building.svg
+7790 | Jack Coombs Field | Athletics Precinct | Reference-informed draft | svg/7790-jack-coombs-field.svg
+7798 | West Campus Grounds Building | Athletics Precinct | Provisional schematic | svg/7798-west-campus-grounds-building.svg
+7799 | Taishoff Aquatic Pavilion | Athletics Precinct | Reference-informed draft | svg/7799-taishoff-aquatic-pavilion.svg
+7849 | Pascal Field House | Athletics Precinct | Provisional schematic | svg/7849-pascal-field-house.svg
+7850 | Freeman Field at Koskinen Stadium | Athletics Precinct | Reference-informed draft | svg/7850-freeman-field-at-koskinen-stadium.svg
+7856 | Cohan Fields | Athletics Precinct | Provisional schematic | svg/7856-cohan-fields.svg
+7857 | 751 Practice Field | Athletics Precinct | Provisional schematic | svg/7857-751-practice-field.svg
+component-146 | Morris Williams Track & Field Stadium | Athletics Precinct | Reference-informed draft | svg/component-146-morris-williams-track-field-stadium.svg
+7009 | The Wilder Family Office Building | Central Campus And Gardens | Provisional schematic | svg/7009-the-wilder-family-office-building.svg
+7010 | Karsh Alumni and Visitors Center | Central Campus And Gardens | Reference-informed draft | svg/7010-karsh-alumni-and-visitors-center.svg
+7011 | The Blue Light Living | Central Campus And Gardens | Reference-informed draft | svg/7011-the-blue-light-living.svg
+7034 | Duke Gardens Gateway Building | Central Campus And Gardens | Reference-informed draft | svg/7034-duke-gardens-gateway-building.svg
+7101 | Laundry Building | Central Campus And Gardens | Reference-informed draft | svg/7101-laundry-building.svg
+7103 | Arts Annex | Central Campus And Gardens | Reference-informed draft | svg/7103-arts-annex.svg
+7107 | Doris Duke Center | Central Campus And Gardens | Reference-informed draft | svg/7107-doris-duke-center.svg
+7120 | Art Studio Building | Central Campus And Gardens | Provisional schematic | svg/7120-art-studio-building.svg
+7124 | 300 Swift | Central Campus And Gardens | Reference-informed draft | svg/7124-300-swift.svg
+7137 | 301 Swift | Central Campus And Gardens | Reference-informed draft | svg/7137-301-swift.svg
+7138 | Freeman Center for Jewish Life | Central Campus And Gardens | Reference-informed draft | svg/7138-freeman-center-for-jewish-life.svg
+7139 | Duke Smart House | Central Campus And Gardens | Reference-informed draft | svg/7139-duke-smart-house.svg
+7189 | Devil's Den | Central Campus And Gardens | Provisional schematic | svg/7189-devil-s-den.svg
+7190 | CCH Tennis/BB Courts | Central Campus And Gardens | Provisional schematic | svg/7190-cch-tennis-bb-courts.svg
+7194 | Rubenstein Arts Center | Central Campus And Gardens | Reference-informed draft | svg/7194-rubenstein-arts-center.svg
+7195 | Duke Children's Campus | Central Campus And Gardens | Provisional schematic | svg/7195-duke-children-s-campus.svg
+7196 | HH Jordan Building | Central Campus And Gardens | Provisional schematic | svg/7196-hh-jordan-building.svg
+7198 | Nasher Museum of Art | Central Campus And Gardens | Reference-informed draft | svg/7198-nasher-museum-of-art.svg
+7764 | Lemur Center | Outlying And Perimeter | Reference-informed draft | svg/7764-lemur-center.svg
+7853 | Sarah P. Duke Gardens | Outlying And Perimeter | Reference-informed draft | svg/7853-sarah-p-duke-gardens.svg
+component-167 | Karcher-Ingram Golf Center | Outlying And Perimeter | Provisional schematic | svg/component-167-karcher-ingram-golf-center.svg
