@@ -66,6 +66,8 @@ function main(): void {
   built.graph.meta.osmFetchedAt = graph.meta.osmFetchedAt
   writeFileSync(resolve(outDir, 'graph.base.json'), JSON.stringify(built.graph))
   writeFileSync(resolve(outDir, 'places.json'), JSON.stringify(built.places, null, 2))
+  // Ship places to the app too — fetched at runtime like graph.json (Phase 4 place index).
+  writeFileSync(resolve(publicDataDir, 'places.json'), JSON.stringify(built.places))
   writeFileSync(resolve(outDir, 'validation.geojson'), JSON.stringify(toValidationGeoJSON(graph)))
 
   const stubs = danglingStubs(graph)
@@ -77,7 +79,7 @@ function main(): void {
     console.log(`  ⚠ ${dangling.length} dangling edit ref(s):`)
     for (const d of dangling) console.log(`    - ${d.reason}`)
   }
-  console.log('[build:graph] wrote public/data/graph.json + data/processed/{graph.base.json, places.json, validation.geojson}')
+  console.log('[build:graph] wrote public/data/{graph.json, places.json} + data/processed/{graph.base.json, places.json, validation.geojson}')
 }
 
 main()
