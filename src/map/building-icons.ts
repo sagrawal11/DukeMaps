@@ -30,7 +30,7 @@ export interface IconLayer {
 
 // Zoom at which each tier starts showing. The app frames the whole campus around ~13.5, so tier 1 is
 // visible from the start; tiers 2–3 reveal as you zoom in. Tunable.
-const TIER_MINZOOM: Record<number, number> = { 1: 13.5, 2: 15, 3: 16 }
+const TIER_MINZOOM: Record<number, number> = { 1: 12, 2: 15, 3: 16.5 }
 
 export function createBuildingIcons(
   map: maplibregl.Map,
