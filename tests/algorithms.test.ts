@@ -1,8 +1,11 @@
 import { describe, it, expect } from 'vitest'
 import { MinHeap } from '../src/algorithms/heap'
-import { buildRoutingGraph, makeWeight } from '../src/algorithms/routing'
+import { buildRoutingGraph, makeWeight, makeHeuristic } from '../src/algorithms/routing'
 import { bfs } from '../src/algorithms/bfs'
 import { dfs } from '../src/algorithms/dfs'
+import { dijkstra } from '../src/algorithms/dijkstra'
+import { astar } from '../src/algorithms/astar'
+import { haversineM } from '../src/graph/geo'
 import type { Graph, GraphEdge, GraphNode } from '../src/graph/types'
 
 describe('MinHeap', () => {
@@ -108,5 +111,85 @@ describe('DFS', () => {
     expect(t.route?.nodes[0]).toBe(1)
     expect(t.route?.nodes.at(-1)).toBe(5)
     expect(isValidPath(hopGraph, t.route?.nodes ?? [])).toBe(true)
+  })
+})
+
+// A random connected graph with geographically-consistent weights (weightS = length / 1.4), so the
+// great-circle A* heuristic is admissible. A random spanning tree guarantees connectivity, plus
+// extra random edges for alternative routes.
+function randomGraph(n: number, extraEdges: number): Graph {
+  const nodes: GraphNode[] = []
+  for (let id = 1; id <= n; id++) nodes.push({ id, lon: -78.95 + Math.random() * 0.03, lat: 36.0 + Math.random() * 0.02 })
+  const edges: GraphEdge[] = []
+  const add = (a: number, b: number): void => {
+    const na = nodes[a - 1]
+    const nb = nodes[b - 1]
+    const lengthM = haversineM(na.lat, na.lon, nb.lat, nb.lon)
+    edges.push({
+      id: `e${edges.length}`,
+      source: 'osm',
+      from: a,
+      to: b,
+      kind: 'footway',
+      stepFree: Math.random() < 0.8,
+      geometry: [
+        [na.lon, na.lat],
+        [nb.lon, nb.lat],
+      ],
+      lengthM,
+      weightS: lengthM / 1.4,
+    })
+  }
+  for (let i = 2; i <= n; i++) add(i, 1 + Math.floor(Math.random() * (i - 1))) // spanning tree -> connected
+  for (let k = 0; k < extraEdges; k++) {
+    const a = 1 + Math.floor(Math.random() * n)
+    const b = 1 + Math.floor(Math.random() * n)
+    if (a !== b) add(a, b)
+  }
+  return { nodes, edges, meta: { nodeCount: nodes.length, edgeCount: edges.length } }
+}
+
+describe('Dijkstra', () => {
+  it('finds the cheapest path, not the fewest-hop one', () => {
+    const rg = buildRoutingGraph(hopGraph)
+    const d = dijkstra(rg, 1, 5, { weight: makeWeight(rg) })
+    expect(d.route?.nodes).toEqual([1, 3, 4, 5]) // cost 9, vs BFS's 2-hop cost-20 route
+    expect(d.route?.costS).toBe(9)
+  })
+})
+
+describe('A* equals Dijkstra (optimality)', () => {
+  it('returns identical costs on hundreds of random pairs, settling no more nodes', () => {
+    const rg = buildRoutingGraph(randomGraph(80, 140))
+    const w = makeWeight(rg)
+    let compared = 0
+    for (let trial = 0; trial < 400; trial++) {
+      const s = 1 + Math.floor(Math.random() * 80)
+      const t = 1 + Math.floor(Math.random() * 80)
+      if (s === t) continue
+      const d = dijkstra(rg, s, t, { weight: w })
+      const a = astar(rg, s, t, { weight: w, heuristic: makeHeuristic(rg, t) })
+      expect(!!a.route).toBe(!!d.route)
+      if (d.route && a.route) {
+        expect(a.route.costS).toBeCloseTo(d.route.costS, 6)
+        expect(a.stats.nodesSettled).toBeLessThanOrEqual(d.stats.nodesSettled) // the heuristic only helps
+        compared++
+      }
+    }
+    expect(compared).toBeGreaterThan(0)
+  })
+
+  it('still agrees under the step-free toggle (cost and reachability)', () => {
+    const rg = buildRoutingGraph(randomGraph(80, 140))
+    const w = makeWeight(rg, { stepFreeOnly: true })
+    for (let trial = 0; trial < 300; trial++) {
+      const s = 1 + Math.floor(Math.random() * 80)
+      const t = 1 + Math.floor(Math.random() * 80)
+      if (s === t) continue
+      const d = dijkstra(rg, s, t, { weight: w })
+      const a = astar(rg, s, t, { weight: w, heuristic: makeHeuristic(rg, t) })
+      expect(!!a.route).toBe(!!d.route)
+      if (d.route && a.route) expect(a.route.costS).toBeCloseTo(d.route.costS, 6)
+    }
   })
 })
