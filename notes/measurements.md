@@ -33,7 +33,13 @@ command that produced it. Keep this honest — measured, not estimated.
 | biA\* — nodes settled vs Dijkstra | 3,335 (**0.54×**, fewest) | `npm run bench:algo` | 2026-10-29 |
 | BFS — fewest hops but slower walk | 103 hops / **94.11 min** (vs optimal 81.76) | `npm run bench:algo` | 2026-10-29 |
 | DFS — finds *a* path, a bad one | 366 hops / **185.55 min** / 15,582 m | `npm run bench:algo` | 2026-10-29 |
-| Unit tests (graph + editor + time + spatial + algorithms) | 85 passing | `npm test` | 2026-10-29 |
+| CH preprocessing (6,189 nodes, static base metric) | 0.59 s · 11,110 shortcuts | `npm run build:ch` | 2026-10-29 |
+| CH hierarchy size (`public/data/ch.json`) | 1.71 MB · avg 3.12 up-arcs/node, max 18 | `npm run build:ch` | 2026-10-29 |
+| CH query vs Dijkstra — far pair, nodes settled | **140 vs 6,189 (44× fewer)**, same 81.76 min | `npm run bench:ch` | 2026-10-29 |
+| CH query vs Dijkstra — avg over 300 random pairs, settled | **134 vs 2,965 (22× fewer)** | `npm run bench:ch` | 2026-10-29 |
+| CH query vs Dijkstra — avg query time | **0.067 ms vs 0.974 ms (~15× faster)** | `npm run bench:ch` | 2026-10-29 |
+| CH correctness | CH == Dijkstra cost on every sampled real pair (0 mismatches) | `npm run build:ch` / `bench:ch` | 2026-10-29 |
+| Unit tests (graph + editor + time + spatial + algorithms + CH) | 90 passing | `npm test` | 2026-10-29 |
 
 Phase 2 (the editor) is complete: the dev-only editor edits the base graph and autosaves a
 replayable edit log (`data/my_edits.json`); `npm run build:graph` replays it, then prunes to
@@ -93,8 +99,37 @@ The bench also asserts five invariants and exits non-zero if any breaks (costs a
 hops, A\* settles ≤ Dijkstra, BFS/DFS no faster-in-time than optimal) — a benchmark that's silently
 wrong is worse than none.
 
+Phase 5b (contraction hierarchies): hand-written CH on the static base metric. Preprocessing
+(`npm run build:ch` → `public/data/ch.json`) contracts all 6,189 nodes in **0.59 s**, adding **11,110
+shortcuts** on top of 8,244 original up-arcs (avg 3.12 up-arcs/node, max 18); the shipped `ch.json` is
+1.71 MB. The query (`npm run bench:ch`) is a bidirectional *upward* search that climbs the hierarchy
+from both ends:
+
+| pair set | metric | Dijkstra | CH | speedup |
+|----------|--------|---------:|---:|--------:|
+| far pair (SW↔NE) | nodes settled | 6,189 | **140** | **44×** |
+| far pair (SW↔NE) | median query ms | 2.405 | **0.151** | ~16× |
+| 300 random pairs | avg nodes settled | 2,965 | **134** | **22×** |
+| 300 random pairs | avg query ms | 0.974 | **0.067** | **~15×** |
+
+Takeaways for the article:
+- **Same answer, a fraction of the work.** CH returns the *exact* optimal cost (81.76 min on the far
+  pair; `CH == Dijkstra` on every sampled real pair, 0 mismatches — guarded in both `build:ch` and
+  `bench:ch`), while touching ~140 nodes instead of sweeping thousands. On the far-corner pair, which
+  forces Dijkstra to settle the whole graph, that's a **44× reduction** in nodes settled.
+- **Preprocessing is a one-time cost paid at build.** 0.59 s to contract the campus graph; the result
+  ships as a 1.71 MB static file, no backend. That's the CH bargain: spend time once offline so every
+  query is cheap.
+- **Shortcuts are the mechanism.** 11,110 of them — each one a precomputed "skip past a less-important
+  node" edge. A query rides shortcuts to leap across the map, then unpacks them back to real paths
+  (the unpacking-integrity test proves no phantom edge hides inside one).
+- **Honest ceiling:** this is CH on the *static base metric* (departure snapshot). It does not yet
+  react to crowding or `hours` — making it do so without rebuilding from scratch is exactly what
+  Customizable CH buys in 5c. Numbers above are off-peak/base-weight, directly comparable to the 5a
+  table.
+
 ## What to capture
 - **Phase 4 — spatial index:** captured above.
-- **Phase 5 — algorithms:** captured above (5a). CH/CCH still to come in 5b/5c.
-- **Phase 5 — contraction hierarchies:** preprocessing time, shortcuts added, query time vs Dijkstra, data size per profile.
+- **Phase 5 — algorithms:** captured above (5a). CCH still to come in 5c.
+- **Phase 5 — contraction hierarchies:** captured above (5b, single static metric). Per-profile/CCH + time-dependent weights in 5c.
 - **Phase 6 — the show:** animation frame rate on a mid-range phone.

@@ -18,6 +18,7 @@
     "build:ch": "tsx scripts/build-ch.ts",
     "bench": "tsx scripts/bench.ts",
     "bench:algo": "tsx scripts/bench-algorithms.ts",
+    "bench:ch": "tsx scripts/bench-ch.ts",
     "fetch:basemap": "tsx scripts/fetch-basemap.ts",
     "rebuild": "npm run fetch && npm run build:graph && npm run build:crowding && npm run build:ch",
     "deploy": "node -e \"console.log('deploy: wired to a GitHub Pages Action in Phase 7')\""
