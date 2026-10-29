@@ -1,14 +1,15 @@
 {
-  "_comment": "Class-change crowding model and hours (Phase 3). FILL IN real Duke values. Weekends are off. Times are local 24-hour 'HH:MM'.",
-  "_comment_classEndTimes": "Weekday class end times (same every weekday) that each trigger a crowding spike.",
+  "_comment": "Class-change crowding + hours (Phase 3). Weekends are off. Times are local 24-hour 'HH:MM'. FILL IN the two Duke facts: classEndTimes and academicBuildings. The crowding numbers are sensible defaults you can tune. Run `npm run build:crowding` after editing.",
+  "_comment_classEndTimes": "Weekday class end times (same every weekday), each triggering a crowding spike. e.g. ['10:05','11:20','12:35']. EMPTY = crowding off.",
   "classEndTimes": [],
   "crowding": {
-    "_comment": "Edges within radiusMeters of an academic building get a time-dependent multiplier that ramps up, peaks just after each class end time, then decays.",
-    "windowMinutes": null,
-    "rampShape": null,
-    "peakMultiplier": null,
-    "radiusMeters": null
+    "_comment": "A multiplier on walking time near academic buildings: a bell that peaks peakLagS seconds AFTER each class end, spanning windowMinutes, reaching peakMultiplier at the peak, only within radiusMeters of a building.",
+    "windowMinutes": 10,
+    "rampShape": "cos",
+    "peakMultiplier": 1.8,
+    "radiusMeters": 120,
+    "peakLagS": 90
   },
-  "_comment_academicBuildings": "Names (matching OSM building names / the place index) of academic buildings that cause crowding.",
+  "_comment_academicBuildings": "Names (must match data/processed/places.json / the place index) of academic buildings that cause crowding. EMPTY = crowding off. e.g. ['Perkins Library','Gross Hall']. Unmatched names are reported by build:crowding.",
   "academicBuildings": []
 }

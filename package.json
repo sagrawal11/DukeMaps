@@ -14,10 +14,11 @@
     "typecheck": "tsc --noEmit",
     "fetch": "tsx scripts/fetch.ts",
     "build:graph": "tsx scripts/build-graph.ts",
+    "build:crowding": "tsx scripts/build-crowding.ts",
     "build:ch": "tsx scripts/build-ch.ts",
     "bench": "tsx scripts/bench.ts",
     "fetch:basemap": "tsx scripts/fetch-basemap.ts",
-    "rebuild": "npm run fetch && npm run build:graph && npm run build:ch",
+    "rebuild": "npm run fetch && npm run build:graph && npm run build:crowding && npm run build:ch",
     "deploy": "node -e \"console.log('deploy: wired to a GitHub Pages Action in Phase 7')\""
   },
   "devDependencies": {
