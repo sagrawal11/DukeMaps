@@ -5,9 +5,13 @@
 import type { Trace, TraceEvent } from '../algorithms/trace'
 
 // What the map needs to draw at a moment in the replay. Sets, so re-adding is idempotent and cheap.
+// Searches that work from both ends (bidirectional, CH, CCH) tag events with side 'f'/'b'; the backward
+// frontier gets its own sets so the map can colour the two halves differently and the meeting reads.
 export interface RenderState {
-  discovered: Set<number> // node ids pushed to the frontier
-  settled: Set<number> // node ids finalized
+  discovered: Set<number> // forward frontier (and the only frontier for single-ended searches)
+  settled: Set<number> // forward settled
+  discoveredB: Set<number> // backward frontier
+  settledB: Set<number> // backward settled
   relaxed: Set<string> // edge ids that improved a neighbour (the explored "tree")
   skipped: Set<string> // edge ids dropped for access (drawn faded, not red)
   current: number | null // the node just settled (highlighted)
@@ -15,7 +19,16 @@ export interface RenderState {
 }
 
 export function emptyState(): RenderState {
-  return { discovered: new Set(), settled: new Set(), relaxed: new Set(), skipped: new Set(), current: null, done: false }
+  return {
+    discovered: new Set(),
+    settled: new Set(),
+    discoveredB: new Set(),
+    settledB: new Set(),
+    relaxed: new Set(),
+    skipped: new Set(),
+    current: null,
+    done: false,
+  }
 }
 
 // Fold one event into the state. meet/shortcut carry no 6a visual (they arrive with bidirectional/CH
@@ -23,11 +36,11 @@ export function emptyState(): RenderState {
 export function applyEvent(s: RenderState, e: TraceEvent): void {
   switch (e.type) {
     case 'push':
-      if (e.node != null) s.discovered.add(e.node)
+      if (e.node != null) (e.side === 'b' ? s.discoveredB : s.discovered).add(e.node)
       break
     case 'settle':
       if (e.node != null) {
-        s.settled.add(e.node)
+        ;(e.side === 'b' ? s.settledB : s.settled).add(e.node)
         s.current = e.node
       }
       break

@@ -72,8 +72,10 @@ export function createOverlay(map: maplibregl.Map, graph: Graph): Overlay {
     if (state) {
       strokeEdges(state.skipped, 'rgba(154,165,177,0.30)', 1) // access-skipped: faded, not red
       strokeEdges(state.relaxed, 'rgba(46,111,214,0.22)', 1) // explored tree
-      fillNodes(state.settled, 'rgba(46,111,214,0.50)', 1.7) // settled
-      fillNodes(state.discovered, 'rgba(242,153,0,0.85)', 1.7, state.settled) // frontier (discovered, not yet settled)
+      fillNodes(state.settled, 'rgba(46,111,214,0.50)', 1.7) // forward settled (blue)
+      fillNodes(state.settledB, 'rgba(139,92,246,0.52)', 1.7) // backward settled (purple)
+      fillNodes(state.discovered, 'rgba(242,153,0,0.85)', 1.7, state.settled) // forward frontier (amber)
+      fillNodes(state.discoveredB, 'rgba(236,72,153,0.85)', 1.7, state.settledB) // backward frontier (pink)
       if (state.current != null) fillNodes([state.current], '#111827', 3.4) // the node being expanded
     }
     if (route) strokeEdges(route.edges, '#1b7a37', 4) // final route

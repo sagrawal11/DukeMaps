@@ -209,7 +209,7 @@ function setupUI(
       trace,
       (s) => {
         overlay.redraw(s)
-        statsEl.innerHTML = `settled <b>${s.settled.size}</b> · relaxed <b>${s.relaxed.size}</b>`
+        statsEl.innerHTML = `settled <b>${s.settled.size + s.settledB.size}</b> · relaxed <b>${s.relaxed.size}</b>`
       },
       { speed: Number(speedEl.value) || 1, reducedMotion: reduced, onDone },
     )

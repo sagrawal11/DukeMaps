@@ -46,4 +46,15 @@ describe('trace player — event folding', () => {
     applyEvent(s, { type: 'found', node: 5 })
     expect(s.done).toBe(true)
   })
+
+  it('routes backward-side events to the backward sets (bidirectional / CH / CCH)', () => {
+    const s = emptyState()
+    applyEvent(s, { type: 'push', node: 1, side: 'f' })
+    applyEvent(s, { type: 'push', node: 2, side: 'b' })
+    applyEvent(s, { type: 'settle', node: 2, side: 'b' })
+    expect([...s.discovered]).toEqual([1])
+    expect([...s.discoveredB]).toEqual([2])
+    expect([...s.settledB]).toEqual([2])
+    expect(s.settled.size).toBe(0)
+  })
 })
