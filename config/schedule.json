@@ -1,15 +1,24 @@
 {
-  "_comment": "Class-change crowding + hours (Phase 3). Weekends are off. Times are local 24-hour 'HH:MM'. FILL IN the two Duke facts: classEndTimes and academicBuildings. The crowding numbers are sensible defaults you can tune. Run `npm run build:crowding` after editing.",
-  "_comment_classEndTimes": "Weekday class end times (same every weekday), each triggering a crowding spike. e.g. ['10:05','11:20','12:35']. EMPTY = crowding off.",
-  "classEndTimes": [],
+  "_comment": "Class-change crowding + hours (Phase 3). PLACEHOLDER values for the first prototype — refine after it's built. Weekends off. Local 24-hour 'HH:MM'. Run `npm run build:crowding` after editing.",
+  "_comment_classEndTimes": "Provisional weekday class end times (from the user; ~same all 5 days). NOTE for later analysis: MWF has more classes than Tu/Th — not yet modeled (all weekdays treated the same).",
+  "classEndTimes": ["09:45", "11:20", "13:00", "14:40", "16:25"],
   "crowding": {
-    "_comment": "A multiplier on walking time near academic buildings: a bell that peaks peakLagS seconds AFTER each class end, spanning windowMinutes, reaching peakMultiplier at the peak, only within radiusMeters of a building.",
+    "_comment": "A multiplier on walking time near academic buildings: a bell peaking peakLagS seconds AFTER each class end, spanning windowMinutes, reaching peakMultiplier, within radiusMeters of a building. Defaults — tune after the prototype.",
     "windowMinutes": 10,
     "rampShape": "cos",
     "peakMultiplier": 1.8,
     "radiusMeters": 120,
     "peakLagS": 90
   },
-  "_comment_academicBuildings": "Names (must match data/processed/places.json / the place index) of academic buildings that cause crowding. EMPTY = crowding off. e.g. ['Perkins Library','Gross Hall']. Unmatched names are reported by build:crowding.",
-  "academicBuildings": []
+  "_comment_academicBuildings": "PLACEHOLDER: core West Campus main-quad academic buildings (the user said the main quad gets more traffic than Science Drive). Names match data/processed/places.json. Refine later — e.g. add high-traffic hubs like the Chapel / West Union, or Science Drive buildings at a lower weight.",
+  "academicBuildings": [
+    "Perkins Library",
+    "Bostock Library",
+    "Allen Building",
+    "Social Sciences Building",
+    "Languages Building",
+    "Old Chemistry Building",
+    "Flowers Building",
+    "Wilkinson Building"
+  ]
 }
