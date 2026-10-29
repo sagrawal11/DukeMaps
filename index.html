@@ -202,15 +202,31 @@
       @keyframes elim-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.55); } }
       .elim-cap { font-size: 11px; color: var(--muted); margin-top: 6px; line-height: 1.35; min-height: 2.7em; }
 
-      /* ── Clickable building icons ───────────────────────────────────────────────── */
+      /* ── Clickable building icons: white circular badges floating over the map ───── */
       .bicon {
-        width: 34px; height: 34px; padding: 0; border: 0; background: none; cursor: pointer;
-        display: block; line-height: 0; filter: drop-shadow(0 1px 1.5px rgba(26, 24, 23, 0.28));
+        border: 0; background: none; padding: 0; cursor: pointer;
+        display: flex; flex-direction: column; align-items: center; gap: 2px;
+      }
+      .bicon-circle {
+        width: 40px; height: 40px; border-radius: 50%; background: #fff; overflow: hidden;
+        display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 2px 6px rgba(26, 24, 23, 0.28), 0 0 0 1px rgba(26, 24, 23, 0.06);
         transition: transform 0.12s ease;
       }
-      .bicon img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; display: block; }
-      .bicon:hover { transform: scale(1.22); z-index: 5; }
-      .bicon:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+      .bicon-circle img { width: 78%; height: 78%; object-fit: contain; pointer-events: none; display: block; }
+      .bicon-label {
+        font: 600 10px var(--sans); color: var(--ink); white-space: nowrap; pointer-events: none;
+        max-width: 110px; overflow: hidden; text-overflow: ellipsis;
+        text-shadow: 0 0 2px #fff, 0 0 2px #fff, 0 0 3px #fff; /* legible over the map */
+      }
+      /* Importance → size: landmarks bigger, minor buildings smaller + muted. */
+      .bicon-t1 .bicon-circle { width: 48px; height: 48px; }
+      .bicon-t1 .bicon-label { font-size: 11px; }
+      .bicon-t3 .bicon-circle { width: 34px; height: 34px; }
+      .bicon-t3 .bicon-label { font-size: 9px; color: var(--muted); }
+      .bicon:hover { z-index: 5; }
+      .bicon:hover .bicon-circle { transform: scale(1.15); }
+      .bicon:focus-visible .bicon-circle { outline: 2px solid var(--accent); outline-offset: 2px; }
       .bicon-hidden { display: none; }
 
       /* ── Mobile: the panel becomes a bottom sheet ──────────────────────────────── */

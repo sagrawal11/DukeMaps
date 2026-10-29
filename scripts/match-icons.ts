@@ -34,8 +34,17 @@ const jaccard = (a: Set<string>, b: Set<string>): number => {
 }
 
 const P = places.map((p) => ({ p, n: norm(p.name), t: new Set(sigToks(p.name)) }))
+const placeByName = new Map(P.map((x) => [x.n, x.p]))
 
-type Conf = 'exact' | 'contains' | 'weak' | 'none'
+// Hand-curated overrides (config/building-overrides.json), keyed by inventory id: nickname, importance
+// tier, and coordinate accepts (`place` = adopt that OSM building's coords; or explicit lat/lon). `_readme` ignored.
+interface Override { nick?: string; tier?: number; place?: string; lat?: number; lon?: number }
+const overrides = JSON.parse(readFileSync(resolve(ROOT, 'config/building-overrides.json'), 'utf8')) as Record<string, Override>
+// Fallback label for buildings without a curated nickname: drop the trailing generic word + any "(...)"/"/…".
+const deriveNick = (name: string): string =>
+  name.split('/')[0].split('(')[0].trim().replace(/\s+(Building|Hall|Residence Hall|Quad|Center|Centre)$/i, '').trim() || name
+
+type Conf = 'exact' | 'contains' | 'weak' | 'none' | 'override'
 interface Hit { conf: Conf; place: { name: string; lat: number; lon: number } | null; score: number }
 const at = (x: { p: Place }): { name: string; lat: number; lon: number } => ({ name: x.p.name, lat: x.p.lat, lon: x.p.lon })
 
@@ -71,6 +80,8 @@ interface IconEntry {
   name: string
   file: string
   area: string
+  nickname: string // short label shown under the icon (curated in building-overrides.json, else derived)
+  tier: number // importance for the zoom reveal: 1 shows first, 3 last (default)
   lat: number | null // null = not placed; fill it in (coords from you) to show the icon
   lon: number | null
   place: string | null // the OSM place the coordinates came from
@@ -78,14 +89,24 @@ interface IconEntry {
   suggestion: { name: string; lat: number; lon: number; score: number } | null // for weak/none — accept by copying into lat/lon
 }
 
+const warnings: string[] = []
 const out: IconEntry[] = rows.map((r) => {
+  const ov = overrides[r.id] ?? {}
+  const base = { id: r.id, name: r.name, file: r.file, area: r.area, nickname: ov.nick ?? deriveNick(r.name), tier: ov.tier ?? 3 }
+
+  // Coordinate priority: explicit override lat/lon > place-accept (adopt an OSM building's coords) > auto name match.
+  if (typeof ov.lat === 'number' && typeof ov.lon === 'number') {
+    return { ...base, lat: ov.lat, lon: ov.lon, place: ov.place ?? null, confidence: 'override' as Conf, suggestion: null }
+  }
+  if (ov.place) {
+    const p = placeByName.get(norm(ov.place))
+    if (p) return { ...base, lat: p.lat, lon: p.lon, place: p.name, confidence: 'override' as Conf, suggestion: null }
+    warnings.push(`${r.name}: override place "${ov.place}" not found in places.json`)
+  }
   const m = match(r.name)
   const placed = (m.conf === 'exact' || m.conf === 'contains') && m.place !== null
   return {
-    id: r.id,
-    name: r.name,
-    file: r.file,
-    area: r.area,
+    ...base,
     lat: placed ? m.place!.lat : null,
     lon: placed ? m.place!.lon : null,
     place: placed ? m.place!.name : null,
@@ -99,6 +120,10 @@ writeFileSync(resolve(ROOT, 'config/building-icons.json'), JSON.stringify(out, n
 const counts = out.reduce<Record<string, number>>((a, e) => ((a[e.confidence] = (a[e.confidence] ?? 0) + 1), a), {})
 const placed = out.filter((e) => e.lat != null).length
 console.log(`icons ${out.length} | placed ${placed} | ${JSON.stringify(counts)}`)
+if (warnings.length) {
+  console.log('\nWARNINGS (override place not found — fix building-overrides.json):')
+  for (const w of warnings) console.log(`  ${w}`)
+}
 console.log('\nNEEDS REVIEW (no confident coordinate — edit config/building-icons.json):')
 for (const e of out.filter((e) => e.lat == null)) {
   console.log(`  ${e.name}${e.suggestion ? `  → suggest "${e.suggestion.name}" (${e.suggestion.score})` : '  (no suggestion)'}`)
