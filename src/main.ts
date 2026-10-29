@@ -1,8 +1,10 @@
-// DukeMaps app — Phase 4: search two campus places with fuzzy autocomplete, or tap anywhere to
-// drop a pin; each endpoint snaps to the nearest point on the walk network. Routing and the
-// algorithm "show" arrive in Phases 5–6. The graph is drawn muted underneath so you can watch each
-// pin land on a path. Data (graph + places) is fetched at runtime, not bundled, so the map paints
-// immediately and a visible status covers the loading/error states.
+// DukeMaps app — the show. Search two campus places (fuzzy autocomplete) or tap to drop a pin; each
+// endpoint snaps to the nearest point on the walk network. With both pinned, the seven hand-written
+// searches replay their exploration over the map in turn, then draw their route. Two live route
+// options — "Leave at" (class-change crowding) and "Step-free" — rebuild the cost metric and
+// re-customize the CCH on the fly (the Phase 5c payoff), while prebuilt CH is disabled under a
+// changed metric because its shortcuts bake the base weights in. Data is fetched at runtime, not
+// bundled, so the map paints immediately and a visible status covers the loading/error states.
 import * as maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { Protocol } from 'pmtiles'
@@ -11,13 +13,16 @@ import type { Graph, GraphNode, Place } from './graph/types'
 import { graphToGeoJSON } from './map/render'
 import { buildPlaceIndex, type PlaceIndex } from './places/search'
 import { buildEdgeIndex, type EdgeIndex } from './spatial/snap'
-import { buildRoutingGraph, makeWeight } from './algorithms/routing'
+import { buildRoutingGraph, makeWeight, type WeightFn } from './algorithms/routing'
 import { customize, type CCHStructure } from './algorithms/cch'
 import type { CHData } from './algorithms/ch'
+import { dijkstra } from './algorithms/dijkstra'
+import { crowdingMultiplier, hmsToSec, type Schedule } from './graph/time'
 import { createOverlay } from './map/overlay'
 import { makePlayer, type Player } from './anim/player'
 import { ALGORITHMS, runAlgo, type AlgoDef } from './anim/algos'
 import aliasesConfig from '../config/aliases.json'
+import scheduleConfig from '../config/schedule.json'
 
 const statusEl = document.createElement('div')
 statusEl.className = 'legend'
@@ -97,10 +102,34 @@ function setupUI(
   edgeIndex: EdgeIndex,
   chData: CHData | null,
   cchStructure: CCHStructure | null,
+  crowdDist: Record<string, number>,
 ): void {
   const rg = buildRoutingGraph(graph) // the algorithms' view of the graph, built once
-  const weight = makeWeight(rg) // base walking-time metric (step-free + "Leave at" come in 6c)
-  const cchData = cchStructure ? customize(cchStructure, rg, weight) : null // customize the CCH once (base metric)
+  const schedule = scheduleConfig as unknown as Schedule // class-change crowding model (Phase 3)
+  const distToAcademicM = (id: string): number | null => crowdDist[id] ?? null // per-edge crowding input
+
+  // Route-option state (persisted). "Leave at" drives time-dependent crowding; "step-free" drops
+  // stairs. Changing either rebuilds the metric and re-customizes the CCH — the Phase 5c payoff.
+  const nowHHMM = (): string => {
+    const d = new Date()
+    return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+  }
+  const metricOpts = {
+    stepFree: localStorage.getItem('dukemaps.stepFree') === '1',
+    leaveAt: localStorage.getItem('dukemaps.leaveAt') || nowHHMM(),
+  }
+  const buildWeight = (): WeightFn =>
+    makeWeight(rg, {
+      stepFreeOnly: metricOpts.stepFree,
+      time: { departureSecOfDay: hmsToSec(metricOpts.leaveAt), isWeekend: false, schedule, distToAcademicM },
+    })
+  // Is a class-change bump active at the chosen departure? (dist 0 ≤ radius, so this reports the time
+  // bump alone.) The base metric = no step-free filter AND off-peak — only then is prebuilt CH valid.
+  const isPeak = (): boolean => crowdingMultiplier(0, { secOfDay: hmsToSec(metricOpts.leaveAt), isWeekend: false }, schedule) > 1
+  const isBaseMetric = (): boolean => !metricOpts.stepFree && !isPeak()
+
+  let weight = buildWeight() // reassigned whenever the options change
+  let cchData: CHData | null = null // populated by applyMetric() below (one customize at startup)
   const overlay = createOverlay(map, graph) // canvas layer the animation draws on
   let player: Player | null = null
 
@@ -110,6 +139,11 @@ function setupUI(
     '<div class="brand">DukeMaps</div>' +
     '<div class="field"><input id="from" placeholder="From — search or tap the map" autocomplete="off" /><div class="ac" id="ac-from"></div></div>' +
     '<div class="field"><input id="to" placeholder="To — search or tap the map" autocomplete="off" /><div class="ac" id="ac-to"></div></div>' +
+    '<div class="options">' +
+    '<label class="leaveat">Leave at <input type="time" id="leaveat" /></label>' +
+    '<button type="button" class="opt" id="stepfree" aria-pressed="false">Step-free</button>' +
+    '</div>' +
+    '<div class="metric" id="metric"></div>' +
     '<div class="info" id="info"></div>' +
     '<div class="show" id="show" hidden>' +
     '<div class="chips" id="chips"></div>' +
@@ -122,6 +156,7 @@ function setupUI(
     '</div>' +
     '<div class="stats" id="stats"></div>' +
     '<div class="result" id="result"></div>' +
+    '<div class="whatif" id="whatif"></div>' +
     '<div class="compare" id="compare"></div>' +
     '</div>'
   document.body.appendChild(panel)
@@ -132,6 +167,10 @@ function setupUI(
   const statsEl = panel.querySelector('#stats') as HTMLDivElement
   const resultEl = panel.querySelector('#result') as HTMLDivElement
   const compareEl = panel.querySelector('#compare') as HTMLDivElement
+  const whatifEl = panel.querySelector('#whatif') as HTMLDivElement
+  const metricEl = panel.querySelector('#metric') as HTMLDivElement
+  const leaveatEl = panel.querySelector('#leaveat') as HTMLInputElement
+  const stepfreeBtn = panel.querySelector('#stepfree') as HTMLButtonElement
   const playAllBtn = panel.querySelector('#playall') as HTMLButtonElement
   const playBtn = panel.querySelector('#playpause') as HTMLButtonElement
   const skipBtn = panel.querySelector('#skip') as HTMLButtonElement
@@ -155,9 +194,13 @@ function setupUI(
   const fmtDist = (m: number): string => (m < 950 ? `${Math.round(m)} m` : `${(m / 1000).toFixed(2)} km`)
 
   // The seven algorithms to walk through. CH/CCH need their prebuilt data; drop them if it didn't load.
-  const algos: AlgoDef[] = ALGORITHMS.filter((a) => (a.key !== 'ch' && a.key !== 'cch') || !!(chData && cchData))
+  const algos: AlgoDef[] = ALGORITHMS.filter((a) => (a.key !== 'ch' && a.key !== 'cch') || !!(chData && cchStructure))
   chipsEl.innerHTML = algos.map((a, i) => `<button type="button" class="chip" data-i="${i}">${esc(a.name)}</button>`).join('')
   const chipEls = Array.from(chipsEl.querySelectorAll('.chip')) as HTMLButtonElement[]
+  const chChipIdx = algos.findIndex((a) => a.key === 'ch')
+  leaveatEl.value = metricOpts.leaveAt
+  stepfreeBtn.classList.toggle('on', metricOpts.stepFree)
+  stepfreeBtn.setAttribute('aria-pressed', String(metricOpts.stepFree))
 
   let curIdx = 0
   let playAll = false
@@ -181,6 +224,13 @@ function setupUI(
   // Run one algorithm, animate its exploration, draw its route, record its stats.
   const playAlgo = (i: number): void => {
     if (!chosen.from || !chosen.to || i < 0 || i >= algos.length) return
+    // CH's shortcuts bake the base metric in — never animate/draw it under a changed metric (its route
+    // can be stale or, under step-free, unsafe). Skip it in the sequence; the chip is disabled too.
+    if (algos[i].key === 'ch' && !isBaseMetric()) {
+      if (playAll && i + 1 < algos.length) playAlgo(i + 1)
+      else playAll = false
+      return
+    }
     window.clearTimeout(advanceTimer)
     player?.dispose()
     overlay.clear()
@@ -217,17 +267,108 @@ function setupUI(
     player.play()
   }
 
+  // The least-walking-time route under an alternate metric, for the "What if?" counterfactual. Always
+  // Dijkstra (correct under any metric), so the comparison is apples-to-apples regardless of which
+  // algorithm is on screen.
+  const renderWhatIf = (): void => {
+    if (!chosen.from || !chosen.to) {
+      whatifEl.textContent = ''
+      return
+    }
+    const s = chosen.from.node.id
+    const t = chosen.to.node.id
+    const cur = dijkstra(rg, s, t, { weight }).route
+    if (!cur) {
+      whatifEl.textContent = ''
+      return
+    }
+    // Counterfactual: step-free on → "what does accessibility cost?" (vs stairs allowed, same time);
+    // otherwise → "what does this departure's crowding cost?" (vs the off-peak base metric).
+    const altWeight = metricOpts.stepFree
+      ? makeWeight(rg, { time: { departureSecOfDay: hmsToSec(metricOpts.leaveAt), isWeekend: false, schedule, distToAcademicM } })
+      : makeWeight(rg)
+    const alt = dijkstra(rg, s, t, { weight: altWeight }).route
+    if (!alt) {
+      whatifEl.textContent = ''
+      return
+    }
+    const deltaMin = Math.round((cur.costS - alt.costS) / 60)
+    if (metricOpts.stepFree) {
+      whatifEl.innerHTML =
+        deltaMin > 0
+          ? `<b>What if?</b> Step-free adds <b>+${deltaMin} min</b> here — the shortest walk uses stairs.`
+          : `<b>What if?</b> Step-free is free here — no stairs on the shortest walk.`
+    } else {
+      whatifEl.innerHTML =
+        deltaMin > 0
+          ? `<b>What if?</b> Class-change crowding adds <b>+${deltaMin} min</b> vs off-peak.`
+          : `<b>What if?</b> No class-change crowding at this departure time.`
+    }
+  }
+
+  // CH can't react to a changed metric, so if the current selection is a now-disabled CH, fall back to
+  // CCH (which re-customizes) — or Dijkstra if the hierarchies didn't load.
+  const runnableIdx = (i: number): number => {
+    if (algos[i]?.key === 'ch' && !isBaseMetric()) {
+      const cch = algos.findIndex((a) => a.key === 'cch')
+      return cch >= 0 ? cch : algos.findIndex((a) => a.key === 'dijkstra')
+    }
+    return i
+  }
+
+  // Rebuild the cost metric from the current options and re-customize the CCH for it — the Phase 5c
+  // payoff: change the weights, re-customize cheaply, never re-contract. Prebuilt CH bakes the base
+  // metric in, so its chip is disabled whenever the metric isn't base. Persists the options locally.
+  const applyMetric = (opt: { rerun?: boolean } = {}): void => {
+    localStorage.setItem('dukemaps.stepFree', metricOpts.stepFree ? '1' : '0')
+    localStorage.setItem('dukemaps.leaveAt', metricOpts.leaveAt)
+    weight = buildWeight()
+    let recustMs = 0
+    if (cchStructure) {
+      const t0 = performance.now()
+      cchData = customize(cchStructure, rg, weight)
+      recustMs = performance.now() - t0
+    }
+    if (isBaseMetric()) {
+      metricEl.innerHTML = '<span class="dim">Metric: base walking time</span>'
+    } else {
+      const bits: string[] = []
+      if (metricOpts.stepFree) bits.push('step-free')
+      if (isPeak()) bits.push('class-change crowding')
+      const recust = cchStructure
+        ? ` · <b>CCH re-customized in ${recustMs.toFixed(1)} ms</b> <span class="dim">(CH would need a full rebuild)</span>`
+        : ''
+      metricEl.innerHTML = `Metric: ${bits.join(' + ')}${recust}`
+    }
+    if (chChipIdx >= 0) {
+      const dis = !isBaseMetric()
+      const chip = chipEls[chChipIdx]
+      chip.classList.toggle('disabled', dis)
+      chip.disabled = dis
+      chip.title = dis
+        ? 'Contraction Hierarchies bake the weights into their shortcuts — a changed metric needs a full rebuild. Customizable CH re-customizes instead.'
+        : ''
+    }
+    if (opt.rerun && chosen.from && chosen.to) {
+      results.clear()
+      renderCompare()
+      renderWhatIf()
+      playAlgo(runnableIdx(curIdx))
+    }
+  }
+
   // Both pinned (or "Play all") → walk through all seven in order, accumulating the comparison.
   const startShow = (): void => {
     results.clear()
     renderCompare()
+    renderWhatIf()
     playAll = true
     playAlgo(0)
   }
 
   chipsEl.addEventListener('click', (e) => {
     const btn = (e.target as HTMLElement).closest('.chip') as HTMLButtonElement | null
-    if (!btn) return
+    if (!btn || btn.disabled) return
     playAll = false
     window.clearTimeout(advanceTimer)
     playAlgo(Number(btn.dataset.i))
@@ -246,6 +387,16 @@ function setupUI(
   })
   skipBtn.addEventListener('click', () => player?.skipToResult())
   speedEl.addEventListener('input', () => player?.setSpeed(Number(speedEl.value) || 1))
+  leaveatEl.addEventListener('change', () => {
+    metricOpts.leaveAt = leaveatEl.value || nowHHMM()
+    applyMetric({ rerun: true })
+  })
+  stepfreeBtn.addEventListener('click', () => {
+    metricOpts.stepFree = !metricOpts.stepFree
+    stepfreeBtn.classList.toggle('on', metricOpts.stepFree)
+    stepfreeBtn.setAttribute('aria-pressed', String(metricOpts.stepFree))
+    applyMetric({ rerun: true })
+  })
 
   const setEndpoint = (w: Which, lonLat: [number, number], label: string): void => {
     const snap = edgeIndex.snap(lonLat[0], lonLat[1])
@@ -267,6 +418,7 @@ function setupUI(
     player?.dispose()
     player = null
     window.clearTimeout(advanceTimer)
+    whatifEl.textContent = ''
   }
 
   const wireField = (w: Which): void => {
@@ -324,6 +476,7 @@ function setupUI(
   })
   map.getCanvas().style.cursor = 'crosshair'
 
+  applyMetric() // set the metric line + CH-chip state and do the startup CCH customize
   renderInfo()
   statusEl.remove() // hand the screen over to the panel
 }
@@ -348,7 +501,8 @@ map.on('load', () => {
     loadJSON<Place[]>('data/places.json'),
     loadJSON<CHData>('data/ch.json'), // prebuilt contraction hierarchy (base metric)
     loadJSON<CCHStructure>('data/cch.json'), // metric-independent CCH structure (customized at runtime)
-  ]).then(([graph, places, chData, cchStructure]) => {
+    loadJSON<{ dist: Record<string, number> }>('data/crowding.json'), // per-edge distance to academic buildings
+  ]).then(([graph, places, chData, cchStructure, crowding]) => {
     if (!graph) {
       setStatus('<b>DukeMaps</b><div style="color:#b00">Could not load the graph. Run <code>npm run build:graph</code>.</div>')
       return
@@ -357,6 +511,6 @@ map.on('load', () => {
     const aliases = (aliasesConfig as { aliases?: Record<string, string> }).aliases ?? {}
     const placeIndex = buildPlaceIndex(places ?? [], aliases)
     const edgeIndex = buildEdgeIndex(graph)
-    setupUI(map, graph, placeIndex, edgeIndex, chData, cchStructure)
+    setupUI(map, graph, placeIndex, edgeIndex, chData, cchStructure, crowding?.dist ?? {})
   })
 })

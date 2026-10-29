@@ -43,7 +43,7 @@ command that produced it. Keep this honest — measured, not estimated.
 | CCH customization (re-weight the WHOLE hierarchy per metric) | ~22–41 ms/metric (base / step-free / crowding snapshot) | `npm run build:cch` / `bench:cch` | 2026-10-29 |
 | CCH shortcuts vs CH | 45,240 vs 11,110 (**4.1×** — the metric-independence trade) | `npm run bench:cch` | 2026-10-29 |
 | CCH correctness (3 metrics) | CCH == Dijkstra on every sampled pair; step-free routes stay step-free inside shortcuts | `npm test` / `build:cch` | 2026-10-29 |
-| Unit tests (graph + editor + time + spatial + algorithms + CH + CCH) | 96 passing | `npm test` | 2026-10-29 |
+| Unit tests (graph + editor + time + spatial + algorithms + CH + CCH + metric reaction) | 102 passing | `npm test` | 2026-10-29 |
 
 Phase 2 (the editor) is complete: the dev-only editor edits the base graph and autosaves a
 replayable edit log (`data/my_edits.json`); `npm run build:graph` replays it, then prunes to
@@ -162,8 +162,18 @@ Takeaways for the article:
   independence — and at campus scale it's cheap (a 0.35 MB structure). Per the project's framing, the
   point is the mechanism, not shaving query time.
 
+Phase 6c (route options — the CCH payoff, wired live): the show now exposes a **"Leave at"** time and a
+**Step-free** toggle. Changing either rebuilds the cost metric and **re-customizes the CCH in the
+browser** (order ~22–41 ms, per the 5c customization number; the exact on-device value is a Phase-6
+capture below), then re-weights every search — while prebuilt **CH is disabled** under a changed metric
+because its shortcuts bake the base weights in (its route would be stale, or under step-free unsafe).
+`tests/metric.test.ts` pins the guarantee the UI leans on: re-customizing the one structure actually
+*reacts* — it reroutes around a crowded corridor / around stairs, matches Dijkstra under the new metric,
+and stays access-safe through unpacked shortcuts. Concrete reroute evidence on the real graph already
+exists via `scripts/find-presets.ts` (21 pairs whose best route changes at class change).
+
 ## What to capture
 - **Phase 4 — spatial index:** captured above.
 - **Phase 5 — algorithms:** captured above (5a).
 - **Phase 5 — contraction hierarchies:** captured above — plain CH (5b) + Customizable CH & nested dissection (5c, mechanism-focused).
-- **Phase 6 — the show:** animation frame rate on a mid-range phone.
+- **Phase 6 — the show:** live CCH re-customization time in the browser (on-device) + animation frame rate on a mid-range phone.
