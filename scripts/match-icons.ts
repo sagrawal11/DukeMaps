@@ -38,7 +38,7 @@ const placeByName = new Map(P.map((x) => [x.n, x.p]))
 
 // Hand-curated overrides (config/building-overrides.json), keyed by inventory id: nickname, importance
 // tier, and coordinate accepts (`place` = adopt that OSM building's coords; or explicit lat/lon). `_readme` ignored.
-interface Override { nick?: string; tier?: number; place?: string; lat?: number; lon?: number }
+interface Override { nick?: string; tier?: number; place?: string; lat?: number; lon?: number; skip?: boolean }
 const overrides = JSON.parse(readFileSync(resolve(ROOT, 'config/building-overrides.json'), 'utf8')) as Record<string, Override>
 // Fallback label for buildings without a curated nickname: drop the trailing generic word + any "(...)"/"/…".
 const deriveNick = (name: string): string =>
@@ -93,6 +93,9 @@ const warnings: string[] = []
 const out: IconEntry[] = rows.map((r) => {
   const ov = overrides[r.id] ?? {}
   const base = { id: r.id, name: r.name, file: r.file, area: r.area, nickname: ov.nick ?? deriveNick(r.name), tier: ov.tier ?? 3 }
+
+  // skip = suppress a wrong auto-match until a real coordinate is supplied.
+  if (ov.skip) return { ...base, lat: null, lon: null, place: null, confidence: 'none' as Conf, suggestion: null }
 
   // Coordinate priority: explicit override lat/lon > place-accept (adopt an OSM building's coords) > auto name match.
   if (typeof ov.lat === 'number' && typeof ov.lon === 'number') {

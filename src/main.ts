@@ -160,6 +160,7 @@ function setupUI(
     '<div class="opt-row">' +
     '<button type="button" class="opt" id="stepfree" aria-pressed="false">Step-free</button>' +
     '<button type="button" class="opt" id="instant" aria-pressed="false">Instant</button>' +
+    '<button type="button" class="opt" id="pickcoords" aria-pressed="false" hidden>📍 Coords</button>' +
     '</div>' +
     '</div>' +
     '<div class="metric" id="metric"></div>' +
@@ -584,9 +585,29 @@ function setupUI(
   }
   createBuildingIcons(map, buildingIconsConfig as BuildingIcon[], pickBuilding)
 
+  // Dev-only coordinate picker: when on, a map click copies "lat, lon" instead of routing — so exact
+  // building positions can be handed back for config/building-overrides.json. Hidden in the built site.
+  let pickCoords = false
+  const pickBtn = panel.querySelector('#pickcoords') as HTMLButtonElement
+  if (import.meta.env.DEV) {
+    pickBtn.hidden = false
+    pickBtn.addEventListener('click', () => {
+      pickCoords = !pickCoords
+      pickBtn.classList.toggle('on', pickCoords)
+      pickBtn.setAttribute('aria-pressed', String(pickCoords))
+      map.getCanvas().style.cursor = pickCoords ? 'copy' : 'crosshair'
+    })
+  }
+
   // Tap fills From, then To; a tap when both are set starts a fresh pair. The pin is labelled with the
   // building you're nearest (not "Dropped pin").
   map.on('click', (e) => {
+    if (pickCoords) {
+      const c = `${e.lngLat.lat.toFixed(6)}, ${e.lngLat.lng.toFixed(6)}`
+      void navigator.clipboard?.writeText(c)
+      flashNotice(`📍 ${c} — copied`)
+      return
+    }
     const lonLat: [number, number] = [e.lngLat.lng, e.lngLat.lat]
     if (chosen.from && chosen.to) {
       clearEndpoint('from')
