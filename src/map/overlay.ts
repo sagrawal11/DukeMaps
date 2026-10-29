@@ -67,41 +67,11 @@ export function createOverlay(map: maplibregl.Map, graph: Graph): Overlay {
     ctx.fill()
   }
 
-  // CH/CCH "leaps": straight lines between a relaxed up-arc's endpoints (a shortcut has no polyline).
-  // `want` selects shortcut vs original arcs so each gets its own batched stroke + dash.
-  const strokeArcs = (
-    leaps: Iterable<{ from: number; to: number; shortcut: boolean }>,
-    want: boolean,
-    color: string,
-    width: number,
-    dash: number[],
-  ): void => {
-    ctx.beginPath()
-    for (const l of leaps) {
-      if (l.shortcut !== want) continue
-      const a = nodeById.get(l.from)
-      const b = nodeById.get(l.to)
-      if (!a || !b) continue
-      const [x1, y1] = px(a.lon, a.lat)
-      const [x2, y2] = px(b.lon, b.lat)
-      ctx.moveTo(x1, y1)
-      ctx.lineTo(x2, y2)
-    }
-    ctx.strokeStyle = color
-    ctx.lineWidth = width * dpr
-    ctx.lineCap = 'round'
-    ctx.setLineDash(dash.map((d) => d * dpr))
-    ctx.stroke()
-    ctx.setLineDash([])
-  }
-
   const draw = (): void => {
     ctx.clearRect(0, 0, canvas.width, canvas.height)
     if (state) {
       strokeEdges(state.skipped, 'rgba(154,165,177,0.30)', 1) // access-skipped: faded, not red
       strokeEdges(state.relaxed, 'rgba(46,111,214,0.22)', 1) // explored tree
-      strokeArcs(state.leaps.values(), false, 'rgba(100,116,139,0.30)', 1, []) // CH/CCH original up-arcs: faint
-      strokeArcs(state.leaps.values(), true, 'rgba(13,148,136,0.70)', 1.6, [5, 4]) // shortcut leaps: dashed teal
       fillNodes(state.settled, 'rgba(46,111,214,0.50)', 1.7) // forward settled (blue)
       fillNodes(state.settledB, 'rgba(139,92,246,0.52)', 1.7) // backward settled (purple)
       fillNodes(state.discovered, 'rgba(242,153,0,0.85)', 1.7, state.settled) // forward frontier (amber)

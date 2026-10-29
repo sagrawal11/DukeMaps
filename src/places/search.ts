@@ -3,6 +3,7 @@
 // library isn't banned, but this matcher is short, so we hand-roll it and keep the dep count at
 // zero. Pure (data in, ranked places out) so it's unit-tested without any fetch/DOM.
 import type { Place } from '../graph/types'
+import { haversineM } from '../graph/geo'
 
 // lowercase, strip accents, collapse every run of non-alphanumerics to a single space.
 export function normalize(s: string): string {
@@ -45,6 +46,7 @@ interface Entry {
 export interface PlaceIndex {
   search(query: string, limit?: number): Place[]
   byId(id: string): Place | undefined
+  nearest(lat: number, lon: number, maxM?: number): Place | null // nearest building centroid within maxM
 }
 
 // aliases: nickname -> place id OR exact building name (config/aliases.json). Unresolved entries —
@@ -63,6 +65,20 @@ export function buildPlaceIndex(places: Place[], aliases: Record<string, string>
 
   return {
     byId: (id) => byId.get(id),
+    // Nearest building to a tapped point (linear scan — 313 places, trivial). Labels a dropped pin with
+    // the building you're at, instead of the snapped path location.
+    nearest(lat, lon, maxM = 70) {
+      let best: Place | null = null
+      let bestD = Infinity
+      for (const p of places) {
+        const d = haversineM(lat, lon, p.lat, p.lon)
+        if (d < bestD) {
+          bestD = d
+          best = p
+        }
+      }
+      return best && bestD <= maxM ? best : null
+    },
     search(query, limit = 8) {
       const q = normalize(query)
       if (!q) return []

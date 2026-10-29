@@ -1,11 +1,9 @@
-// DukeMaps app — the show. Search two campus places (fuzzy autocomplete) or tap to drop a pin; each
-// endpoint snaps to the nearest point on the walk network. With both pinned, the seven hand-written
-// searches replay their exploration over the map in turn, then draw their route and its step-by-step
-// directions. Two live route options — "Leave at" (class-change crowding) and "Step-free" — rebuild
-// the cost metric and re-customize the CCH on the fly (the Phase 5c payoff); prebuilt CH is disabled
-// under a changed metric because its shortcuts bake the base weights in. An "Instant" toggle skips the
-// show for people who just want directions. Data is fetched at runtime, not bundled, so the map paints
-// immediately and a visible status covers the loading/error states.
+// DukeMaps app — the show. Search two campus places (fuzzy autocomplete) or tap to drop a pin (which
+// is labelled with the building you're nearest). With both pinned, the seven hand-written searches
+// replay their exploration over the map in turn, then draw their route. Secondary controls live in an
+// "Options" disclosure to keep the panel calm: "Leave now" (base metric — Contraction Hierarchies work)
+// vs "Leave at" a time (class-change crowding, which re-customizes the CCH live), plus Step-free and an
+// Instant mode. Data is fetched at runtime, not bundled, so the map paints immediately.
 import * as maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { Protocol } from 'pmtiles'
@@ -16,11 +14,9 @@ import { buildEdgeIndex, type EdgeIndex } from './spatial/snap'
 import { buildRoutingGraph, makeWeight, type WeightFn } from './algorithms/routing'
 import { customize, type CCHStructure } from './algorithms/cch'
 import type { CHData } from './algorithms/ch'
-import type { RouteResult } from './algorithms/trace'
 import { dijkstra } from './algorithms/dijkstra'
 import { crowdingMultiplier, hmsToSec, type Schedule } from './graph/time'
 import { createOverlay } from './map/overlay'
-import { makeDirections } from './directions'
 import { makePlayer, type Player } from './anim/player'
 import { ALGORITHMS, runAlgo, type AlgoDef } from './anim/algos'
 import aliasesConfig from '../config/aliases.json'
@@ -103,8 +99,6 @@ function setupUI(
   const schedule = scheduleConfig as unknown as Schedule // class-change crowding model (Phase 3)
   const distToAcademicM = (id: string): number | null => crowdDist[id] ?? null // per-edge crowding input
 
-  // Route-option state (persisted). "Leave at" drives time-dependent crowding; "step-free" drops
-  // stairs. Changing either rebuilds the metric and re-customizes the CCH — the Phase 5c payoff.
   const nowHHMM = (): string => {
     const d = new Date()
     return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
@@ -113,28 +107,30 @@ function setupUI(
     stepFree: localStorage.getItem('dukemaps.stepFree') === '1',
     leaveAt: localStorage.getItem('dukemaps.leaveAt') || nowHHMM(),
   }
+  // "Leave now" (default) = plain base metric, so Contraction Hierarchies stay valid. "Leave at" a time
+  // opts into class-change crowding (which re-customizes the CCH live and greys prebuilt CH when peak).
+  let leaveNow = localStorage.getItem('dukemaps.leaveNow') == null ? true : localStorage.getItem('dukemaps.leaveNow') === '1'
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  // "Instant" = skip the walk-through, just draw the optimal route + directions. Remembered locally;
-  // defaults on when the visitor prefers reduced motion.
+  // "Instant" = skip the walk-through, just draw the optimal route. Remembered; defaults on under reduced motion.
   let instant = ((): boolean => {
     const s = localStorage.getItem('dukemaps.instant')
     return s == null ? prefersReducedMotion : s === '1'
   })()
 
   const buildWeight = (): WeightFn =>
-    makeWeight(rg, {
-      stepFreeOnly: metricOpts.stepFree,
-      time: { departureSecOfDay: hmsToSec(metricOpts.leaveAt), isWeekend: false, schedule, distToAcademicM },
-    })
-  // Is a class-change bump active at the chosen departure? (dist 0 ≤ radius, so this reports the time
-  // bump alone.) The base metric = no step-free filter AND off-peak — only then is prebuilt CH valid.
-  const isPeak = (): boolean => crowdingMultiplier(0, { secOfDay: hmsToSec(metricOpts.leaveAt), isWeekend: false }, schedule) > 1
+    leaveNow
+      ? makeWeight(rg, { stepFreeOnly: metricOpts.stepFree })
+      : makeWeight(rg, {
+          stepFreeOnly: metricOpts.stepFree,
+          time: { departureSecOfDay: hmsToSec(metricOpts.leaveAt), isWeekend: false, schedule, distToAcademicM },
+        })
+  // A class-change bump is only possible when you've opted into a specific departure time.
+  const isPeak = (): boolean => !leaveNow && crowdingMultiplier(0, { secOfDay: hmsToSec(metricOpts.leaveAt), isWeekend: false }, schedule) > 1
   const isBaseMetric = (): boolean => !metricOpts.stepFree && !isPeak()
 
   let weight = buildWeight() // reassigned whenever the options change
   let cchData: CHData | null = null // populated by applyMetric() below (one customize at startup)
   const overlay = createOverlay(map, graph) // canvas layer the animation draws on
-  const toDirections = makeDirections(graph) // route -> turn-by-turn steps (built once)
   let player: Player | null = null
 
   const panel = document.createElement('div')
@@ -144,10 +140,19 @@ function setupUI(
     '<div class="brand">DukeMaps</div>' +
     '<div class="field"><input id="from" placeholder="From — search or tap the map" autocomplete="off" /><div class="ac" id="ac-from"></div></div>' +
     '<div class="field"><input id="to" placeholder="To — search or tap the map" autocomplete="off" /><div class="ac" id="ac-to"></div></div>' +
-    '<div class="options">' +
-    '<label class="leaveat">Leave at <input type="time" id="leaveat" /></label>' +
+    '<button type="button" class="disclosure" id="opt-toggle" aria-expanded="false">Options</button>' +
+    '<div class="options" id="options" hidden>' +
+    '<div class="leave-row">' +
+    '<div class="seg" role="group" aria-label="Departure">' +
+    '<button type="button" class="seg-btn on" id="leave-now">Leave now</button>' +
+    '<button type="button" class="seg-btn" id="leave-at">Leave at</button>' +
+    '</div>' +
+    '<input type="time" id="leaveat" hidden />' +
+    '</div>' +
+    '<div class="opt-row">' +
     '<button type="button" class="opt" id="stepfree" aria-pressed="false">Step-free</button>' +
     '<button type="button" class="opt" id="instant" aria-pressed="false">Instant</button>' +
+    '</div>' +
     '</div>' +
     '<div class="metric" id="metric"></div>' +
     '<div class="info" id="info"></div>' +
@@ -156,16 +161,16 @@ function setupUI(
     '<div class="chipnote" id="chipnote"></div>' +
     '<div class="caption" id="caption"></div>' +
     '<div class="controls">' +
-    '<button type="button" id="playall">▶ Play all</button>' +
-    '<button type="button" id="playpause">Pause</button>' +
+    '<button type="button" id="playpause" class="ctl-primary">Pause</button>' +
     '<button type="button" id="skip">Skip</button>' +
     '<label class="spd">Speed <input type="range" id="speed" min="0.25" max="4" step="0.25" value="1" /></label>' +
+    '<button type="button" id="playall" class="ctl-link">↻ Replay all</button>' +
     '</div>' +
     '<div class="stats" id="stats"></div>' +
     '<div class="result" id="result"></div>' +
-    '<div class="directions" id="directions"></div>' +
     '<div class="whatif" id="whatif"></div>' +
-    '<div class="compare" id="compare"></div>' +
+    '<button type="button" class="disclosure" id="cmp-toggle" aria-expanded="false">Compare all</button>' +
+    '<div class="compare" id="compare" hidden></div>' +
     '</div>'
   document.body.appendChild(panel)
   // Mobile bottom-sheet: the grab handle collapses/expands the sheet so the map stays visible.
@@ -177,13 +182,17 @@ function setupUI(
   const captionEl = panel.querySelector('#caption') as HTMLDivElement
   const statsEl = panel.querySelector('#stats') as HTMLDivElement
   const resultEl = panel.querySelector('#result') as HTMLDivElement
-  const directionsEl = panel.querySelector('#directions') as HTMLDivElement
   const compareEl = panel.querySelector('#compare') as HTMLDivElement
   const whatifEl = panel.querySelector('#whatif') as HTMLDivElement
   const metricEl = panel.querySelector('#metric') as HTMLDivElement
+  const optToggle = panel.querySelector('#opt-toggle') as HTMLButtonElement
+  const optionsEl = panel.querySelector('#options') as HTMLDivElement
+  const leaveNowBtn = panel.querySelector('#leave-now') as HTMLButtonElement
+  const leaveAtBtn = panel.querySelector('#leave-at') as HTMLButtonElement
   const leaveatEl = panel.querySelector('#leaveat') as HTMLInputElement
   const stepfreeBtn = panel.querySelector('#stepfree') as HTMLButtonElement
   const instantBtn = panel.querySelector('#instant') as HTMLButtonElement
+  const cmpToggle = panel.querySelector('#cmp-toggle') as HTMLButtonElement
   const playAllBtn = panel.querySelector('#playall') as HTMLButtonElement
   const playBtn = panel.querySelector('#playpause') as HTMLButtonElement
   const skipBtn = panel.querySelector('#skip') as HTMLButtonElement
@@ -216,36 +225,6 @@ function setupUI(
   const fmtTime = (s: number): string => (s < 90 ? `${Math.round(s)} s` : `${Math.round(s / 60)} min`)
   const fmtDist = (m: number): string => (m < 950 ? `${Math.round(m)} m` : `${(m / 1000).toFixed(2)} km`)
 
-  // Step-by-step directions for a drawn route. Shown in every mode (animated / instant / reduced
-  // motion) because it hangs off the final route, not the animation.
-  const GLYPH: Record<string, string> = {
-    depart: '◉',
-    continue: '↑',
-    'slight-left': '↖',
-    left: '←',
-    'sharp-left': '↙',
-    'slight-right': '↗',
-    right: '→',
-    'sharp-right': '↘',
-    uturn: '↩',
-    stairs: '⌁',
-    arrive: '⚑',
-  }
-  const renderDirections = (route: RouteResult | null): void => {
-    if (!route) {
-      directionsEl.textContent = ''
-      return
-    }
-    directionsEl.innerHTML = toDirections(route)
-      .map(
-        (s) =>
-          `<div class="step"><span class="mv">${GLYPH[s.maneuver] ?? '•'}</span><span class="tx">${esc(s.text)}</span>${
-            s.distanceM >= 1 ? `<span class="ds">${fmtDist(s.distanceM)}</span>` : ''
-          }</div>`,
-      )
-      .join('')
-  }
-
   // The seven algorithms to walk through. CH/CCH need their prebuilt data; drop them if it didn't load.
   const algos: AlgoDef[] = ALGORITHMS.filter((a) => (a.key !== 'ch' && a.key !== 'cch') || !!(chData && cchStructure))
   chipsEl.innerHTML = algos.map((a, i) => `<button type="button" class="chip" data-i="${i}">${esc(a.name)}</button>`).join('')
@@ -257,6 +236,9 @@ function setupUI(
     return i >= 0 ? i : algos.findIndex((a) => a.key === 'dijkstra')
   })()
   leaveatEl.value = metricOpts.leaveAt
+  leaveatEl.hidden = leaveNow
+  leaveNowBtn.classList.toggle('on', leaveNow)
+  leaveAtBtn.classList.toggle('on', !leaveNow)
   stepfreeBtn.classList.toggle('on', metricOpts.stepFree)
   stepfreeBtn.setAttribute('aria-pressed', String(metricOpts.stepFree))
   instantBtn.classList.toggle('on', instant)
@@ -282,7 +264,7 @@ function setupUI(
       : ''
   }
 
-  // Run one algorithm, animate its exploration, draw its route + directions, record its stats.
+  // Run one algorithm, animate its exploration, draw its route, record its stats.
   const playAlgo = (i: number): void => {
     if (!chosen.from || !chosen.to || i < 0 || i >= algos.length) return
     // CH's shortcuts bake the base metric in — never animate/draw it under a changed metric (its route
@@ -309,10 +291,8 @@ function setupUI(
       if (trace.route) {
         overlay.drawRoute(trace.route)
         resultEl.innerHTML = `<b>${fmtTime(trace.route.costS)}</b> · ${fmtDist(trace.route.distanceM)} walk · explored ${trace.stats.nodesSettled} nodes`
-        renderDirections(trace.route)
       } else {
         resultEl.textContent = 'No route found.'
-        renderDirections(null)
       }
       if (playAll && curIdx < algos.length - 1) advanceTimer = window.setTimeout(() => playAlgo(curIdx + 1), 1100)
       else playAll = false
@@ -330,10 +310,9 @@ function setupUI(
   }
 
   // The least-walking-time route under an alternate metric, for the "What if?" counterfactual. Always
-  // Dijkstra (correct under any metric), so the comparison is apples-to-apples regardless of which
-  // algorithm is on screen.
+  // Dijkstra (correct under any metric). Nothing to contrast under the plain base metric.
   const renderWhatIf = (): void => {
-    if (!chosen.from || !chosen.to) {
+    if (!chosen.from || !chosen.to || (!metricOpts.stepFree && leaveNow)) {
       whatifEl.textContent = ''
       return
     }
@@ -344,10 +323,12 @@ function setupUI(
       whatifEl.textContent = ''
       return
     }
-    // Counterfactual: step-free on → "what does accessibility cost?" (vs stairs allowed, same time);
-    // otherwise → "what does this departure's crowding cost?" (vs the off-peak base metric).
+    const timeOpt = { departureSecOfDay: hmsToSec(metricOpts.leaveAt), isWeekend: false, schedule, distToAcademicM }
+    // step-free on → vs stairs-allowed at the same departure; else → this departure's crowding vs off-peak.
     const altWeight = metricOpts.stepFree
-      ? makeWeight(rg, { time: { departureSecOfDay: hmsToSec(metricOpts.leaveAt), isWeekend: false, schedule, distToAcademicM } })
+      ? leaveNow
+        ? makeWeight(rg)
+        : makeWeight(rg, { time: timeOpt })
       : makeWeight(rg)
     const alt = dijkstra(rg, s, t, { weight: altWeight }).route
     if (!alt) {
@@ -384,6 +365,7 @@ function setupUI(
   const applyMetric = (opt: { rerun?: boolean } = {}): void => {
     localStorage.setItem('dukemaps.stepFree', metricOpts.stepFree ? '1' : '0')
     localStorage.setItem('dukemaps.leaveAt', metricOpts.leaveAt)
+    localStorage.setItem('dukemaps.leaveNow', leaveNow ? '1' : '0')
     weight = buildWeight()
     let recustMs = 0
     if (cchStructure) {
@@ -422,8 +404,8 @@ function setupUI(
     }
   }
 
-  // Both pinned (or "Play all") → walk through all seven in order; or, in Instant mode, just the
-  // optimal route + its directions, no animation.
+  // Both pinned (or "Replay all") → walk through all seven in order; or, in Instant mode, just the
+  // optimal route, no animation.
   const startShow = (): void => {
     results.clear()
     renderCompare()
@@ -436,6 +418,43 @@ function setupUI(
       playAlgo(0)
     }
   }
+
+  const toggleDisclosure = (btn: HTMLButtonElement, body: HTMLElement): void => {
+    const open = body.hidden
+    body.hidden = !open
+    btn.setAttribute('aria-expanded', String(open))
+    btn.classList.toggle('open', open)
+  }
+  optToggle.addEventListener('click', () => toggleDisclosure(optToggle, optionsEl))
+  cmpToggle.addEventListener('click', () => toggleDisclosure(cmpToggle, compareEl))
+
+  const setLeaveMode = (now: boolean): void => {
+    leaveNow = now
+    leaveNowBtn.classList.toggle('on', now)
+    leaveAtBtn.classList.toggle('on', !now)
+    leaveatEl.hidden = now
+    applyMetric({ rerun: true })
+  }
+  leaveNowBtn.addEventListener('click', () => setLeaveMode(true))
+  leaveAtBtn.addEventListener('click', () => setLeaveMode(false))
+  leaveatEl.addEventListener('change', () => {
+    metricOpts.leaveAt = leaveatEl.value || nowHHMM()
+    applyMetric({ rerun: true })
+  })
+  stepfreeBtn.addEventListener('click', () => {
+    metricOpts.stepFree = !metricOpts.stepFree
+    stepfreeBtn.classList.toggle('on', metricOpts.stepFree)
+    stepfreeBtn.setAttribute('aria-pressed', String(metricOpts.stepFree))
+    applyMetric({ rerun: true })
+  })
+  instantBtn.addEventListener('click', () => {
+    instant = !instant
+    localStorage.setItem('dukemaps.instant', instant ? '1' : '0')
+    instantBtn.classList.toggle('on', instant)
+    instantBtn.setAttribute('aria-pressed', String(instant))
+    showEl.classList.toggle('instant', instant)
+    if (chosen.from && chosen.to) startShow() // switch modes immediately
+  })
 
   chipsEl.addEventListener('click', (e) => {
     const btn = (e.target as HTMLElement).closest('.chip') as HTMLButtonElement | null
@@ -458,24 +477,6 @@ function setupUI(
   })
   skipBtn.addEventListener('click', () => player?.skipToResult())
   speedEl.addEventListener('input', () => player?.setSpeed(Number(speedEl.value) || 1))
-  leaveatEl.addEventListener('change', () => {
-    metricOpts.leaveAt = leaveatEl.value || nowHHMM()
-    applyMetric({ rerun: true })
-  })
-  stepfreeBtn.addEventListener('click', () => {
-    metricOpts.stepFree = !metricOpts.stepFree
-    stepfreeBtn.classList.toggle('on', metricOpts.stepFree)
-    stepfreeBtn.setAttribute('aria-pressed', String(metricOpts.stepFree))
-    applyMetric({ rerun: true })
-  })
-  instantBtn.addEventListener('click', () => {
-    instant = !instant
-    localStorage.setItem('dukemaps.instant', instant ? '1' : '0')
-    instantBtn.classList.toggle('on', instant)
-    instantBtn.setAttribute('aria-pressed', String(instant))
-    showEl.classList.toggle('instant', instant)
-    if (chosen.from && chosen.to) startShow() // switch modes immediately
-  })
 
   const setEndpoint = (w: Which, lonLat: [number, number], label: string, enforceOnCampus = false): void => {
     const snap = edgeIndex.snap(lonLat[0], lonLat[1])
@@ -502,7 +503,6 @@ function setupUI(
     player = null
     window.clearTimeout(advanceTimer)
     whatifEl.textContent = ''
-    directionsEl.textContent = ''
   }
 
   const wireField = (w: Which): void => {
@@ -547,7 +547,8 @@ function setupUI(
   wireField('from')
   wireField('to')
 
-  // Tap fills From, then To; a tap when both are set starts a fresh pair.
+  // Tap fills From, then To; a tap when both are set starts a fresh pair. The pin is labelled with the
+  // building you're nearest (not "Dropped pin").
   map.on('click', (e) => {
     const lonLat: [number, number] = [e.lngLat.lng, e.lngLat.lat]
     if (chosen.from && chosen.to) {
@@ -555,8 +556,9 @@ function setupUI(
       clearEndpoint('to')
     }
     const w: Which = chosen.from ? 'to' : 'from'
-    setEndpoint(w, lonLat, 'Dropped pin', true) // enforce: reject taps off the campus network
-    if (chosen[w]) input(w).value = 'Dropped pin' // only label the field if the pin was accepted
+    const name = placeIndex.nearest(e.lngLat.lat, e.lngLat.lng)?.name ?? 'Pinned location'
+    setEndpoint(w, lonLat, name, true) // enforce: reject taps off the campus network
+    if (chosen[w]) input(w).value = name // only label the field if the pin was accepted
   })
   map.getCanvas().style.cursor = 'crosshair'
 

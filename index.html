@@ -87,12 +87,26 @@
       .ac .hit:hover { background: var(--line-2); }
 
       /* Options row */
-      .options { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 10px 0 6px; }
-      .options .leaveat { font-size: 12.5px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
-      .options input[type='time'] {
+      .disclosure {
+        border: 0; background: none; padding: 5px 0; margin: 6px 0 2px; font: 12.5px var(--sans);
+        color: var(--accent-ink); cursor: pointer; display: inline-flex; align-items: center; gap: 5px;
+      }
+      .disclosure::after { content: '▾'; font-size: 9px; transition: transform 0.15s; }
+      .disclosure.open::after { transform: rotate(180deg); }
+      .options { display: flex; flex-direction: column; gap: 10px; margin: 2px 0 8px; }
+      .options[hidden], .compare[hidden] { display: none; }
+      .leave-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+      .seg { display: inline-flex; border: 1px solid var(--line); border-radius: var(--radius-pill); overflow: hidden; }
+      .seg-btn { border: 0; background: var(--paper-2); padding: 6px 13px; font: 12px var(--sans); color: var(--muted); cursor: pointer; }
+      .seg-btn:hover { background: var(--line-2); }
+      .seg-btn.on { background: var(--accent); color: #fff; }
+      .leave-row input[type='time'] {
         padding: 6px 8px; border: 1px solid var(--line); border-radius: var(--radius-sm);
         font: 12.5px var(--sans); color: var(--ink); background: var(--paper-2);
       }
+      .opt-row { display: flex; gap: 8px; flex-wrap: wrap; }
+      .controls .ctl-link { border: 0; background: none; color: var(--muted); padding: 5px 2px; margin-left: auto; }
+      .controls .ctl-link:hover { background: none; color: var(--ink); }
       .opt {
         border: 1px solid var(--line); background: var(--paper-2); border-radius: var(--radius-pill);
         padding: 5px 12px; font: 12px var(--sans); color: var(--muted); cursor: pointer;
@@ -148,14 +162,6 @@
       .result { margin-top: 8px; font-size: 15px; color: var(--ink); }
       .result b { font-family: var(--serif); font-weight: 600; font-size: 17px; }
 
-      /* Directions */
-      .directions { margin-top: 10px; max-height: 200px; overflow: auto; border-top: 1px solid var(--line-2); padding-top: 8px; }
-      .directions:empty { display: none; }
-      .directions .step { display: flex; align-items: baseline; gap: 10px; font-size: 13px; color: var(--ink); padding: 3px 0; }
-      .directions .step .mv { color: var(--accent); width: 1.1em; flex: none; text-align: center; }
-      .directions .step .tx { flex: 1; }
-      .directions .step .ds { color: var(--faint); font-size: 12px; flex: none; white-space: nowrap; }
-
       .whatif {
         margin-top: 10px; font-size: 12.5px; line-height: 1.5; color: var(--muted);
         background: var(--line-2); border-radius: var(--radius-sm); padding: 8px 10px;
@@ -172,7 +178,7 @@
       .compare th:nth-child(n + 2), .compare td:nth-child(n + 2) { text-align: right; }
       .compare .dim { color: var(--faint); font-size: 11px; margin-top: 4px; }
 
-      .show.instant .chips, .show.instant .caption, .show.instant .controls, .show.instant .stats, .show.instant .compare { display: none; }
+      .show.instant .chips, .show.instant .caption, .show.instant .controls, .show.instant .stats, .show.instant .compare, .show.instant .disclosure { display: none; }
 
       /* ── Mobile: the panel becomes a bottom sheet ──────────────────────────────── */
       @media (max-width: 640px) {
