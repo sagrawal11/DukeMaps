@@ -64,6 +64,30 @@ function editorServer(): Plugin {
           })
           return
         }
+        // Door-placement tool (dev-only): persist a flat list of [lon,lat] door positions.
+        if (path === '/__doors' && req.method === 'GET') {
+          const doorsPath = resolve(server.config.root, 'data/doors.json')
+          res.setHeader('content-type', 'application/json')
+          res.end(existsSync(doorsPath) ? readFileSync(doorsPath, 'utf8') : '[]')
+          return
+        }
+        if (path === '/__doors' && req.method === 'POST') {
+          const doorsPath = resolve(server.config.root, 'data/doors.json')
+          void readBody(req).then((raw) => {
+            try {
+              const doors = JSON.parse(raw)
+              const tmp = `${doorsPath}.tmp`
+              writeFileSync(tmp, JSON.stringify(doors, null, 2))
+              renameSync(tmp, doorsPath)
+              res.statusCode = 204
+              res.end()
+            } catch {
+              res.statusCode = 400
+              res.end('invalid JSON')
+            }
+          })
+          return
+        }
         next()
       })
     },

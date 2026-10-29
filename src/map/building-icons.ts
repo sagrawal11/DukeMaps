@@ -17,6 +17,7 @@ export interface BuildingIcon {
   area: string
   nickname?: string
   tier?: number // 1 landmark … 3 minor (default 3)
+  doors?: [number, number][] // [lon,lat] entrances for door-accurate routing
   lat: number | null
   lon: number | null
   place: string | null
@@ -35,7 +36,7 @@ const TIER_MINZOOM: Record<number, number> = { 1: 12, 2: 15, 3: 16.5 }
 export function createBuildingIcons(
   map: maplibregl.Map,
   icons: BuildingIcon[],
-  onPick: (name: string, lonLat: [number, number]) => void,
+  onPick: (name: string, lonLat: [number, number], doors?: [number, number][]) => void,
   opts: { collidePx?: number } = {},
 ): IconLayer {
   const collidePx = opts.collidePx ?? 46 // badge + label footprint
@@ -68,7 +69,7 @@ export function createBuildingIcons(
 
     el.addEventListener('click', (e) => {
       e.stopPropagation() // a marker click is its own thing, not a map tap
-      onPick(ic.name, [ic.lon as number, ic.lat as number])
+      onPick(ic.name, [ic.lon as number, ic.lat as number], ic.doors)
     })
     const marker = new maplibregl.Marker({ element: el, anchor: 'center' }).setLngLat([ic.lon as number, ic.lat as number]).addTo(map)
     return { marker, tier }

@@ -11,6 +11,7 @@ import themeLayers from 'protomaps-themes-base'
 import type { Graph, GraphNode, Place } from './graph/types'
 import { buildPlaceIndex, type PlaceIndex } from './places/search'
 import { buildEdgeIndex, type EdgeIndex } from './spatial/snap'
+import { haversineM } from './graph/geo'
 import { buildRoutingGraph, makeWeight, type WeightFn } from './algorithms/routing'
 import { customize, type CCHStructure } from './algorithms/cch'
 import type { CHData } from './algorithms/ch'
@@ -89,6 +90,7 @@ interface Endpoint {
   point: [number, number]
   distM: number
   node: GraphNode // routing anchor (nearest edge endpoint) — what the algorithms route between
+  doors?: [number, number][] // [lon,lat] entrances; if set, routing snaps the door nearest the other endpoint
 }
 
 // Pick From and To by searching a building (fuzzy autocomplete) or tapping the map. Each endpoint
@@ -164,6 +166,8 @@ function setupUI(
     '<button type="button" class="opt" id="stepfree" aria-pressed="false">Step-free</button>' +
     '<button type="button" class="opt" id="instant" aria-pressed="false">Instant</button>' +
     '<button type="button" class="opt" id="pickcoords" aria-pressed="false" hidden>📍 Coords</button>' +
+    '<button type="button" class="opt" id="doormode" aria-pressed="false" hidden>🚪 Doors</button>' +
+    '<button type="button" class="opt" id="doorundo" hidden>↶ Undo door</button>' +
     '</div>' +
     '</div>' +
     '<div class="metric" id="metric"></div>' +
@@ -433,7 +437,33 @@ function setupUI(
 
   // Both pinned (or "Replay all") → walk through all seven in order; or, in Instant mode, just the
   // optimal route, no animation.
+  // If an endpoint is a building with doors, snap the door nearest the OTHER endpoint — so you leave/enter
+  // by the right side of the building instead of whatever path happens to be closest to its centroid.
+  const resolveDoors = (): void => {
+    for (const w of ['from', 'to'] as Which[]) {
+      const ep = chosen[w]
+      const other = chosen[w === 'from' ? 'to' : 'from']
+      if (!ep?.doors?.length || !other) continue
+      let best = ep.doors[0]
+      let bestD = Infinity
+      for (const d of ep.doors) {
+        const dd = haversineM(d[1], d[0], other.point[1], other.point[0])
+        if (dd < bestD) {
+          bestD = dd
+          best = d
+        }
+      }
+      const snap = edgeIndex.snap(best[0], best[1])
+      if (snap) {
+        ep.point = snap.point
+        ep.node = snap.node
+        markers[w]?.setLngLat(snap.point)
+      }
+    }
+  }
+
   const startShow = (): void => {
+    resolveDoors()
     results.clear()
     renderCompare()
     renderWhatIf()
@@ -505,14 +535,14 @@ function setupUI(
   skipBtn.addEventListener('click', () => player?.skipToResult())
   speedEl.addEventListener('input', () => player?.setSpeed(Number(speedEl.value) || 1))
 
-  const setEndpoint = (w: Which, lonLat: [number, number], label: string, enforceOnCampus = false): void => {
+  const setEndpoint = (w: Which, lonLat: [number, number], label: string, enforceOnCampus = false, doors?: [number, number][]): void => {
     const snap = edgeIndex.snap(lonLat[0], lonLat[1])
     if (!snap) return
     if (enforceOnCampus && snap.distM > MAX_SNAP_M) {
       flashNotice("That spot isn't on Duke's campus — tap a path or building on campus.")
       return
     }
-    chosen[w] = { label, point: snap.point, distM: snap.distM, node: snap.node }
+    chosen[w] = { label, point: snap.point, distM: snap.distM, node: snap.node, doors: doors?.length ? doors : undefined }
     const m = markers[w] ?? new maplibregl.Marker({ color: colors[w] })
     markers[w] = m.setLngLat(snap.point).addTo(map)
     renderInfo()
@@ -543,7 +573,7 @@ function setupUI(
     const pick = (p: Place): void => {
       el.value = p.name
       close()
-      setEndpoint(w, [p.lon, p.lat], p.name)
+      setEndpoint(w, [p.lon, p.lat], p.name, false, doorsByName.get(p.name))
     }
     el.addEventListener('input', () => {
       close()
@@ -577,15 +607,17 @@ function setupUI(
 
   // Clickable building icons: tap an illustration to pick it as From (then To) — same flow as a map tap,
   // but no enforce (the committed icons are real campus buildings). Icons without a coord are skipped.
-  const pickBuilding = (name: string, lonLat: [number, number]): void => {
+  const pickBuilding = (name: string, lonLat: [number, number], doors?: [number, number][]): void => {
     if (chosen.from && chosen.to) {
       clearEndpoint('from')
       clearEndpoint('to')
     }
     const w: Which = chosen.from ? 'to' : 'from'
-    setEndpoint(w, lonLat, name)
+    setEndpoint(w, lonLat, name, false, doors)
     if (chosen[w]) input(w).value = name
   }
+  // Doors for a searched place (best-effort by exact name; icon clicks pass doors directly).
+  const doorsByName = new Map((buildingIconsConfig as BuildingIcon[]).filter((b) => b.doors?.length).map((b) => [b.name, b.doors as [number, number][]]))
   createBuildingIcons(map, buildingIconsConfig as BuildingIcon[], pickBuilding)
 
   // Dev-only coordinate picker: when on, a map click copies "lat, lon" instead of routing — so exact
@@ -602,9 +634,56 @@ function setupUI(
     })
   }
 
+  // Door-placement editor (dev-only): drop a pin at each building door. Autosaved to data/doors.json;
+  // `npm run assign:doors` later associates each door with its nearest building for door-accurate routing.
+  let doorMode = false
+  const doorPts: [number, number][] = [] // [lon, lat]
+  const doorMarkers: maplibregl.Marker[] = []
+  const doorBtn = panel.querySelector('#doormode') as HTMLButtonElement
+  const doorUndoBtn = panel.querySelector('#doorundo') as HTMLButtonElement
+  const addDoorPin = (lon: number, lat: number): void => {
+    const el = document.createElement('div')
+    el.className = 'door-pin'
+    doorMarkers.push(new maplibregl.Marker({ element: el, anchor: 'center' }).setLngLat([lon, lat]).addTo(map))
+  }
+  const saveDoors = (): void => {
+    void fetch('/__doors', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(doorPts) })
+  }
+  if (import.meta.env.DEV) {
+    doorBtn.hidden = false
+    doorUndoBtn.hidden = false
+    void fetch('/__doors')
+      .then((r) => (r.ok ? r.json() : []))
+      .then((pts: [number, number][]) => {
+        for (const p of pts) {
+          doorPts.push(p)
+          addDoorPin(p[0], p[1])
+        }
+      })
+    doorBtn.addEventListener('click', () => {
+      doorMode = !doorMode
+      doorBtn.classList.toggle('on', doorMode)
+      doorBtn.setAttribute('aria-pressed', String(doorMode))
+      if (doorMode) flashNotice(`🚪 Door mode on — click each door (${doorPts.length} placed)`)
+    })
+    doorUndoBtn.addEventListener('click', () => {
+      doorPts.pop()
+      doorMarkers.pop()?.remove()
+      saveDoors()
+      flashNotice(`🚪 ${doorPts.length} doors`)
+    })
+  }
+
   // Tap fills From, then To; a tap when both are set starts a fresh pair. The pin is labelled with the
   // building you're nearest (not "Dropped pin").
   map.on('click', (e) => {
+    if (doorMode) {
+      doorPts.push([e.lngLat.lng, e.lngLat.lat])
+      addDoorPin(e.lngLat.lng, e.lngLat.lat)
+      saveDoors()
+      flashNotice(`🚪 ${doorPts.length} doors (saved)`)
+      return
+    }
     if (pickCoords) {
       const c = `${e.lngLat.lat.toFixed(6)}, ${e.lngLat.lng.toFixed(6)}`
       void navigator.clipboard?.writeText(c)

@@ -23,6 +23,7 @@
     "bench:cch": "tsx scripts/bench-cch.ts",
     "fetch:basemap": "tsx scripts/fetch-basemap.ts",
     "match:icons": "tsx scripts/match-icons.ts",
+    "assign:doors": "tsx scripts/assign-doors.ts",
     "rebuild": "npm run fetch && npm run build:graph && npm run build:crowding && npm run build:ch && npm run build:cch",
     "deploy": "node -e \"console.log('deploy: wired to a GitHub Pages Action in Phase 7')\""
   },

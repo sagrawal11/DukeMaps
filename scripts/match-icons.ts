@@ -7,7 +7,7 @@
 //
 // NOTE: this OVERWRITES config/building-icons.json — it's a one-time seeder. Once you've hand-corrected
 // coordinates in that file, don't re-run it (or you'll lose the edits).
-import { readFileSync, writeFileSync } from 'node:fs'
+import { readFileSync, writeFileSync, existsSync } from 'node:fs'
 import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import type { Place } from '../src/graph/types'
@@ -40,6 +40,10 @@ const placeByName = new Map(P.map((x) => [x.n, x.p]))
 // tier, and coordinate accepts (`place` = adopt that OSM building's coords; or explicit lat/lon). `_readme` ignored.
 interface Override { nick?: string; tier?: number; place?: string; lat?: number; lon?: number; skip?: boolean }
 const overrides = JSON.parse(readFileSync(resolve(ROOT, 'config/building-overrides.json'), 'utf8')) as Record<string, Override>
+// Doors per building (from `npm run assign:doors`), merged into each icon so routing can snap to the door
+// nearest the other endpoint instead of the centroid. Empty until doors are placed + assigned.
+const doorsFile = resolve(ROOT, 'config/building-doors.json')
+const buildingDoors = existsSync(doorsFile) ? (JSON.parse(readFileSync(doorsFile, 'utf8')) as Record<string, [number, number][]>) : {}
 // Fallback label for buildings without a curated nickname: drop the trailing generic word + any "(...)"/"/…".
 const deriveNick = (name: string): string =>
   name.split('/')[0].split('(')[0].trim().replace(/\s+(Building|Hall|Residence Hall|Quad|Center|Centre)$/i, '').trim() || name
@@ -82,6 +86,7 @@ interface IconEntry {
   area: string
   nickname: string // short label shown under the icon (curated in building-overrides.json, else derived)
   tier: number // importance for the zoom reveal: 1 shows first, 3 last (default)
+  doors: [number, number][] // [lon,lat] door positions for door-accurate routing (empty until assigned)
   lat: number | null // null = not placed; fill it in (coords from you) to show the icon
   lon: number | null
   place: string | null // the OSM place the coordinates came from
@@ -92,7 +97,7 @@ interface IconEntry {
 const warnings: string[] = []
 const out: IconEntry[] = rows.map((r) => {
   const ov = overrides[r.id] ?? {}
-  const base = { id: r.id, name: r.name, file: r.file, area: r.area, nickname: ov.nick ?? deriveNick(r.name), tier: ov.tier ?? 3 }
+  const base = { id: r.id, name: r.name, file: r.file, area: r.area, nickname: ov.nick ?? deriveNick(r.name), tier: ov.tier ?? 3, doors: buildingDoors[r.id] ?? [] }
 
   // skip = suppress a wrong auto-match until a real coordinate is supplied.
   if (ov.skip) return { ...base, lat: null, lon: null, place: null, confidence: 'none' as Conf, suggestion: null }
