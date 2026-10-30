@@ -158,6 +158,9 @@ function setupUI(
     '<button type="button" class="opt" id="pickcoords" aria-pressed="false" hidden>📍 Coords</button>' +
     '<button type="button" class="opt" id="doormode" aria-pressed="false" hidden>🚪 Doors</button>' +
     '<button type="button" class="opt" id="doorundo" hidden>↶ Undo door</button>' +
+    '<button type="button" class="opt" id="regionmode" aria-pressed="false" hidden>🗺️ Region</button>' +
+    '<button type="button" class="opt" id="regionfinish" hidden>✓ Finish</button>' +
+    '<button type="button" class="opt" id="regionundo" hidden>↶ Undo</button>' +
     '<button type="button" class="opt" id="editgraph" hidden>✏️ Edit graph</button>' +
     '</div>' +
     '</div>' +
@@ -692,6 +695,85 @@ function setupUI(
     saveDoors()
     flashNotice(`🚪 ${doorPts.length} doors`)
   })
+
+  // Region editor (dev-only): draw campus / sub-region polygons by clicking the map, then "Finish" to
+  // name + save one. Persisted to config/dissection.json via the /__regions dev endpoint. These regions
+  // become the nested-dissection separators for the campus-aware CCH ordering — so the user marks which
+  // nodes divide campuses / dorms / academic clusters by drawing, not by hand-editing coordinates.
+  interface Region {
+    name: string
+    polygon: [number, number][] // [lon, lat] ring (not closed; the last->first edge is implied)
+  }
+  let regionMode = false
+  let regionDraft: [number, number][] = [] // the in-progress polygon's vertices
+  let regions: Region[] = []
+  let regionsLoaded = false
+  const regionBtn = panel.querySelector('#regionmode') as HTMLButtonElement
+  const regionFinishBtn = panel.querySelector('#regionfinish') as HTMLButtonElement
+  const regionUndoBtn = panel.querySelector('#regionundo') as HTMLButtonElement
+  const REGION_SRC = 'dm-regions'
+  const DRAFT_SRC = 'dm-region-draft'
+  const emptyFC: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features: [] }
+  map.addSource(REGION_SRC, { type: 'geojson', data: emptyFC })
+  map.addSource(DRAFT_SRC, { type: 'geojson', data: emptyFC })
+  map.addLayer({ id: 'dm-regions-fill', type: 'fill', source: REGION_SRC, paint: { 'fill-color': '#0b7285', 'fill-opacity': 0.1 } })
+  map.addLayer({ id: 'dm-regions-line', type: 'line', source: REGION_SRC, paint: { 'line-color': '#0b7285', 'line-width': 2 } })
+  map.addLayer({ id: 'dm-regions-label', type: 'symbol', source: REGION_SRC, layout: { 'text-field': ['get', 'name'], 'text-size': 13, 'text-font': ['Noto Sans Regular'] }, paint: { 'text-color': '#0b5566', 'text-halo-color': '#fff', 'text-halo-width': 1.6 } })
+  map.addLayer({ id: 'dm-draft-line', type: 'line', source: DRAFT_SRC, paint: { 'line-color': '#e8590c', 'line-width': 2, 'line-dasharray': [2, 1] } })
+  map.addLayer({ id: 'dm-draft-pts', type: 'circle', source: DRAFT_SRC, filter: ['==', ['geometry-type'], 'Point'], paint: { 'circle-radius': 4, 'circle-color': '#e8590c' } })
+  const regionLayerIds = ['dm-regions-fill', 'dm-regions-line', 'dm-regions-label', 'dm-draft-line', 'dm-draft-pts']
+  const setRegionLayersVisible = (v: boolean): void => {
+    for (const id of regionLayerIds) map.setLayoutProperty(id, 'visibility', v ? 'visible' : 'none')
+  }
+  const refreshRegions = (): void => {
+    const fc: GeoJSON.FeatureCollection = {
+      type: 'FeatureCollection',
+      features: regions.map((r) => ({ type: 'Feature', properties: { name: r.name }, geometry: { type: 'Polygon', coordinates: [[...r.polygon, r.polygon[0]]] } })),
+    }
+    ;(map.getSource(REGION_SRC) as maplibregl.GeoJSONSource).setData(fc)
+  }
+  const refreshDraft = (): void => {
+    const features: GeoJSON.Feature[] = regionDraft.map((p) => ({ type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: p } }))
+    if (regionDraft.length >= 2) features.push({ type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: regionDraft } })
+    ;(map.getSource(DRAFT_SRC) as maplibregl.GeoJSONSource).setData({ type: 'FeatureCollection', features })
+  }
+  const saveRegions = (): void => {
+    void fetch('/__regions', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(regions) })
+  }
+  regionBtn.addEventListener('click', () => {
+    regionMode = !regionMode
+    regionBtn.classList.toggle('on', regionMode)
+    regionBtn.setAttribute('aria-pressed', String(regionMode))
+    regionFinishBtn.hidden = !regionMode
+    regionUndoBtn.hidden = !regionMode
+    if (regionMode) flashNotice('🗺️ Region mode — click to outline a region, then Finish to name it')
+  })
+  regionFinishBtn.addEventListener('click', () => {
+    if (regionDraft.length < 3) {
+      flashNotice('A region needs at least 3 points')
+      return
+    }
+    const name = window.prompt('Region name (e.g. west, west-dorms, west-academic):')?.trim()
+    if (!name) return
+    regions.push({ name, polygon: regionDraft })
+    regionDraft = []
+    refreshRegions()
+    refreshDraft()
+    saveRegions()
+    flashNotice(`🗺️ Saved “${name}” — ${regions.length} region(s)`)
+  })
+  regionUndoBtn.addEventListener('click', () => {
+    if (regionDraft.length) {
+      regionDraft.pop()
+      refreshDraft()
+    } else if (regions.length) {
+      const dropped = regions.pop()
+      refreshRegions()
+      saveRegions()
+      flashNotice(`🗺️ Removed “${dropped?.name}” — ${regions.length} left`)
+    }
+  })
+
   // Show/hide the dev tools; load the placed door pins the first time it's enabled.
   let devMode = localStorage.getItem('dukemaps.dev') === '1'
   let doorsLoaded = false
@@ -701,6 +783,7 @@ function setupUI(
     doorBtn.hidden = !devMode
     doorUndoBtn.hidden = !devMode
     editBtn.hidden = !devMode
+    regionBtn.hidden = !devMode
     localStorage.setItem('dukemaps.dev', devMode ? '1' : '0')
     const link = document.querySelector('.dm-devlogin') // the attribution link doubles as login / logout
     if (link) link.textContent = devMode ? 'developer logout' : 'developer login'
@@ -715,14 +798,30 @@ function setupUI(
           }
         })
     }
+    if (devMode && !regionsLoaded) {
+      regionsLoaded = true
+      void fetch('/__regions')
+        .then((r) => (r.ok ? r.json() : []))
+        .then((rs: Region[]) => {
+          regions = Array.isArray(rs) ? rs : []
+          refreshRegions()
+        })
+    }
     if (!devMode) {
       pickCoords = false
       doorMode = false
+      regionMode = false
+      regionDraft = []
+      refreshDraft()
       pickBtn.classList.remove('on')
       doorBtn.classList.remove('on')
+      regionBtn.classList.remove('on')
+      regionFinishBtn.hidden = true
+      regionUndoBtn.hidden = true
     }
-    // Door pins are a dev-only overlay — hide them on logout, re-show on re-entry (keep the data).
+    // Door pins + region layers are dev-only overlays — hide on logout, re-show on re-entry (keep data).
     for (const m of doorMarkers) m.getElement().style.display = devMode ? '' : 'none'
+    setRegionLayersVisible(devMode)
   }
   // The "developer login" link is rendered inside the MapLibre attribution — delegate its click.
   document.addEventListener('click', (e) => {
@@ -745,6 +844,12 @@ function setupUI(
   // Tap fills From, then To; a tap when both are set starts a fresh pair. The pin is labelled with the
   // building you're nearest (not "Dropped pin").
   map.on('click', (e) => {
+    if (regionMode) {
+      regionDraft.push([e.lngLat.lng, e.lngLat.lat])
+      refreshDraft()
+      flashNotice(`🗺️ ${regionDraft.length} pts — Finish to name, Undo to drop the last`)
+      return
+    }
     if (doorMode) {
       doorPts.push([e.lngLat.lng, e.lngLat.lat])
       addDoorPin(e.lngLat.lng, e.lngLat.lat)

@@ -88,6 +88,30 @@ function editorServer(): Plugin {
           })
           return
         }
+        // Region-drawing tool (dev-only): persist the campus / sub-region polygons for the CCH ordering.
+        if (path === '/__regions' && req.method === 'GET') {
+          const regionsPath = resolve(server.config.root, 'config/dissection.json')
+          res.setHeader('content-type', 'application/json')
+          res.end(existsSync(regionsPath) ? readFileSync(regionsPath, 'utf8') : '[]')
+          return
+        }
+        if (path === '/__regions' && req.method === 'POST') {
+          const regionsPath = resolve(server.config.root, 'config/dissection.json')
+          void readBody(req).then((raw) => {
+            try {
+              const regions = JSON.parse(raw)
+              const tmp = `${regionsPath}.tmp`
+              writeFileSync(tmp, JSON.stringify(regions, null, 2))
+              renameSync(tmp, regionsPath)
+              res.statusCode = 204
+              res.end()
+            } catch {
+              res.statusCode = 400
+              res.end('invalid JSON')
+            }
+          })
+          return
+        }
         next()
       })
     },
