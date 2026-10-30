@@ -21,12 +21,10 @@ export interface AlgoDef {
 
 export const ALGORITHMS: AlgoDef[] = [
   { key: 'bfs', name: 'BFS', optimal: false, caption: 'Breadth-first — explores in rings of equal hop-count, so it finds the fewest-edges path. On a walk network that is usually not the fastest.' },
-  { key: 'dfs', name: 'DFS', optimal: false, caption: 'Depth-first — plunges down one branch until stuck, then backtracks. It finds a path, almost never a good one.' },
   { key: 'dijkstra', name: 'Dijkstra', optimal: true, caption: 'Always expands the node reachable in the least walking time so far — so its route is optimal, but it fans out in every direction.' },
   { key: 'astar', name: 'A*', optimal: true, caption: 'Dijkstra plus a straight-line hint toward the target, so it stops fanning out and heads for the goal — same optimal route, far fewer nodes.' },
   { key: 'bidir', name: 'Bidirectional', optimal: true, caption: 'Two searches at once — one from the start, one from the target — meeting in the middle. Two small frontiers beat one big one.' },
-  { key: 'ch', name: 'Contraction Hierarchies', optimal: true, caption: 'Precomputed shortcuts let the search leap over unimportant nodes, up to “important” paths and back down. It barely explores at all.' },
-  { key: 'cch', name: 'Customizable CH', optimal: true, caption: 'The same leaps, but the hierarchy is built from the map’s shape alone — its weights are customized cheaply, so it reacts to crowding or a step-free toggle without rebuilding.' },
+  { key: 'cch', name: 'Customizable CH', optimal: true, caption: 'Precomputed shortcuts let the search leap up to “important” paths and back down — and because the hierarchy is built from the map’s shape alone, its weights re-customize cheaply when crowding or a step-free toggle changes. It barely explores at all.' },
 ]
 
 // One call that runs any of them between two node ids. chData = the prebuilt CH; cchData = the CCH

@@ -271,7 +271,7 @@ function setupUI(
   const fmtDist = (m: number): string => (m < 950 ? `${Math.round(m)} m` : `${(m / 1000).toFixed(2)} km`)
 
   // The seven algorithms to walk through. CH/CCH need their prebuilt data; drop them if it didn't load.
-  const algos: AlgoDef[] = ALGORITHMS.filter((a) => (a.key !== 'ch' && a.key !== 'cch') || !!(chData && cchStructure))
+  const algos: AlgoDef[] = ALGORITHMS.filter((a) => a.key !== 'cch' || !!cchStructure)
   // One colour per algorithm — routes persist in these colours during "Play all". The optimal searches
   // find the identical route (so they overlap); BFS and DFS differ, so their colours stand apart.
   const ALGO_COLORS: Record<string, string> = {
@@ -325,6 +325,7 @@ function setupUI(
     overlay.clearState() // clear the exploration frontier; persisted routes stay (they stack during Play all)
     elimView.hide() // re-shown just below, only for the hierarchy searches
     resultEl.textContent = ''
+    statsEl.textContent = '' // settled/relaxed only shows while animating (set in the render loop below)
     curIdx = i
     const def = algos[i]
     const trace = runAlgo(def.key, rg, weight, chData as CHData, cchData as CHData, chosen.from.node.id, chosen.to.node.id)
@@ -348,7 +349,7 @@ function setupUI(
       renderCompare()
       if (trace.route) {
         overlay.addRoute(trace.route.edges, playAll ? ALGO_COLORS[def.key] ?? '#1b7a37' : '#1b7a37')
-        resultEl.innerHTML = `<b>${fmtTime(trace.route.costS)}</b> · ${fmtDist(trace.route.distanceM)} walk · explored ${trace.stats.nodesSettled} nodes`
+        resultEl.innerHTML = `<b>${fmtTime(trace.route.costS)}</b> · ${fmtDist(trace.route.distanceM)} walk${animate ? ` · explored ${trace.stats.nodesSettled} nodes` : ''}`
       } else {
         resultEl.textContent = 'No route found.'
       }
@@ -361,8 +362,8 @@ function setupUI(
         if (animate) {
           overlay.redraw(s)
           if (isHierarchy) elimView.update(s) // climb the chains / pulse the apex / descend, in sync
+          statsEl.innerHTML = `settled <b>${s.settled.size + s.settledB.size}</b> · relaxed <b>${s.relaxed.size}</b>`
         }
-        statsEl.innerHTML = `settled <b>${s.settled.size + s.settledB.size}</b> · relaxed <b>${s.relaxed.size}</b>`
       },
       { speed: Number(speedEl.value) || 1, reducedMotion: !animate || prefersReducedMotion, onDone },
     )
