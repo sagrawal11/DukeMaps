@@ -50,12 +50,16 @@ function main(): void {
   graph = keepLargestComponent(graph)
   const droppedNodes = beforeNodeCount - graph.nodes.length
 
-  // Densify long edges: split any edge > MAX_SEG_M into ~MAX_SEG_M sub-edges with pass-through nodes, so a
-  // tap snaps to a node near where you clicked instead of a distant edge endpoint (which caused long
-  // detours like exiting a building from the wrong side). Shape + total walking cost are preserved.
+  // Densify long edges so a tap snaps to a node near where you clicked (not a distant edge endpoint).
+  // PROXIMITY-AWARE: split finely (MAX_SEG_M) only near buildings, where taps actually land; far-flung
+  // paths split coarsely (COARSE_SEG_M) since nobody searches there — this keeps the routing graph much
+  // smaller (fewer nodes for CH/CCH to climb) without hurting snapping where it matters. Shape + total
+  // walking cost are preserved exactly either way.
   const MAX_SEG_M = 25
+  const COARSE_SEG_M = 120
+  const NEAR_M = 70
   const preDensifyNodes = graph.nodes.length
-  graph = densifyGraph(graph, MAX_SEG_M)
+  graph = densifyGraph(graph, MAX_SEG_M, { coarseSegM: COARSE_SEG_M, places: built.places, nearM: NEAR_M })
   const addedNodes = graph.nodes.length - preDensifyNodes
 
   graph.meta.builtAt = new Date().toISOString()

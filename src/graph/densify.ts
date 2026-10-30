@@ -45,17 +45,31 @@ export function splitPolyline(geom: [number, number][], n: number): [number, num
   return parts
 }
 
-export function densifyGraph(graph: Graph, maxSegM: number): Graph {
+// `maxSegM` is the fine split length used NEAR searchable places (where a tap needs a close anchor). With
+// `opts`, edges far from every place split only at the coarser `opts.coarseSegM` (or not at all): far-flung
+// paths are rarely tapped, so leaving them sparse shrinks the routing graph without hurting snapping where
+// it matters. Without `opts` the behaviour is the old uniform split (used by the tests).
+export function densifyGraph(graph: Graph, maxSegM: number, opts?: { coarseSegM: number; places: { lat: number; lon: number }[]; nearM: number }): Graph {
   const nodes: GraphNode[] = graph.nodes.map((n) => ({ ...n }))
   const edges: GraphEdge[] = []
   let nextId = nodes.reduce((m, n) => Math.max(m, n.id), 0) + 1 // synthetic ids sit above every existing id
 
+  // An edge is "near" if any of its ends or midpoint is within nearM of a place — cheap and good enough
+  // since places are dense in the tapped core; the sparse far paths fall through to the coarse split.
+  const nearPlace = (e: GraphEdge): boolean => {
+    if (!opts) return true
+    const pts = [e.geometry[0], e.geometry[Math.floor(e.geometry.length / 2)], e.geometry[e.geometry.length - 1]]
+    for (const [lon, lat] of pts) for (const p of opts.places) if (haversineM(lat, lon, p.lat, p.lon) <= opts.nearM) return true
+    return false
+  }
+
   for (const e of graph.edges) {
-    if (e.lengthM <= maxSegM || e.geometry.length < 2) {
+    const segM = opts && !nearPlace(e) ? opts.coarseSegM : maxSegM
+    if (e.lengthM <= segM || e.geometry.length < 2) {
       edges.push(e)
       continue
     }
-    const n = Math.ceil(e.lengthM / maxSegM)
+    const n = Math.ceil(e.lengthM / segM)
     const parts = splitPolyline(e.geometry, n)
     let prev = e.from
     let accW = 0

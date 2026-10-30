@@ -1,36 +1,36 @@
 # Nested-dissection experiments (CCH node order)
 
-Graph **15304 nodes / 17459 edges**. 1000 eval pairs/distribution, base metric. Correctness holds for any order (self-checks ✓). `npx tsx scripts/experiment-dissection.ts`, 2026-10-30.
+Graph **10484 nodes / 12639 edges**. 1000 eval pairs/distribution, base metric. Correctness holds for any order (self-checks ✓). `npx tsx scripts/experiment-dissection.ts`, 2026-10-30.
 
-Region sizes: `athletic`=416, `graduate`=316, `apartments`=170, `east`=970, `west`=2379, `__connector`=11053. Importance (asc): athletic < hospital < graduate < apartments < east < west.
+Region sizes: `athletic`=319, `graduate`=192, `apartments`=112, `east`=901, `west`=1883, `__connector`=7077. Importance (asc): athletic < hospital < graduate < apartments < east < west.
 
-**realistic** = 70% of pairs both-endpoints-in-a-region (importance-weighted, west likeliest) + 30% uniform; 177/1000 fell within one region. Query-aware orders learn node usage from a **separate** 3000-query training sample (hot=11322 nodes ever on a path, cold=3982 never).
+**realistic** = 70% of pairs both-endpoints-in-a-region (importance-weighted, west likeliest) + 30% uniform; 173/1000 fell within one region. Query-aware orders learn node usage from a **separate** 3000-query training sample (hot=7989 nodes ever on a path, cold=2495 never).
 
 ## Realistic distribution (what actually gets searched)
 
 | strategy | shortcuts | up/node | settled/query | climb avg·max | query µs | vs base | self-check |
 |---|--:|--:|--:|--:|--:|--:|:--:|
-| geometric | 76552 | 6.14 | 210 | 158·272 | 161 | — | ✓ |
-| region-imp, conn-last | 116659 | 8.76 | 539 | 425·925 | 444 | +157% | ✓ |
-| boundary-sep last | 94810 | 7.34 | 318 | 170·379 | 317 | +52% | ✓ |
-| query-aware hot/cold | 123696 | 9.22 | 430 | 466·1117 | 348 | +105% | ✓ |
-| query-aware graded | 95063 | 7.35 | 391 | 235·660 | 378 | +86% | ✓ |
-| query-aware hot-ND, cold-flat | 124475 | 9.27 | 431 | 466·1117 | 355 | +105% | ✓ |
+| geometric | 61027 | 7.02 | 194 | 153·259 | 167 | — | ✓ |
+| region-imp, conn-last | 104009 | 11.12 | 566 | 460·960 | 461 | +192% | ✓ |
+| boundary-sep last | 78953 | 8.73 | 303 | 171·367 | 293 | +56% | ✓ |
+| query-aware hot/cold | 78684 | 8.71 | 313 | 291·620 | 235 | +61% | ✓ |
+| query-aware graded | 87573 | 9.56 | 363 | 208·648 | 352 | +87% | ✓ |
+| query-aware hot-ND, cold-flat | 79323 | 8.77 | 313 | 291·624 | 233 | +61% | ✓ |
 
 ## Uniform distribution (reference)
 
 | strategy | shortcuts | up/node | settled/query | climb avg·max | query µs | vs base | self-check |
 |---|--:|--:|--:|--:|--:|--:|:--:|
-| geometric | 76552 | 6.14 | 227 | 163·266 | 191 | — | ✓ |
-| region-imp, conn-last | 116659 | 8.76 | 397 | 341·912 | 332 | +75% | ✓ |
-| boundary-sep last | 94810 | 7.34 | 399 | 169·404 | 416 | +76% | ✓ |
-| query-aware hot/cold | 123696 | 9.22 | 498 | 508·1156 | 399 | +119% | ✓ |
-| query-aware graded | 95063 | 7.35 | 530 | 309·711 | 488 | +134% | ✓ |
-| query-aware hot-ND, cold-flat | 124475 | 9.27 | 499 | 509·1178 | 412 | +120% | ✓ |
+| geometric | 61027 | 7.02 | 200 | 153·259 | 149 | — | ✓ |
+| region-imp, conn-last | 104009 | 11.12 | 446 | 379·950 | 372 | +122% | ✓ |
+| boundary-sep last | 78953 | 8.73 | 349 | 169·378 | 327 | +74% | ✓ |
+| query-aware hot/cold | 78684 | 8.71 | 310 | 279·620 | 233 | +55% | ✓ |
+| query-aware graded | 87573 | 9.56 | 452 | 264·662 | 419 | +125% | ✓ |
+| query-aware hot-ND, cold-flat | 79323 | 8.77 | 311 | 279·618 | 233 | +55% | ✓ |
 
 ## Findings
 
-- **Realistic winner: `geometric`** (210 settled/query, — vs geometric). Uniform winner: `geometric`.
+- **Realistic winner: `geometric`** (194 settled/query, — vs geometric). Uniform winner: `geometric`.
 - Query-aware orders learn the real traffic network from a training sample and rank those nodes high; the geographic region blocks (28% of nodes in regions, 72% outlying connectors) can't, which is why they trail.
 
 ## How each was dissected
