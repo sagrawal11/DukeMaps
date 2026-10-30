@@ -191,7 +191,7 @@
          Rank is a non-spatial axis the map can't show, so the hierarchy gets its own little
          panel: y = depth, apex at the top, From/To at the bottom. SVG (tens of nodes). */
       .elim-inset {
-        position: absolute; right: 16px; bottom: 16px; width: 232px; background: var(--paper);
+        position: absolute; right: 16px; bottom: 16px; width: 360px; max-width: calc(100vw - 32px); background: var(--paper);
         border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow);
         padding: 12px 14px 10px; z-index: 1; pointer-events: none;
       }
@@ -204,7 +204,7 @@
         letter-spacing: -0.01em; margin-bottom: 6px;
       }
       .elim-svg { display: block; width: 100%; height: auto; overflow: visible; }
-      .elim-label { font: 600 7px var(--sans); }
+      .elim-label { font: 600 6px var(--sans); }
       .elim-apex.pulse { transform-box: fill-box; transform-origin: center; animation: elim-pulse 1.1s ease-in-out infinite; }
       @keyframes elim-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.55); } }
       .elim-cap { font-size: 11px; color: var(--muted); margin-top: 6px; line-height: 1.35; min-height: 2.7em; }
@@ -296,7 +296,7 @@
         .panel.collapsed .info, .panel.collapsed .metric, .panel.collapsed .options, .panel.collapsed .show { display: none; }
         .legend { top: 12px; right: 12px; left: 12px; max-width: none; }
         /* The bottom sheet owns the bottom; the inset moves to the clear top-left corner. */
-        .elim-inset { right: auto; left: 12px; top: 12px; bottom: auto; width: 142px; padding: 9px 10px 7px; }
+        .elim-inset { right: auto; left: 12px; top: 12px; bottom: auto; width: min(70vw, 230px); padding: 9px 10px 7px; }
         .elim-title { font-size: 11.5px; }
         .elim-cap { font-size: 10px; }
       }

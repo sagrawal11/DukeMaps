@@ -135,7 +135,7 @@ export function layoutElimTree(paths: ElimPaths, ch: CHData): TreeLayout {
   // every node at a level"). Siblings fan to the outside; capped so the inset stays readable.
   const children = buildChildren(buildParents(ch))
   const onChain = new Set<number>([...paths.sPath, ...paths.tPath])
-  const K = 3
+  const K = 4 // siblings shown per chain node — more = fuller decision-tree look
   const addSiblings = (path: number[], idxs: number[], dir: -1 | 1): void => {
     const last = path.length - 1
     for (let d = 0; d < last; d++) {

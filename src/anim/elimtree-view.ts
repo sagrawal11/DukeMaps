@@ -18,7 +18,7 @@ const DIM = '#d2cfc6' // not-yet-reached (on the search path)
 const FAINT = '#e8e5de' // unsearched sibling branches — just there for tree context
 
 // viewBox coordinate space; layout's [0,1]^2 maps into it with padding for the labels.
-const VW = 120
+const VW = 150
 const VH = 132
 const PAD_X = 9
 const PAD_TOP = 15 // room for the apex label

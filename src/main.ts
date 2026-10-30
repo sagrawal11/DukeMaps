@@ -177,7 +177,6 @@ function setupUI(
     '<div class="stats" id="stats"></div>' +
     '<div class="result" id="result"></div>' +
     '<div class="whatif" id="whatif"></div>' +
-    '<button type="button" class="disclosure" id="cmp-toggle" aria-expanded="false">Compare all</button>' +
     '<div class="compare" id="compare" hidden></div>' +
     '</div>'
   document.body.appendChild(panel)
@@ -233,7 +232,6 @@ function setupUI(
   const leaveAtBtn = panel.querySelector('#leave-at') as HTMLButtonElement
   const leaveatEl = panel.querySelector('#leaveat') as HTMLInputElement
   const stepfreeBtn = panel.querySelector('#stepfree') as HTMLButtonElement
-  const cmpToggle = panel.querySelector('#cmp-toggle') as HTMLButtonElement
   const playBtn = panel.querySelector('#playpause') as HTMLButtonElement
   const skipBtn = panel.querySelector('#skip') as HTMLButtonElement
   const speedEl = panel.querySelector('#speed') as HTMLInputElement
@@ -293,6 +291,7 @@ function setupUI(
 
   let curIdx = 0
   let playAll = false
+  let showCompare = false // the compare table only appears after "Play all", never on a normal search
   let advanceTimer = 0
   const results = new Map<string, { settled: number; searchMs: number; costS: number; found: boolean; optimal: boolean; edges: string[] }>()
 
@@ -310,6 +309,7 @@ function setupUI(
     compareEl.innerHTML = rows
       ? `<table><tr><th>algorithm</th><th>nodes searched</th><th>search time</th></tr>${rows}</table><div class="dim">* not the shortest route · hover a row to show its path</div>`
       : ''
+    compareEl.hidden = !showCompare || !rows // only during/after "Play all", never a normal search
   }
 
   // Run one algorithm, draw its route, record its stats. animate=false draws the route instantly (the
@@ -502,6 +502,7 @@ function setupUI(
   // opt into watching the exploration animate.
   const startShow = (): void => {
     resolveDoors()
+    showCompare = false
     results.clear()
     renderCompare()
     renderWhatIf()
@@ -510,13 +511,6 @@ function setupUI(
     playAlgo(optimalIdx, false)
   }
 
-  const toggleDisclosure = (btn: HTMLButtonElement, body: HTMLElement): void => {
-    const open = body.hidden
-    body.hidden = !open
-    btn.setAttribute('aria-expanded', String(open))
-    btn.classList.toggle('open', open)
-  }
-  cmpToggle.addEventListener('click', () => toggleDisclosure(cmpToggle, compareEl))
   // Hover a compare row → emphasise that algorithm's route on the map (handy once routes overlap).
   compareEl.addEventListener('mouseover', (e) => {
     const key = ((e.target as HTMLElement).closest('tr[data-key]') as HTMLElement | null)?.dataset.key
@@ -548,6 +542,7 @@ function setupUI(
   algosLink.addEventListener('click', () => {
     if (!chosen.from || !chosen.to) return
     window.clearTimeout(advanceTimer)
+    showCompare = true
     results.clear()
     renderCompare()
     overlay.clearRoutes()
@@ -592,6 +587,8 @@ function setupUI(
     input(w).value = ''
     syncFieldX(w)
     showEl.hidden = true
+    showCompare = false
+    compareEl.hidden = true
     overlay.clear()
     elimView.hide()
     player?.dispose()
