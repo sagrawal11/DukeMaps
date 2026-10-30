@@ -14,6 +14,8 @@ export interface Overlay {
   redraw(s: RenderState): void
   addRoute(edges: string[], color: string): void // persist a coloured route (routes stack as each algo finishes)
   clearRoutes(): void
+  setHighlight(edges: string[], color: string): void // emphasise one route (hovering a compare row)
+  clearHighlight(): void
   clearState(): void // clear the exploration frontier but keep persisted routes
   clear(): void
   dispose(): void
@@ -30,6 +32,7 @@ export function createOverlay(map: maplibregl.Map, graph: Graph): Overlay {
   let dpr = 1
   let state: RenderState | null = null
   let routes: { edges: string[]; color: string }[] = [] // persisted; each algorithm adds its route in its colour
+  let highlight: { edges: string[]; color: string } | null = null // one route emphasised on hover
 
   const px = (lon: number, lat: number): [number, number] => {
     const p = map.project([lon, lat])
@@ -80,6 +83,10 @@ export function createOverlay(map: maplibregl.Map, graph: Graph): Overlay {
       if (state.current != null) fillNodes([state.current], '#111827', 3.4) // the node being expanded
     }
     for (const r of routes) strokeEdges(r.edges, r.color, 4) // persisted routes (one colour per algorithm)
+    if (highlight) {
+      strokeEdges(highlight.edges, '#ffffff', 8) // white casing so the hovered path reads over the others
+      strokeEdges(highlight.edges, highlight.color, 5)
+    }
   }
 
   const resize = (): void => {
@@ -109,6 +116,15 @@ export function createOverlay(map: maplibregl.Map, graph: Graph): Overlay {
     },
     clearRoutes() {
       routes = []
+      highlight = null
+      draw()
+    },
+    setHighlight(edges, color) {
+      highlight = { edges, color }
+      draw()
+    },
+    clearHighlight() {
+      highlight = null
       draw()
     },
     clearState() {
@@ -118,6 +134,7 @@ export function createOverlay(map: maplibregl.Map, graph: Graph): Overlay {
     clear() {
       state = null
       routes = []
+      highlight = null
       draw()
     },
     dispose() {

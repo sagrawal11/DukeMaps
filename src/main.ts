@@ -269,6 +269,7 @@ function setupUI(
 
   const fmtTime = (s: number): string => (s < 90 ? `${Math.round(s)} s` : `${Math.round(s / 60)} min`)
   const fmtDist = (m: number): string => (m < 950 ? `${Math.round(m)} m` : `${(m / 1000).toFixed(2)} km`)
+  const fmtSearch = (ms: number): string => (ms < 1 ? `${(ms * 1000).toFixed(0)} µs` : `${ms.toFixed(ms < 10 ? 1 : 0)} ms`)
 
   // The seven algorithms to walk through. CH/CCH need their prebuilt data; drop them if it didn't load.
   const algos: AlgoDef[] = ALGORITHMS.filter((a) => a.key !== 'cch' || !!cchStructure)
@@ -292,20 +293,21 @@ function setupUI(
   let curIdx = 0
   let playAll = false
   let advanceTimer = 0
-  const results = new Map<string, { settled: number; costS: number; found: boolean; optimal: boolean }>()
+  const results = new Map<string, { settled: number; searchMs: number; costS: number; found: boolean; optimal: boolean; edges: string[] }>()
 
   // A small table that accumulates as each algorithm finishes — the mechanism contrast, side by side.
+  // Each row carries its algorithm key so hovering it can highlight that algorithm's route on the map.
   const renderCompare = (): void => {
     const rows = algos
       .filter((a) => results.has(a.key))
       .map((a) => {
         const r = results.get(a.key)!
         const dot = `<span class="swatch" style="background:${ALGO_COLORS[a.key] ?? '#1b7a37'}"></span>`
-        return `<tr><td>${dot}${esc(a.name)}</td><td>${r.settled}</td><td>${r.found ? fmtTime(r.costS) : '—'}${r.optimal ? '' : '*'}</td></tr>`
+        return `<tr data-key="${a.key}"><td>${dot}${esc(a.name)}${r.optimal ? '' : '*'}</td><td>${r.settled}</td><td>${fmtSearch(r.searchMs)}</td></tr>`
       })
       .join('')
     compareEl.innerHTML = rows
-      ? `<table><tr><th>algorithm</th><th>settled</th><th>time</th></tr>${rows}</table><div class="dim">* not the fastest route</div>`
+      ? `<table><tr><th>algorithm</th><th>nodes searched</th><th>search time</th></tr>${rows}</table><div class="dim">* not the shortest route · hover a row to show its path</div>`
       : ''
   }
 
@@ -328,7 +330,9 @@ function setupUI(
     statsEl.textContent = '' // settled/relaxed only shows while animating (set in the render loop below)
     curIdx = i
     const def = algos[i]
-    const trace = runAlgo(def.key, rg, weight, chData as CHData, cchData as CHData, chosen.from.node.id, chosen.to.node.id)
+    const sId = chosen.from.node.id // captured so the onDone closure (timing loop) has them non-null
+    const tId = chosen.to.node.id
+    const trace = runAlgo(def.key, rg, weight, chData as CHData, cchData as CHData, sId, tId)
     showEl.hidden = false
     controlsEl.hidden = !animate // playback controls only while watching an animation
     captionEl.textContent = animate ? def.caption : ''
@@ -345,7 +349,20 @@ function setupUI(
     }
     const onDone = (): void => {
       playBtn.textContent = 'Replay'
-      results.set(def.key, { settled: trace.stats.nodesSettled, costS: trace.route?.costS ?? Infinity, found: trace.stats.found, optimal: def.optimal })
+      // Search time = how long the algorithm takes to compute, averaged over a few warm runs so the
+      // number is stable (sub-millisecond otherwise). The animation run above already warmed the JIT.
+      const K = 25
+      const t0 = performance.now()
+      for (let k = 0; k < K; k++) runAlgo(def.key, rg, weight, chData as CHData, cchData as CHData, sId, tId)
+      const searchMs = (performance.now() - t0) / K
+      results.set(def.key, {
+        settled: trace.stats.nodesSettled,
+        searchMs,
+        costS: trace.route?.costS ?? Infinity,
+        found: trace.stats.found,
+        optimal: def.optimal,
+        edges: trace.route?.edges ?? [],
+      })
       renderCompare()
       if (trace.route) {
         overlay.addRoute(trace.route.edges, playAll ? ALGO_COLORS[def.key] ?? '#1b7a37' : '#1b7a37')
@@ -499,6 +516,13 @@ function setupUI(
     btn.classList.toggle('open', open)
   }
   cmpToggle.addEventListener('click', () => toggleDisclosure(cmpToggle, compareEl))
+  // Hover a compare row → emphasise that algorithm's route on the map (handy once routes overlap).
+  compareEl.addEventListener('mouseover', (e) => {
+    const key = ((e.target as HTMLElement).closest('tr[data-key]') as HTMLElement | null)?.dataset.key
+    const r = key ? results.get(key) : null
+    if (r && r.edges.length) overlay.setHighlight(r.edges, ALGO_COLORS[key as string] ?? '#111827')
+  })
+  compareEl.addEventListener('mouseleave', () => overlay.clearHighlight())
 
   const setLeaveMode = (now: boolean): void => {
     leaveNow = now
