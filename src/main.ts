@@ -49,7 +49,7 @@ function initMap(): maplibregl.Map {
           type: 'vector',
           url: basemapUrl,
           attribution:
-            '<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap</a> (ODbL) · <a href="https://protomaps.com" target="_blank" rel="noopener">Protomaps</a>',
+            '<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap</a> (ODbL) · <a href="https://protomaps.com" target="_blank" rel="noopener">Protomaps</a> · <a href="#" class="dm-devlogin">developer login</a>',
         },
       },
       layers: themeLayers('protomaps', 'light', 'en'),
@@ -656,25 +656,14 @@ function setupUI(
   const doorsByName = new Map((buildingIconsConfig as BuildingIcon[]).filter((b) => b.doors?.length).map((b) => [b.name, b.doors as [number, number][]]))
   createBuildingIcons(map, buildingIconsConfig as BuildingIcon[], pickBuilding)
 
-  // Dev-only coordinate picker: when on, a map click copies "lat, lon" instead of routing — so exact
-  // building positions can be handed back for config/building-overrides.json. Hidden in the built site.
+  // Developer tools (coordinate picker + door editor) are hidden by default. A "developer login" link in
+  // the map attribution (bottom-right; password: dukemaps) reveals them, persisted in localStorage — so the
+  // normal search modal stays clean for visitors.
   let pickCoords = false
-  const pickBtn = panel.querySelector('#pickcoords') as HTMLButtonElement
-  if (import.meta.env.DEV) {
-    pickBtn.hidden = false
-    pickBtn.addEventListener('click', () => {
-      pickCoords = !pickCoords
-      pickBtn.classList.toggle('on', pickCoords)
-      pickBtn.setAttribute('aria-pressed', String(pickCoords))
-      map.getCanvas().style.cursor = pickCoords ? 'copy' : 'crosshair'
-    })
-  }
-
-  // Door-placement editor (dev-only): drop a pin at each building door. Autosaved to data/doors.json;
-  // `npm run assign:doors` later associates each door with its nearest building for door-accurate routing.
   let doorMode = false
   const doorPts: [number, number][] = [] // [lon, lat]
   const doorMarkers: maplibregl.Marker[] = []
+  const pickBtn = panel.querySelector('#pickcoords') as HTMLButtonElement
   const doorBtn = panel.querySelector('#doormode') as HTMLButtonElement
   const doorUndoBtn = panel.querySelector('#doorundo') as HTMLButtonElement
   const addDoorPin = (lon: number, lat: number): void => {
@@ -685,30 +674,67 @@ function setupUI(
   const saveDoors = (): void => {
     void fetch('/__doors', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(doorPts) })
   }
-  if (import.meta.env.DEV) {
-    doorBtn.hidden = false
-    doorUndoBtn.hidden = false
-    void fetch('/__doors')
-      .then((r) => (r.ok ? r.json() : []))
-      .then((pts: [number, number][]) => {
-        for (const p of pts) {
-          doorPts.push(p)
-          addDoorPin(p[0], p[1])
-        }
-      })
-    doorBtn.addEventListener('click', () => {
-      doorMode = !doorMode
-      doorBtn.classList.toggle('on', doorMode)
-      doorBtn.setAttribute('aria-pressed', String(doorMode))
-      if (doorMode) flashNotice(`🚪 Door mode on — click each door (${doorPts.length} placed)`)
-    })
-    doorUndoBtn.addEventListener('click', () => {
-      doorPts.pop()
-      doorMarkers.pop()?.remove()
-      saveDoors()
-      flashNotice(`🚪 ${doorPts.length} doors`)
-    })
+  pickBtn.addEventListener('click', () => {
+    pickCoords = !pickCoords
+    pickBtn.classList.toggle('on', pickCoords)
+    pickBtn.setAttribute('aria-pressed', String(pickCoords))
+    map.getCanvas().style.cursor = pickCoords ? 'copy' : 'crosshair'
+  })
+  doorBtn.addEventListener('click', () => {
+    doorMode = !doorMode
+    doorBtn.classList.toggle('on', doorMode)
+    doorBtn.setAttribute('aria-pressed', String(doorMode))
+    if (doorMode) flashNotice(`🚪 Door mode on — click each door (${doorPts.length} placed)`)
+  })
+  doorUndoBtn.addEventListener('click', () => {
+    doorPts.pop()
+    doorMarkers.pop()?.remove()
+    saveDoors()
+    flashNotice(`🚪 ${doorPts.length} doors`)
+  })
+  // Show/hide the dev tools; load the placed door pins the first time it's enabled.
+  let devMode = localStorage.getItem('dukemaps.dev') === '1'
+  let doorsLoaded = false
+  const applyDevMode = (): void => {
+    pickBtn.hidden = !devMode
+    doorBtn.hidden = !devMode
+    doorUndoBtn.hidden = !devMode
+    localStorage.setItem('dukemaps.dev', devMode ? '1' : '0')
+    if (devMode && !doorsLoaded) {
+      doorsLoaded = true
+      void fetch('/__doors')
+        .then((r) => (r.ok ? r.json() : []))
+        .then((pts: [number, number][]) => {
+          for (const p of pts) {
+            doorPts.push(p)
+            addDoorPin(p[0], p[1])
+          }
+        })
+    }
+    if (!devMode) {
+      pickCoords = false
+      doorMode = false
+      pickBtn.classList.remove('on')
+      doorBtn.classList.remove('on')
+    }
   }
+  // The "developer login" link is rendered inside the MapLibre attribution — delegate its click.
+  document.addEventListener('click', (e) => {
+    if (!(e.target as HTMLElement).closest('.dm-devlogin')) return
+    e.preventDefault()
+    if (devMode) {
+      devMode = false
+      applyDevMode()
+      flashNotice('Developer mode off')
+    } else if (window.prompt('Developer password') === 'dukemaps') {
+      devMode = true
+      applyDevMode()
+      flashNotice('Developer mode on')
+    } else {
+      flashNotice('Wrong password')
+    }
+  })
+  applyDevMode()
 
   // Tap fills From, then To; a tap when both are set starts a fresh pair. The pin is labelled with the
   // building you're nearest (not "Dropped pin").

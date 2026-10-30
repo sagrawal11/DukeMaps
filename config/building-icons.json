@@ -985,7 +985,12 @@
   "area": "East Campus",
   "nickname": "East Duke",
   "tier": 2,
-  "doors": [],
+  "doors": [
+   [
+    -78.91440323506073,
+    36.004963628845005
+   ]
+  ],
   "lat": 36.00495905333334,
   "lon": -78.91415289333335,
   "place": "East Duke Building",
@@ -999,7 +1004,16 @@
   "area": "East Campus",
   "nickname": "West Duke",
   "tier": 2,
-  "doors": [],
+  "doors": [
+   [
+    -78.91509405240537,
+    36.00497403292563
+   ],
+   [
+    -78.9152575703406,
+    36.00506172440704
+   ]
+  ],
   "lat": 36.004990069230765,
   "lon": -78.91538774615385,
   "place": "West Duke Building",
@@ -1013,7 +1027,12 @@
   "area": "East Campus",
   "nickname": "East House",
   "tier": 1,
-  "doors": [],
+  "doors": [
+   [
+    -78.91414231334842,
+    36.00575881649871
+   ]
+  ],
   "lat": 36.00575486923078,
   "lon": -78.91406406153848,
   "place": "East House Residence Hall",
@@ -1027,7 +1046,12 @@
   "area": "East Campus",
   "nickname": "West House",
   "tier": 1,
-  "doors": [],
+  "doors": [
+   [
+    -78.91527407793436,
+    36.00578111073064
+   ]
+  ],
   "lat": 36.005781,
   "lon": -78.915335,
   "place": null,
@@ -1097,7 +1121,12 @@
   "area": "East Campus",
   "nickname": "White Lecture Hall",
   "tier": 3,
-  "doors": [],
+  "doors": [
+   [
+    -78.91404312814736,
+    36.00528020953854
+   ]
+  ],
   "lat": 36.00530514285715,
   "lon": -78.91395665714286,
   "place": "Richard White Lecture Hall",
@@ -1111,7 +1140,12 @@
   "area": "East Campus",
   "nickname": "Classroom",
   "tier": 3,
-  "doors": [],
+  "doors": [
+   [
+    -78.91506378558748,
+    36.00644058410853
+   ]
+  ],
   "lat": 36.006443676923084,
   "lon": -78.91526615384616,
   "place": "Classroom Building",
@@ -1125,7 +1159,12 @@
   "area": "East Campus",
   "nickname": "Giles",
   "tier": 1,
-  "doors": [],
+  "doors": [
+   [
+    -78.91504437009057,
+    36.00702694614003
+   ]
+  ],
   "lat": 36.00707316153846,
   "lon": -78.91524646153847,
   "place": "Giles Residence Hall",
@@ -1139,7 +1178,12 @@
   "area": "East Campus",
   "nickname": "Lilly",
   "tier": 2,
-  "doors": [],
+  "doors": [
+   [
+    -78.91516086307176,
+    36.00759766092162
+   ]
+  ],
   "lat": 36.007614322222224,
   "lon": -78.91530184999999,
   "place": "Lilly Library",
@@ -1153,7 +1197,12 @@
   "area": "East Campus",
   "nickname": "Alspaugh",
   "tier": 1,
-  "doors": [],
+  "doors": [
+   [
+    -78.9150476060047,
+    36.00814736738687
+   ]
+  ],
   "lat": 36.00817211578947,
   "lon": -78.91519927368421,
   "place": "Alspaugh Residence Hall",
@@ -1167,7 +1216,12 @@
   "area": "East Campus",
   "nickname": "Pegram",
   "tier": 1,
-  "doors": [],
+  "doors": [
+   [
+    -78.91501848275907,
+    36.0087546576915
+   ]
+  ],
   "lat": 36.008773676190486,
   "lon": -78.91517537619046,
   "place": "Pegram Residence Hall",
@@ -1181,7 +1235,12 @@
   "area": "East Campus",
   "nickname": "Baldwin",
   "tier": 2,
-  "doors": [],
+  "doors": [
+   [
+    -78.91464958831222,
+    36.008875068143766
+   ]
+  ],
   "lat": 36.00905374166666,
   "lon": -78.91464485416667,
   "place": "Baldwin Auditorium",
@@ -1195,7 +1254,12 @@
   "area": "East Campus",
   "nickname": "Bassett",
   "tier": 1,
-  "doors": [],
+  "doors": [
+   [
+    -78.9142580424524,
+    36.008731099102334
+   ]
+  ],
   "lat": 36.00874615263158,
   "lon": -78.91412111578946,
   "place": "Bassett Residence Hall",
@@ -1209,7 +1273,12 @@
   "area": "East Campus",
   "nickname": "Brown",
   "tier": 1,
-  "doors": [],
+  "doors": [
+   [
+    -78.91427098611717,
+    36.00811595569169
+   ]
+  ],
   "lat": 36.00811529473684,
   "lon": -78.91410654736843,
   "place": "Brown Residence Hall",
@@ -1223,7 +1292,12 @@
   "area": "East Campus",
   "nickname": "Marketplace",
   "tier": 1,
-  "doors": [],
+  "doors": [
+   [
+    -78.91418361637972,
+    36.007537454742476
+   ]
+  ],
   "lat": 36.00758218,
   "lon": -78.91408377,
   "place": "East Campus Union Building",
@@ -1237,7 +1311,12 @@
   "area": "East Campus",
   "nickname": "Wilson",
   "tier": 1,
-  "doors": [],
+  "doors": [
+   [
+    -78.91431628894561,
+    36.00702956381775
+   ]
+  ],
   "lat": 36.00703268125,
   "lon": -78.91419398750001,
   "place": "Wilson Residence Hall",
@@ -1251,7 +1330,12 @@
   "area": "East Campus",
   "nickname": "Friedl",
   "tier": 3,
-  "doors": [],
+  "doors": [
+   [
+    -78.91430334528081,
+    36.00642749562026
+   ]
+  ],
   "lat": 36.006412875,
   "lon": -78.9141221625,
   "place": "Friedl Science Building",
@@ -1265,7 +1349,12 @@
   "area": "East Campus",
   "nickname": "Southgate",
   "tier": 1,
-  "doors": [],
+  "doors": [
+   [
+    -78.91804635631537,
+    36.00604718317223
+   ]
+  ],
   "lat": 36.00598544333332,
   "lon": -78.91796638333332,
   "place": "Southgate Residence Hall",
@@ -1331,7 +1420,12 @@
   "area": "East Campus",
   "nickname": "GA",
   "tier": 1,
-  "doors": [],
+  "doors": [
+   [
+    -78.91735250610178,
+    36.005776607847494
+   ]
+  ],
   "lat": 36.005702126086966,
   "lon": -78.91694392173915,
   "place": "Gilbert-Addoms Residence Hall",
@@ -1364,7 +1458,12 @@
   "area": "East Campus",
   "nickname": "Mary Duke Biddle Music",
   "tier": 3,
-  "doors": [],
+  "doors": [
+   [
+    -78.91587743729764,
+    36.00893581899656
+   ]
+  ],
   "lat": 36.009132828571424,
   "lon": -78.91588202857143,
   "place": "Mary Duke Biddle Music Building",
@@ -1378,7 +1477,16 @@
   "area": "East Campus",
   "nickname": "Blackwell",
   "tier": 1,
-  "doors": [],
+  "doors": [
+   [
+    -78.91640283226454,
+    36.00657774196168
+   ],
+   [
+    -78.9164007881474,
+    36.00632060866599
+   ]
+  ],
   "lat": 36.00645143962264,
   "lon": -78.91647553207545,
   "place": "Blackwell Residence Hall",
@@ -1392,7 +1500,16 @@
   "area": "East Campus",
   "nickname": "Randolph",
   "tier": 1,
-  "doors": [],
+  "doors": [
+   [
+    -78.91725454634508,
+    36.00679745735705
+   ],
+   [
+    -78.917013605632,
+    36.00679632416916
+   ]
+  ],
   "lat": 36.00671786734694,
   "lon": -78.9171444265306,
   "place": "Randolph Residence Hall",
@@ -1420,7 +1537,12 @@
   "area": "East Campus",
   "nickname": "Trinity",
   "tier": 1,
-  "doors": [],
+  "doors": [
+   [
+    -78.91857066781824,
+    36.006319585778144
+   ]
+  ],
   "lat": 36.006526472881355,
   "lon": -78.91872082542373,
   "place": "Trinity Residence Hall",
@@ -2507,7 +2629,16 @@
   "area": "Central Campus And Gardens",
   "nickname": "300 Swift",
   "tier": 1,
-  "doors": [],
+  "doors": [
+   [
+    -78.9217154311451,
+    36.002703274848244
+   ],
+   [
+    -78.92209558820007,
+    36.00256742752744
+   ]
+  ],
   "lat": 36.002858,
   "lon": -78.922204,
   "place": null,
@@ -2601,7 +2732,12 @@
   "area": "Central Campus And Gardens",
   "nickname": "The Ruby",
   "tier": 2,
-  "doors": [],
+  "doors": [
+   [
+    -78.92967985287166,
+    36.00027139018137
+   ]
+  ],
   "lat": 36.00028342631579,
   "lon": -78.92947085789474,
   "place": "Rubenstein Arts Center",
