@@ -166,14 +166,12 @@ function setupUI(
     '<div class="metric" id="metric"></div>' +
     '<div class="info" id="info"></div>' +
     '<div class="show" id="show" hidden>' +
-    '<div class="chips" id="chips"></div>' +
-    '<div class="chipnote" id="chipnote"></div>' +
+    '<button type="button" class="algos-link" id="algos-link">Look how different search algorithms find this path! →</button>' +
     '<div class="caption" id="caption"></div>' +
-    '<div class="controls">' +
+    '<div class="controls" id="controls" hidden>' +
     '<button type="button" id="playpause" class="ctl-primary">Pause</button>' +
     '<button type="button" id="skip">Skip</button>' +
     '<label class="spd">Speed <input type="range" id="speed" min="0.25" max="4" step="0.25" value="1" /></label>' +
-    '<button type="button" id="playall" class="ctl-link">▶ Play all</button>' +
     '</div>' +
     '<div class="stats" id="stats"></div>' +
     '<div class="result" id="result"></div>' +
@@ -222,8 +220,8 @@ function setupUI(
   })
 
   const showEl = panel.querySelector('#show') as HTMLDivElement
-  const chipsEl = panel.querySelector('#chips') as HTMLDivElement
-  const chipnoteEl = panel.querySelector('#chipnote') as HTMLDivElement
+  const algosLink = panel.querySelector('#algos-link') as HTMLButtonElement
+  const controlsEl = panel.querySelector('#controls') as HTMLDivElement
   const captionEl = panel.querySelector('#caption') as HTMLDivElement
   const statsEl = panel.querySelector('#stats') as HTMLDivElement
   const resultEl = panel.querySelector('#result') as HTMLDivElement
@@ -235,7 +233,6 @@ function setupUI(
   const leaveatEl = panel.querySelector('#leaveat') as HTMLInputElement
   const stepfreeBtn = panel.querySelector('#stepfree') as HTMLButtonElement
   const cmpToggle = panel.querySelector('#cmp-toggle') as HTMLButtonElement
-  const playAllBtn = panel.querySelector('#playall') as HTMLButtonElement
   const playBtn = panel.querySelector('#playpause') as HTMLButtonElement
   const skipBtn = panel.querySelector('#skip') as HTMLButtonElement
   const speedEl = panel.querySelector('#speed') as HTMLInputElement
@@ -269,9 +266,11 @@ function setupUI(
 
   // The seven algorithms to walk through. CH/CCH need their prebuilt data; drop them if it didn't load.
   const algos: AlgoDef[] = ALGORITHMS.filter((a) => (a.key !== 'ch' && a.key !== 'cch') || !!(chData && cchStructure))
-  chipsEl.innerHTML = algos.map((a, i) => `<button type="button" class="chip" data-i="${i}">${esc(a.name)}</button>`).join('')
-  const chipEls = Array.from(chipsEl.querySelectorAll('.chip')) as HTMLButtonElement[]
-  const chChipIdx = algos.findIndex((a) => a.key === 'ch')
+  // One colour per algorithm — routes persist in these colours during "Play all". The optimal searches
+  // find the identical route (so they overlap); BFS and DFS differ, so their colours stand apart.
+  const ALGO_COLORS: Record<string, string> = {
+    bfs: '#e8590c', dfs: '#ae3ec9', dijkstra: '#1b7a37', astar: '#1c7ed6', bidir: '#f08c00', ch: '#e03131', cch: '#0b7285',
+  }
   // The one optimal algorithm the default (instant) route draw uses (CCH if the hierarchy loaded, else Dijkstra).
   const optimalIdx = ((): number => {
     const i = algos.findIndex((a) => a.key === 'cch')
@@ -295,7 +294,8 @@ function setupUI(
       .filter((a) => results.has(a.key))
       .map((a) => {
         const r = results.get(a.key)!
-        return `<tr><td>${esc(a.name)}</td><td>${r.settled}</td><td>${r.found ? fmtTime(r.costS) : '—'}${r.optimal ? '' : '*'}</td></tr>`
+        const dot = `<span class="swatch" style="background:${ALGO_COLORS[a.key] ?? '#1b7a37'}"></span>`
+        return `<tr><td>${dot}${esc(a.name)}</td><td>${r.settled}</td><td>${r.found ? fmtTime(r.costS) : '—'}${r.optimal ? '' : '*'}</td></tr>`
       })
       .join('')
     compareEl.innerHTML = rows
@@ -316,15 +316,15 @@ function setupUI(
     }
     window.clearTimeout(advanceTimer)
     player?.dispose()
-    overlay.clear()
+    overlay.clearState() // clear the exploration frontier; persisted routes stay (they stack during Play all)
     elimView.hide() // re-shown just below, only for the hierarchy searches
     resultEl.textContent = ''
     curIdx = i
-    chipEls.forEach((c, k) => c.classList.toggle('on', k === i))
     const def = algos[i]
     const trace = runAlgo(def.key, rg, weight, chData as CHData, cchData as CHData, chosen.from.node.id, chosen.to.node.id)
     showEl.hidden = false
-    captionEl.textContent = def.caption
+    controlsEl.hidden = !animate // playback controls only while watching an animation
+    captionEl.textContent = animate ? def.caption : ''
     // The elimination-tree inset tells the "climb to the apex, unpack back down" story — only for CH/CCH,
     // and not in Instant (it's educational chrome). Derived structurally from the active hierarchy; the
     // algorithms stay pure. CH uses the prebuilt data, CCH its live-customized data — both are CHData.
@@ -341,7 +341,7 @@ function setupUI(
       results.set(def.key, { settled: trace.stats.nodesSettled, costS: trace.route?.costS ?? Infinity, found: trace.stats.found, optimal: def.optimal })
       renderCompare()
       if (trace.route) {
-        overlay.drawRoute(trace.route)
+        overlay.addRoute(trace.route.edges, playAll ? ALGO_COLORS[def.key] ?? '#1b7a37' : '#1b7a37')
         resultEl.innerHTML = `<b>${fmtTime(trace.route.costS)}</b> · ${fmtDist(trace.route.distanceM)} walk · explored ${trace.stats.nodesSettled} nodes`
       } else {
         resultEl.textContent = 'No route found.'
@@ -439,22 +439,11 @@ function setupUI(
         : ''
       metricEl.innerHTML = `Metric: ${bits.join(' + ')}${recust}`
     }
-    if (chChipIdx >= 0) {
-      const dis = !isBaseMetric()
-      const chip = chipEls[chChipIdx]
-      chip.classList.toggle('disabled', dis)
-      chip.disabled = dis
-      chip.title = dis
-        ? 'Contraction Hierarchies bake the weights into their shortcuts — a changed metric needs a full rebuild. Customizable CH re-customizes instead.'
-        : ''
-      chipnoteEl.innerHTML = dis
-        ? 'Contraction Hierarchies is greyed out — it bakes the weights into its shortcuts, so it can’t react to this metric. Customizable CH re-customizes instead.'
-        : ''
-    }
     if (opt.rerun && chosen.from && chosen.to) {
       results.clear()
       renderCompare()
       renderWhatIf()
+      overlay.clearRoutes()
       playAlgo(runnableIdx(curIdx), false)
     }
   }
@@ -491,6 +480,7 @@ function setupUI(
     results.clear()
     renderCompare()
     renderWhatIf()
+    overlay.clearRoutes()
     playAll = false
     playAlgo(optimalIdx, false)
   }
@@ -522,25 +512,22 @@ function setupUI(
     stepfreeBtn.setAttribute('aria-pressed', String(metricOpts.stepFree))
     applyMetric({ rerun: true })
   })
-  chipsEl.addEventListener('click', (e) => {
-    const btn = (e.target as HTMLElement).closest('.chip') as HTMLButtonElement | null
-    if (!btn || btn.disabled) return
-    playAll = false
-    window.clearTimeout(advanceTimer)
-    playAlgo(Number(btn.dataset.i), true) // clicking a chip animates that algorithm
-  })
-  // Play all → watch every algorithm explore in sequence (the educational show, now opt-in).
-  playAllBtn.addEventListener('click', () => {
+  // The single link → watch every algorithm explore in turn, each route persisting in its own colour.
+  algosLink.addEventListener('click', () => {
     if (!chosen.from || !chosen.to) return
     window.clearTimeout(advanceTimer)
     results.clear()
     renderCompare()
+    overlay.clearRoutes()
     playAll = true
     playAlgo(0, true)
   })
   playBtn.addEventListener('click', () => {
     if (!player) return
-    if (playBtn.textContent === 'Replay') playAlgo(curIdx, true)
+    if (playBtn.textContent === 'Replay') {
+      overlay.clearRoutes()
+      playAlgo(curIdx, true)
+    }
     else if (player.playing) {
       player.pause()
       playBtn.textContent = 'Play'

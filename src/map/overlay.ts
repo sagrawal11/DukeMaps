@@ -9,11 +9,12 @@
 import type * as maplibregl from 'maplibre-gl'
 import type { Graph } from '../graph/types'
 import type { RenderState } from '../anim/player'
-import type { RouteResult } from '../algorithms/trace'
 
 export interface Overlay {
   redraw(s: RenderState): void
-  drawRoute(r: RouteResult): void
+  addRoute(edges: string[], color: string): void // persist a coloured route (routes stack as each algo finishes)
+  clearRoutes(): void
+  clearState(): void // clear the exploration frontier but keep persisted routes
   clear(): void
   dispose(): void
 }
@@ -28,7 +29,7 @@ export function createOverlay(map: maplibregl.Map, graph: Graph): Overlay {
 
   let dpr = 1
   let state: RenderState | null = null
-  let route: RouteResult | null = null
+  let routes: { edges: string[]; color: string }[] = [] // persisted; each algorithm adds its route in its colour
 
   const px = (lon: number, lat: number): [number, number] => {
     const p = map.project([lon, lat])
@@ -78,7 +79,7 @@ export function createOverlay(map: maplibregl.Map, graph: Graph): Overlay {
       fillNodes(state.discoveredB, 'rgba(236,72,153,0.85)', 1.7, state.settledB) // backward frontier (pink)
       if (state.current != null) fillNodes([state.current], '#111827', 3.4) // the node being expanded
     }
-    if (route) strokeEdges(route.edges, '#1b7a37', 4) // final route
+    for (const r of routes) strokeEdges(r.edges, r.color, 4) // persisted routes (one colour per algorithm)
   }
 
   const resize = (): void => {
@@ -102,13 +103,21 @@ export function createOverlay(map: maplibregl.Map, graph: Graph): Overlay {
       state = s
       draw()
     },
-    drawRoute(r) {
-      route = r
+    addRoute(edges, color) {
+      routes.push({ edges, color })
+      draw()
+    },
+    clearRoutes() {
+      routes = []
+      draw()
+    },
+    clearState() {
+      state = null
       draw()
     },
     clear() {
       state = null
-      route = null
+      routes = []
       draw()
     },
     dispose() {
