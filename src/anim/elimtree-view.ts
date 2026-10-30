@@ -15,7 +15,7 @@ export interface FullTreeHighlight {
   sPath: number[] // routing indices, From leaf .. apex
   tPath: number[] // routing indices, To leaf .. apex
   apex: number // routing index of the meeting node
-  buildings?: { idx: number; file: string }[] // placed building icons: routing index of their node + icon URL
+  buildings?: { idx: number; file: string; name: string }[] // placed building icons: node routing index, icon URL, label
 }
 
 const NS = 'http://www.w3.org/2000/svg'
@@ -150,6 +150,9 @@ export function createElimTreeView(container: HTMLElement): ElimTreeView {
     // placed building icons at their nodes — campus landmarks scattered through the hierarchy
     if (fh.buildings) {
       const S = 17
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'top'
+      ctx.font = '600 10px ui-sans-serif, system-ui, sans-serif'
       for (const b of fh.buildings) {
         let img = iconCache.get(b.file)
         if (!img) {
@@ -173,6 +176,13 @@ export function createElimTreeView(container: HTMLElement): ElimTreeView {
         ctx.arc(ix, iy, S / 2 + 2, 0, 7)
         ctx.fill()
         ctx.drawImage(img, ix - S / 2, iy - S / 2, S, S)
+        // building name under the icon, with a white halo so it reads over the tree
+        const ty = iy + S / 2 + 2
+        ctx.lineWidth = 3
+        ctx.strokeStyle = '#fff'
+        ctx.strokeText(b.name, ix, ty)
+        ctx.fillStyle = '#374151'
+        ctx.fillText(b.name, ix, ty)
       }
     }
   }
@@ -202,7 +212,7 @@ export function createElimTreeView(container: HTMLElement): ElimTreeView {
       const r = canvas.getBoundingClientRect()
       const mx = e.clientX - r.left
       const my = e.clientY - r.top
-      const f = Math.exp(-e.deltaY * 0.0012) // gentle zoom toward the cursor, scaled to the scroll amount
+      const f = Math.exp(-e.deltaY * 0.0025) // zoom toward the cursor, scaled to scroll amount (map-like speed)
       viewT.ox = mx - (mx - viewT.ox) * f
       viewT.oy = my - (my - viewT.oy) * f
       viewT.zoom *= f
