@@ -154,6 +154,7 @@
       .caption:empty { display: none; }
 
       .controls { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
+      .controls[hidden] { display: none; } /* class rule above would otherwise beat the plain [hidden] */
       .controls button {
         border: 1px solid var(--line); background: var(--paper-2); border-radius: var(--radius-sm);
         padding: 6px 11px; font: 12.5px var(--sans); color: var(--ink); cursor: pointer;
