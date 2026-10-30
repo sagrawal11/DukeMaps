@@ -32,21 +32,21 @@ export interface CCHStructure {
 // the nodes on the "far" side that touch the "near" side — is ranked above both halves, so a query
 // climbing the hierarchy passes through these few important nodes last. Hand-written vertex separator
 // (brief: no library); a graph-partitioner (KaHIP/Metis) would find smaller ones.
-export function nestedDissectionOrder(rg: RoutingGraph): number[] {
-  const n = rg.nodes.length
-  const adj: Set<number>[] = rg.adj.map((arcs) => new Set(arcs.map((a) => a.to)))
-  const order: number[] = [] // contraction order, low rank first
-
-  const dissect = (nodes: number[]): void => {
-    if (nodes.length <= 2) {
-      for (const v of nodes) order.push(v)
+// Recursive coordinate bisection over a node SUBSET, exported so the campus-aware order and the
+// dissection EXPERIMENTS can run it per region. Returns a contraction order (low rank first). `adj` is
+// the full adjacency; cross-subset neighbours just aren't in `inA`, so a subset still bisects correctly.
+export function geometricOrder(rg: RoutingGraph, nodes: number[], adj: Set<number>[]): number[] {
+  const order: number[] = []
+  const dissect = (ns: number[]): void => {
+    if (ns.length <= 2) {
+      for (const v of ns) order.push(v)
       return
     }
     let minLon = Infinity
     let maxLon = -Infinity
     let minLat = Infinity
     let maxLat = -Infinity
-    for (const v of nodes) {
+    for (const v of ns) {
       const nd = rg.nodes[v]
       if (nd.lon < minLon) minLon = nd.lon
       if (nd.lon > maxLon) maxLon = nd.lon
@@ -55,7 +55,7 @@ export function nestedDissectionOrder(rg: RoutingGraph): number[] {
     }
     const cos = Math.cos((((minLat + maxLat) / 2) * Math.PI) / 180) // lon degrees are shorter than lat
     const byLon = (maxLon - minLon) * cos >= maxLat - minLat
-    const sorted = [...nodes].sort((a, b) => (byLon ? rg.nodes[a].lon - rg.nodes[b].lon : rg.nodes[a].lat - rg.nodes[b].lat))
+    const sorted = [...ns].sort((a, b) => (byLon ? rg.nodes[a].lon - rg.nodes[b].lon : rg.nodes[a].lat - rg.nodes[b].lat))
     const mid = sorted.length >> 1
     const A = sorted.slice(0, mid)
     const B = sorted.slice(mid)
@@ -77,20 +77,30 @@ export function nestedDissectionOrder(rg: RoutingGraph): number[] {
     dissect(bRest)
     for (const v of sep) order.push(v) // ...the separator
   }
+  dissect(nodes)
+  return order
+}
 
-  dissect(Array.from({ length: n }, (_, i) => i))
-  const rank = new Array<number>(n)
+// Turn a contraction order (low rank first) into a rank array (routing index -> rank).
+export function rankFromOrder(order: number[]): number[] {
+  const rank = new Array<number>(order.length)
   order.forEach((v, i) => (rank[v] = i))
   return rank
+}
+
+// Default order: geometric nested dissection over the WHOLE graph, as a rank array.
+export function nestedDissectionOrder(rg: RoutingGraph): number[] {
+  const n = rg.nodes.length
+  const adj: Set<number>[] = rg.adj.map((arcs) => new Set(arcs.map((a) => a.to)))
+  return rankFromOrder(geometricOrder(rg, Array.from({ length: n }, (_, i) => i), adj))
 }
 
 // ---------- 2. metric-independent contraction ----------
 // Contract in rank order. When a node is contracted, every pair of its still-present (= higher-rank)
 // neighbours gets a shortcut — unconditionally. Snapshot those neighbours as the node's up-arcs. No
 // weights, no witness searches: pure topology, valid for any future metric.
-export function buildCCH(rg: RoutingGraph): CCHStructure {
+export function buildCCH(rg: RoutingGraph, rank: number[] = nestedDissectionOrder(rg)): CCHStructure {
   const n = rg.nodes.length
-  const rank = nestedDissectionOrder(rg)
 
   const neigh: Set<number>[] = Array.from({ length: n }, () => new Set<number>())
   for (const e of rg.edges) {
