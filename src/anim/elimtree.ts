@@ -73,12 +73,13 @@ export interface TreeNode {
   nodeId: number // ORIGINAL node id, so the view can test membership in RenderState.settled / .settledB
   x: number // 0..1, left..right
   y: number // 0..1, apex (top) = 0, leaf (bottom) = 1
-  side: 'f' | 'b' | 'apex'
+  side: 'f' | 'b' | 'apex' | 'ctx' // 'ctx' = an unsearched sibling branch, drawn faint for context
   depth: number // 0 = leaf, increasing toward the apex
 }
 export interface TreeEdge {
   from: number // index into nodes[]
   to: number
+  faint?: boolean // a branch to an unsearched sibling (drawn dim, never lit)
 }
 export interface TreeLayout {
   nodes: TreeNode[]
@@ -86,6 +87,13 @@ export interface TreeLayout {
   apexIndex: number // index into nodes[]
   sLeafIndex: number
   tLeafIndex: number
+}
+
+// Children of each node (inverse of parent) — lets the layout show the unsearched sibling branches.
+export function buildChildren(parent: Int32Array): number[][] {
+  const children: number[][] = Array.from({ length: parent.length }, () => [])
+  for (let i = 0; i < parent.length; i++) if (parent[i] >= 0) children[parent[i]].push(i)
+  return children
 }
 
 const LEAF_X = 0.12 // how far the leaves sit from the edges (apex is at x = 0.5)
@@ -121,6 +129,34 @@ export function layoutElimTree(paths: ElimPaths, ch: CHData): TreeLayout {
   }
   link(sIdxs)
   link(tIdxs)
+
+  // Context: at each chain node, show a few REAL siblings (other children of its parent) that the search
+  // does NOT climb — drawn faint. Makes the selective climb through a wide tree obvious ("we don't touch
+  // every node at a level"). Siblings fan to the outside; capped so the inset stays readable.
+  const children = buildChildren(buildParents(ch))
+  const onChain = new Set<number>([...paths.sPath, ...paths.tPath])
+  const K = 3
+  const addSiblings = (path: number[], idxs: number[], dir: -1 | 1): void => {
+    const last = path.length - 1
+    for (let d = 0; d < last; d++) {
+      const parentIdx = d + 1 < last ? idxs[d + 1] : apexIndex
+      const cNode = nodes[idxs[d]]
+      const sibs = (children[path[d + 1]] ?? []).filter((x) => x !== path[d] && !onChain.has(x)).slice(0, K)
+      sibs.forEach((sib, k) => {
+        const idx = nodes.length
+        nodes.push({
+          nodeId: ch.nodeIds[sib],
+          x: Math.min(0.97, Math.max(0.03, cNode.x + dir * (k + 1) * 0.055)),
+          y: Math.min(0.99, cNode.y + 0.015),
+          side: 'ctx',
+          depth: d,
+        })
+        edges.push({ from: parentIdx, to: idx, faint: true })
+      })
+    }
+  }
+  addSiblings(paths.sPath, sIdxs, -1) // s-chain siblings fan left
+  addSiblings(paths.tPath, tIdxs, 1) // t-chain siblings fan right
 
   return {
     nodes,
