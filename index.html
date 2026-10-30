@@ -67,12 +67,20 @@
       /* Search fields */
       .panel .field { position: relative; margin-bottom: 9px; }
       .panel .field input {
-        width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1px solid var(--line);
+        width: 100%; box-sizing: border-box; padding: 10px 30px 10px 12px; border: 1px solid var(--line);
         border-radius: var(--radius-sm); font: 14px var(--sans); color: var(--ink); background: var(--paper-2);
         transition: border-color 0.15s, box-shadow 0.15s;
       }
       .panel .field input::placeholder { color: var(--faint); }
       .panel .field input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(11, 114, 133, 0.14); }
+      /* Tiny clear (×) button inside each search field. */
+      .field-x {
+        position: absolute; top: 50%; right: 7px; transform: translateY(-50%); z-index: 1;
+        width: 20px; height: 20px; border: 0; border-radius: 50%; background: var(--line-2); color: var(--muted);
+        font-size: 15px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      }
+      .field-x:hover { background: #e3e0d8; color: var(--ink); }
+      .field-x[hidden] { display: none; }
 
       /* Autocomplete */
       .ac {

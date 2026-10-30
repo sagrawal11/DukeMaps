@@ -146,8 +146,8 @@ function setupUI(
   panel.innerHTML =
     '<button type="button" class="sheet-handle" id="sheet-handle" aria-label="Expand or collapse the panel"></button>' +
     '<div class="brandrow"><span class="brand">DukeMaps</span><button type="button" class="about-link" id="about-open">About</button></div>' +
-    '<div class="field"><input id="from" placeholder="From — search or tap the map" autocomplete="off" /><div class="ac" id="ac-from"></div></div>' +
-    '<div class="field"><input id="to" placeholder="To — search or tap the map" autocomplete="off" /><div class="ac" id="ac-to"></div></div>' +
+    '<div class="field"><input id="from" placeholder="From — search or tap the map" autocomplete="off" /><button type="button" class="field-x" id="x-from" aria-label="Clear start" hidden>×</button><div class="ac" id="ac-from"></div></div>' +
+    '<div class="field"><input id="to" placeholder="To — search or tap the map" autocomplete="off" /><button type="button" class="field-x" id="x-to" aria-label="Clear destination" hidden>×</button><div class="ac" id="ac-to"></div></div>' +
     '<div class="options" id="options">' +
     '<div class="leave-row">' +
     '<div class="seg" role="group" aria-label="Departure">' +
@@ -242,6 +242,12 @@ function setupUI(
   const colors: Record<Which, string> = { from: '#2e9e5b', to: '#d64545' }
   const markers: Record<Which, maplibregl.Marker | null> = { from: null, to: null }
   const chosen: Record<Which, Endpoint | null> = { from: null, to: null }
+  // The field the user last clicked into — a following map/icon pick targets THAT box (else From, then To).
+  let activeField: Which | null = null
+  // Show the little × only when a field holds a value.
+  const syncFieldX = (w: Which): void => {
+    ;(panel.querySelector(`#x-${w}`) as HTMLButtonElement).hidden = !input(w).value
+  }
 
   const renderInfo = (): void => {
     const line = (w: Which, name: string): string =>
@@ -558,6 +564,7 @@ function setupUI(
     markers[w] = null
     chosen[w] = null
     input(w).value = ''
+    syncFieldX(w)
     showEl.hidden = true
     overlay.clear()
     elimView.hide()
@@ -577,10 +584,13 @@ function setupUI(
     const pick = (p: Place): void => {
       el.value = p.name
       close()
+      syncFieldX(w)
+      activeField = null
       setEndpoint(w, [p.lon, p.lat], p.name, false, doorsByName.get(p.name))
     }
     el.addEventListener('input', () => {
       close()
+      syncFieldX(w)
       const hits = placeIndex.search(el.value, 8)
       if (!hits.length) return
       for (const p of hits) {
@@ -604,6 +614,13 @@ function setupUI(
         close()
       }
     })
+    el.addEventListener('focus', () => {
+      activeField = w // a following map/icon pick targets THIS box
+    })
+    ;(panel.querySelector(`#x-${w}`) as HTMLButtonElement).addEventListener('click', () => {
+      if (activeField === w) activeField = null
+      clearEndpoint(w)
+    })
     el.addEventListener('blur', () => setTimeout(close, 120)) // let a click on a hit land first
   }
   wireField('from')
@@ -612,13 +629,26 @@ function setupUI(
   // Clickable building icons: tap an illustration to pick it as From (then To) — same flow as a map tap,
   // but no enforce (the committed icons are real campus buildings). Icons without a coord are skipped.
   const pickBuilding = (name: string, lonLat: [number, number], doors?: [number, number][]): void => {
+    if (activeField) {
+      const w = activeField
+      activeField = null
+      setEndpoint(w, lonLat, name, false, doors)
+      if (chosen[w]) {
+        input(w).value = name
+        syncFieldX(w)
+      }
+      return
+    }
     if (chosen.from && chosen.to) {
       clearEndpoint('from')
       clearEndpoint('to')
     }
     const w: Which = chosen.from ? 'to' : 'from'
     setEndpoint(w, lonLat, name, false, doors)
-    if (chosen[w]) input(w).value = name
+    if (chosen[w]) {
+      input(w).value = name
+      syncFieldX(w)
+    }
   }
   // Doors for a searched place (best-effort by exact name; icon clicks pass doors directly).
   const doorsByName = new Map((buildingIconsConfig as BuildingIcon[]).filter((b) => b.doors?.length).map((b) => [b.name, b.doors as [number, number][]]))
@@ -723,14 +753,28 @@ function setupUI(
       return
     }
     const lonLat: [number, number] = [e.lngLat.lng, e.lngLat.lat]
+    const name = placeIndex.nearest(e.lngLat.lat, e.lngLat.lng)?.name ?? 'Pinned location'
+    // If the user clicked into a box first, set THAT one (and rerun if both are now pinned).
+    if (activeField) {
+      const w = activeField
+      activeField = null
+      setEndpoint(w, lonLat, name, true)
+      if (chosen[w]) {
+        input(w).value = name
+        syncFieldX(w)
+      }
+      return
+    }
     if (chosen.from && chosen.to) {
       clearEndpoint('from')
       clearEndpoint('to')
     }
     const w: Which = chosen.from ? 'to' : 'from'
-    const name = placeIndex.nearest(e.lngLat.lat, e.lngLat.lng)?.name ?? 'Pinned location'
     setEndpoint(w, lonLat, name, true) // enforce: reject taps off the campus network
-    if (chosen[w]) input(w).value = name // only label the field if the pin was accepted
+    if (chosen[w]) {
+      input(w).value = name // only label the field if the pin was accepted
+      syncFieldX(w)
+    }
   })
   map.getCanvas().style.cursor = 'crosshair'
 
