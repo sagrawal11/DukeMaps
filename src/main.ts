@@ -163,6 +163,8 @@ function setupUI(
     '<button type="button" class="opt" id="regionundo" hidden>↶ Undo</button>' +
     '<button type="button" class="opt" id="editgraph" hidden>✏️ Edit graph</button>' +
     '</div>' +
+    '<div class="opt-row" id="viz-row"><button type="button" class="opt" id="cch-heat" aria-pressed="false" title="Colour every node by its CCH rank — red = important (contracted last), blue = leaf">🔥 Node importance</button></div>' +
+    '<div class="heat-legend" id="heat-legend" hidden><span>leaf</span><i class="heat-bar"></i><span>important</span></div>' +
     '</div>' +
     '<div class="metric" id="metric"></div>' +
     '<div class="info" id="info"></div>' +
@@ -513,6 +515,37 @@ function setupUI(
     if (r && r.edges.length) overlay.setHighlight(r.edges, ALGO_COLORS[key as string] ?? '#111827', r.explored)
   })
   compareEl.addEventListener('mouseleave', () => overlay.clearHighlight())
+
+  // CCH node-importance heatmap: colour every node by its rank — blue leaf (contracted first) -> red
+  // important (contracted last / high in the elimination tree). Built once from the prebuilt structure.
+  const cchHeatBtn = panel.querySelector('#cch-heat') as HTMLButtonElement
+  const heatLegend = panel.querySelector('#heat-legend') as HTMLDivElement
+  let heatBuckets: { ids: number[]; color: string }[] | null = null
+  const buildHeat = (): { ids: number[]; color: string }[] => {
+    if (heatBuckets) return heatBuckets
+    const NB = 24 // rank buckets, batched one canvas fill each (a smooth blue->red ramp)
+    const ids: number[][] = Array.from({ length: NB }, () => [])
+    const ranks = cchStructure!.rank
+    const m = ranks.length
+    for (let i = 0; i < m; i++) {
+      const t = m > 1 ? ranks[i] / (m - 1) : 0 // 0 = leaf, 1 = most important
+      ids[Math.min(NB - 1, Math.floor(t * NB))].push(cchStructure!.nodeIds[i])
+    }
+    heatBuckets = ids.map((bucket, b) => ({ ids: bucket, color: `hsla(${Math.round(240 * (1 - b / (NB - 1)))}, 85%, 52%, 0.82)` }))
+    return heatBuckets
+  }
+  if (!cchStructure) {
+    ;(panel.querySelector('#viz-row') as HTMLElement).hidden = true
+  } else {
+    let heatOn = false
+    cchHeatBtn.addEventListener('click', () => {
+      heatOn = !heatOn
+      cchHeatBtn.classList.toggle('on', heatOn)
+      cchHeatBtn.setAttribute('aria-pressed', String(heatOn))
+      heatLegend.hidden = !heatOn
+      overlay.setHeatmap(heatOn ? buildHeat() : null)
+    })
+  }
 
   const setLeaveMode = (now: boolean): void => {
     leaveNow = now

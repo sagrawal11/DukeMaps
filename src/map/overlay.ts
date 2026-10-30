@@ -16,6 +16,7 @@ export interface Overlay {
   clearRoutes(): void
   setHighlight(edges: string[], color: string, nodes?: Iterable<number>): void // emphasise one route + the nodes it explored
   clearHighlight(): void
+  setHeatmap(buckets: { ids: number[]; color: string }[] | null): void // colour every node by CCH rank (null = off)
   clearState(): void // clear the exploration frontier but keep persisted routes
   clear(): void
   dispose(): void
@@ -33,6 +34,7 @@ export function createOverlay(map: maplibregl.Map, graph: Graph): Overlay {
   let state: RenderState | null = null
   let routes: { edges: string[]; color: string }[] = [] // persisted; each algorithm adds its route in its colour
   let highlight: { edges: string[]; color: string; nodes?: Iterable<number> } | null = null // one route + the nodes it explored, on hover
+  let heatmap: { ids: number[]; color: string }[] | null = null // CCH node-importance heatmap: all nodes, bucketed by rank
 
   const px = (lon: number, lat: number): [number, number] => {
     const p = map.project([lon, lat])
@@ -73,6 +75,7 @@ export function createOverlay(map: maplibregl.Map, graph: Graph): Overlay {
 
   const draw = (): void => {
     ctx.clearRect(0, 0, canvas.width, canvas.height)
+    if (heatmap) for (const b of heatmap) fillNodes(b.ids, b.color, 2) // rank heatmap, under everything
     if (state) {
       strokeEdges(state.skipped, 'rgba(154,165,177,0.30)', 1) // access-skipped: faded, not red
       strokeEdges(state.relaxed, 'rgba(46,111,214,0.22)', 1) // explored tree
@@ -130,6 +133,10 @@ export function createOverlay(map: maplibregl.Map, graph: Graph): Overlay {
     },
     clearHighlight() {
       highlight = null
+      draw()
+    },
+    setHeatmap(buckets) {
+      heatmap = buckets
       draw()
     },
     clearState() {

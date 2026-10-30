@@ -122,6 +122,9 @@
       }
       .opt:hover { border-color: #d8d5cc; background: var(--line-2); }
       .opt.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+      .heat-legend { display: flex; align-items: center; gap: 7px; font-size: 11px; color: var(--muted); margin: 2px 0 6px; }
+      .heat-legend[hidden] { display: none; }
+      .heat-bar { flex: 1; height: 8px; border-radius: 4px; background: linear-gradient(to right, hsl(240,85%,52%), hsl(180,85%,52%), hsl(120,85%,52%), hsl(60,85%,52%), hsl(0,85%,52%)); }
 
       .metric { font-size: 11.5px; color: var(--muted); margin-bottom: 6px; min-height: 1em; line-height: 1.4; }
       .metric b { color: var(--accent-ink); font-weight: 600; }
