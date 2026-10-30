@@ -212,7 +212,7 @@ export function createElimTreeView(container: HTMLElement): ElimTreeView {
       const r = canvas.getBoundingClientRect()
       const mx = e.clientX - r.left
       const my = e.clientY - r.top
-      const f = Math.exp(-e.deltaY * 0.0025) // zoom toward the cursor, scaled to scroll amount (map-like speed)
+      const f = Math.exp(-e.deltaY * 0.004) // zoom toward the cursor, scaled to the scroll amount
       viewT.ox = mx - (mx - viewT.ox) * f
       viewT.oy = my - (my - viewT.oy) * f
       viewT.zoom *= f
