@@ -668,6 +668,8 @@ function setupUI(
     doorBtn.hidden = !devMode
     doorUndoBtn.hidden = !devMode
     localStorage.setItem('dukemaps.dev', devMode ? '1' : '0')
+    const link = document.querySelector('.dm-devlogin') // the attribution link doubles as login / logout
+    if (link) link.textContent = devMode ? 'developer logout' : 'developer login'
     if (devMode && !doorsLoaded) {
       doorsLoaded = true
       void fetch('/__doors')
