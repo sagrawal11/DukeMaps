@@ -14,7 +14,7 @@ export interface Overlay {
   redraw(s: RenderState): void
   addRoute(edges: string[], color: string): void // persist a coloured route (routes stack as each algo finishes)
   clearRoutes(): void
-  setHighlight(edges: string[], color: string): void // emphasise one route (hovering a compare row)
+  setHighlight(edges: string[], color: string, nodes?: Iterable<number>): void // emphasise one route + the nodes it explored
   clearHighlight(): void
   clearState(): void // clear the exploration frontier but keep persisted routes
   clear(): void
@@ -32,7 +32,7 @@ export function createOverlay(map: maplibregl.Map, graph: Graph): Overlay {
   let dpr = 1
   let state: RenderState | null = null
   let routes: { edges: string[]; color: string }[] = [] // persisted; each algorithm adds its route in its colour
-  let highlight: { edges: string[]; color: string } | null = null // one route emphasised on hover
+  let highlight: { edges: string[]; color: string; nodes?: Iterable<number> } | null = null // one route + the nodes it explored, on hover
 
   const px = (lon: number, lat: number): [number, number] => {
     const p = map.project([lon, lat])
@@ -84,6 +84,11 @@ export function createOverlay(map: maplibregl.Map, graph: Graph): Overlay {
     }
     for (const r of routes) strokeEdges(r.edges, r.color, 4) // persisted routes (one colour per algorithm)
     if (highlight) {
+      if (highlight.nodes) {
+        ctx.globalAlpha = 0.5 // the algorithm's whole explored set, in its colour but faded under the route
+        fillNodes(highlight.nodes, highlight.color, 2.1)
+        ctx.globalAlpha = 1
+      }
       strokeEdges(highlight.edges, '#ffffff', 8) // white casing so the hovered path reads over the others
       strokeEdges(highlight.edges, highlight.color, 5)
     }
@@ -119,8 +124,8 @@ export function createOverlay(map: maplibregl.Map, graph: Graph): Overlay {
       highlight = null
       draw()
     },
-    setHighlight(edges, color) {
-      highlight = { edges, color }
+    setHighlight(edges, color, nodes) {
+      highlight = { edges, color, nodes }
       draw()
     },
     clearHighlight() {

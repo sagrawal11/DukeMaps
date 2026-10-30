@@ -287,7 +287,7 @@ function setupUI(
   let playAll = false
   let showCompare = false // the compare table only appears after "Play all", never on a normal search
   let advanceTimer = 0
-  const results = new Map<string, { settled: number; searchMs: number; costS: number; found: boolean; optimal: boolean; edges: string[] }>()
+  const results = new Map<string, { settled: number; searchMs: number; costS: number; found: boolean; optimal: boolean; edges: string[]; explored: number[] }>()
 
   // A small table that accumulates as each algorithm finishes — the mechanism contrast, side by side.
   // Each row carries its algorithm key so hovering it can highlight that algorithm's route on the map.
@@ -357,6 +357,8 @@ function setupUI(
       const t0 = performance.now()
       for (let k = 0; k < K; k++) runAlgo(def.key, rg, weight, chData as CHData, cchData as CHData, sId, tId)
       const searchMs = (performance.now() - t0) / K
+      const explored: number[] = [] // every node this algorithm settled — drawn faded when its row is hovered
+      for (const ev of trace.events) if (ev.type === 'settle' && ev.node != null) explored.push(ev.node)
       results.set(def.key, {
         settled: trace.stats.nodesSettled,
         searchMs,
@@ -364,6 +366,7 @@ function setupUI(
         found: trace.stats.found,
         optimal: def.optimal,
         edges: trace.route?.edges ?? [],
+        explored,
       })
       renderCompare()
       if (trace.route) {
@@ -494,7 +497,7 @@ function setupUI(
   compareEl.addEventListener('mouseover', (e) => {
     const key = ((e.target as HTMLElement).closest('tr[data-key]') as HTMLElement | null)?.dataset.key
     const r = key ? results.get(key) : null
-    if (r && r.edges.length) overlay.setHighlight(r.edges, ALGO_COLORS[key as string] ?? '#111827')
+    if (r && r.edges.length) overlay.setHighlight(r.edges, ALGO_COLORS[key as string] ?? '#111827', r.explored)
   })
   compareEl.addEventListener('mouseleave', () => overlay.clearHighlight())
 
