@@ -120,11 +120,6 @@ function setupUI(
   // opts into class-change crowding (which re-customizes the CCH live and greys prebuilt CH when peak).
   let leaveNow = localStorage.getItem('dukemaps.leaveNow') == null ? true : localStorage.getItem('dukemaps.leaveNow') === '1'
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  // "Instant" = skip the walk-through, just draw the optimal route. Remembered; defaults on under reduced motion.
-  let instant = ((): boolean => {
-    const s = localStorage.getItem('dukemaps.instant')
-    return s == null ? prefersReducedMotion : s === '1'
-  })()
 
   const buildWeight = (): WeightFn =>
     leaveNow
@@ -153,8 +148,7 @@ function setupUI(
     '<div class="brandrow"><span class="brand">DukeMaps</span><button type="button" class="about-link" id="about-open">About</button></div>' +
     '<div class="field"><input id="from" placeholder="From — search or tap the map" autocomplete="off" /><div class="ac" id="ac-from"></div></div>' +
     '<div class="field"><input id="to" placeholder="To — search or tap the map" autocomplete="off" /><div class="ac" id="ac-to"></div></div>' +
-    '<button type="button" class="disclosure" id="opt-toggle" aria-expanded="false">Options</button>' +
-    '<div class="options" id="options" hidden>' +
+    '<div class="options" id="options">' +
     '<div class="leave-row">' +
     '<div class="seg" role="group" aria-label="Departure">' +
     '<button type="button" class="seg-btn on" id="leave-now">Leave now</button>' +
@@ -163,8 +157,7 @@ function setupUI(
     '<input type="time" id="leaveat" hidden />' +
     '</div>' +
     '<div class="opt-row">' +
-    '<button type="button" class="opt" id="stepfree" aria-pressed="false">Step-free</button>' +
-    '<button type="button" class="opt" id="instant" aria-pressed="false">Instant</button>' +
+    '<button type="button" class="opt" id="stepfree" aria-pressed="false">No stairs</button>' +
     '<button type="button" class="opt" id="pickcoords" aria-pressed="false" hidden>📍 Coords</button>' +
     '<button type="button" class="opt" id="doormode" aria-pressed="false" hidden>🚪 Doors</button>' +
     '<button type="button" class="opt" id="doorundo" hidden>↶ Undo door</button>' +
@@ -180,7 +173,7 @@ function setupUI(
     '<button type="button" id="playpause" class="ctl-primary">Pause</button>' +
     '<button type="button" id="skip">Skip</button>' +
     '<label class="spd">Speed <input type="range" id="speed" min="0.25" max="4" step="0.25" value="1" /></label>' +
-    '<button type="button" id="playall" class="ctl-link">↻ Replay all</button>' +
+    '<button type="button" id="playall" class="ctl-link">▶ Play all</button>' +
     '</div>' +
     '<div class="stats" id="stats"></div>' +
     '<div class="result" id="result"></div>' +
@@ -237,13 +230,10 @@ function setupUI(
   const compareEl = panel.querySelector('#compare') as HTMLDivElement
   const whatifEl = panel.querySelector('#whatif') as HTMLDivElement
   const metricEl = panel.querySelector('#metric') as HTMLDivElement
-  const optToggle = panel.querySelector('#opt-toggle') as HTMLButtonElement
-  const optionsEl = panel.querySelector('#options') as HTMLDivElement
   const leaveNowBtn = panel.querySelector('#leave-now') as HTMLButtonElement
   const leaveAtBtn = panel.querySelector('#leave-at') as HTMLButtonElement
   const leaveatEl = panel.querySelector('#leaveat') as HTMLInputElement
   const stepfreeBtn = panel.querySelector('#stepfree') as HTMLButtonElement
-  const instantBtn = panel.querySelector('#instant') as HTMLButtonElement
   const cmpToggle = panel.querySelector('#cmp-toggle') as HTMLButtonElement
   const playAllBtn = panel.querySelector('#playall') as HTMLButtonElement
   const playBtn = panel.querySelector('#playpause') as HTMLButtonElement
@@ -282,7 +272,7 @@ function setupUI(
   chipsEl.innerHTML = algos.map((a, i) => `<button type="button" class="chip" data-i="${i}">${esc(a.name)}</button>`).join('')
   const chipEls = Array.from(chipsEl.querySelectorAll('.chip')) as HTMLButtonElement[]
   const chChipIdx = algos.findIndex((a) => a.key === 'ch')
-  // The one optimal algorithm Instant mode runs (CCH if the hierarchy loaded, else Dijkstra).
+  // The one optimal algorithm the default (instant) route draw uses (CCH if the hierarchy loaded, else Dijkstra).
   const optimalIdx = ((): number => {
     const i = algos.findIndex((a) => a.key === 'cch')
     return i >= 0 ? i : algos.findIndex((a) => a.key === 'dijkstra')
@@ -293,9 +283,6 @@ function setupUI(
   leaveAtBtn.classList.toggle('on', !leaveNow)
   stepfreeBtn.classList.toggle('on', metricOpts.stepFree)
   stepfreeBtn.setAttribute('aria-pressed', String(metricOpts.stepFree))
-  instantBtn.classList.toggle('on', instant)
-  instantBtn.setAttribute('aria-pressed', String(instant))
-  showEl.classList.toggle('instant', instant)
 
   let curIdx = 0
   let playAll = false
@@ -316,13 +303,14 @@ function setupUI(
       : ''
   }
 
-  // Run one algorithm, animate its exploration, draw its route, record its stats.
-  const playAlgo = (i: number): void => {
+  // Run one algorithm, draw its route, record its stats. animate=false draws the route instantly (the
+  // default on both-pinned); animate=true plays the exploration (clicking a chip or Play all).
+  const playAlgo = (i: number, animate = true): void => {
     if (!chosen.from || !chosen.to || i < 0 || i >= algos.length) return
     // CH's shortcuts bake the base metric in — never animate/draw it under a changed metric (its route
     // can be stale or, under step-free, unsafe). Skip it in the sequence; the chip is disabled too.
     if (algos[i].key === 'ch' && !isBaseMetric()) {
-      if (playAll && i + 1 < algos.length) playAlgo(i + 1)
+      if (playAll && i + 1 < algos.length) playAlgo(i + 1, animate)
       else playAll = false
       return
     }
@@ -341,7 +329,7 @@ function setupUI(
     // and not in Instant (it's educational chrome). Derived structurally from the active hierarchy; the
     // algorithms stay pure. CH uses the prebuilt data, CCH its live-customized data — both are CHData.
     const isHierarchy = def.key === 'ch' || def.key === 'cch'
-    if (isHierarchy && !instant) {
+    if (isHierarchy && animate) {
       const activeCH = def.key === 'ch' ? chData : cchData
       const sIdx = rg.indexOf.get(chosen.from.node.id)
       const tIdx = rg.indexOf.get(chosen.to.node.id)
@@ -358,19 +346,19 @@ function setupUI(
       } else {
         resultEl.textContent = 'No route found.'
       }
-      if (playAll && curIdx < algos.length - 1) advanceTimer = window.setTimeout(() => playAlgo(curIdx + 1), 1100)
+      if (playAll && curIdx < algos.length - 1) advanceTimer = window.setTimeout(() => playAlgo(curIdx + 1, true), 1100)
       else playAll = false
     }
     player = makePlayer(
       trace,
       (s) => {
-        if (!instant) {
-          overlay.redraw(s) // Instant = clean route only; skip the exploration viz
+        if (animate) {
+          overlay.redraw(s)
           if (isHierarchy) elimView.update(s) // climb the chains / pulse the apex / descend, in sync
         }
         statsEl.innerHTML = `settled <b>${s.settled.size + s.settledB.size}</b> · relaxed <b>${s.relaxed.size}</b>`
       },
-      { speed: Number(speedEl.value) || 1, reducedMotion: instant || prefersReducedMotion, onDone },
+      { speed: Number(speedEl.value) || 1, reducedMotion: !animate || prefersReducedMotion, onDone },
     )
     playBtn.textContent = 'Pause'
     player.play()
@@ -406,8 +394,8 @@ function setupUI(
     if (metricOpts.stepFree) {
       whatifEl.innerHTML =
         deltaMin > 0
-          ? `<b>What if?</b> Step-free adds <b>+${deltaMin} min</b> here — the shortest walk uses stairs.`
-          : `<b>What if?</b> Step-free is free here — no stairs on the shortest walk.`
+          ? `<b>What if?</b> Avoiding stairs adds <b>+${deltaMin} min</b> here — the shortest walk uses stairs.`
+          : `<b>What if?</b> No stairs needed — the shortest walk has none.`
     } else {
       whatifEl.innerHTML =
         deltaMin > 0
@@ -444,7 +432,7 @@ function setupUI(
       metricEl.innerHTML = '<span class="dim">Metric: base walking time</span>'
     } else {
       const bits: string[] = []
-      if (metricOpts.stepFree) bits.push('step-free')
+      if (metricOpts.stepFree) bits.push('no stairs')
       if (isPeak()) bits.push('class-change crowding')
       const recust = cchStructure
         ? ` · <b>CCH re-customized in ${recustMs.toFixed(1)} ms</b> <span class="dim">(CH would need a full rebuild)</span>`
@@ -467,12 +455,10 @@ function setupUI(
       results.clear()
       renderCompare()
       renderWhatIf()
-      playAlgo(runnableIdx(curIdx))
+      playAlgo(runnableIdx(curIdx), false)
     }
   }
 
-  // Both pinned (or "Replay all") → walk through all seven in order; or, in Instant mode, just the
-  // optimal route, no animation.
   // If an endpoint is a building with doors, snap the door nearest the OTHER endpoint — so you leave/enter
   // by the right side of the building instead of whatever path happens to be closest to its centroid.
   const resolveDoors = (): void => {
@@ -498,18 +484,15 @@ function setupUI(
     }
   }
 
+  // Both pinned → draw the best route instantly (the default). The algorithm chips / Play all let the user
+  // opt into watching the exploration animate.
   const startShow = (): void => {
     resolveDoors()
     results.clear()
     renderCompare()
     renderWhatIf()
-    if (instant) {
-      playAll = false
-      playAlgo(optimalIdx)
-    } else {
-      playAll = true
-      playAlgo(0)
-    }
+    playAll = false
+    playAlgo(optimalIdx, false)
   }
 
   const toggleDisclosure = (btn: HTMLButtonElement, body: HTMLElement): void => {
@@ -518,7 +501,6 @@ function setupUI(
     btn.setAttribute('aria-expanded', String(open))
     btn.classList.toggle('open', open)
   }
-  optToggle.addEventListener('click', () => toggleDisclosure(optToggle, optionsEl))
   cmpToggle.addEventListener('click', () => toggleDisclosure(cmpToggle, compareEl))
 
   const setLeaveMode = (now: boolean): void => {
@@ -540,26 +522,25 @@ function setupUI(
     stepfreeBtn.setAttribute('aria-pressed', String(metricOpts.stepFree))
     applyMetric({ rerun: true })
   })
-  instantBtn.addEventListener('click', () => {
-    instant = !instant
-    localStorage.setItem('dukemaps.instant', instant ? '1' : '0')
-    instantBtn.classList.toggle('on', instant)
-    instantBtn.setAttribute('aria-pressed', String(instant))
-    showEl.classList.toggle('instant', instant)
-    if (chosen.from && chosen.to) startShow() // switch modes immediately
-  })
-
   chipsEl.addEventListener('click', (e) => {
     const btn = (e.target as HTMLElement).closest('.chip') as HTMLButtonElement | null
     if (!btn || btn.disabled) return
     playAll = false
     window.clearTimeout(advanceTimer)
-    playAlgo(Number(btn.dataset.i))
+    playAlgo(Number(btn.dataset.i), true) // clicking a chip animates that algorithm
   })
-  playAllBtn.addEventListener('click', startShow)
+  // Play all → watch every algorithm explore in sequence (the educational show, now opt-in).
+  playAllBtn.addEventListener('click', () => {
+    if (!chosen.from || !chosen.to) return
+    window.clearTimeout(advanceTimer)
+    results.clear()
+    renderCompare()
+    playAll = true
+    playAlgo(0, true)
+  })
   playBtn.addEventListener('click', () => {
     if (!player) return
-    if (playBtn.textContent === 'Replay') playAlgo(curIdx)
+    if (playBtn.textContent === 'Replay') playAlgo(curIdx, true)
     else if (player.playing) {
       player.pause()
       playBtn.textContent = 'Play'
