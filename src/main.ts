@@ -2,8 +2,8 @@
 // is labelled with the building you're nearest). With both pinned, the seven hand-written searches
 // replay their exploration over the map in turn, then draw their route. Secondary controls live in an
 // "Options" disclosure to keep the panel calm: "Leave now" (base metric — Contraction Hierarchies work)
-// vs "Leave at" a time (class-change crowding, which re-customizes the CCH live), plus Step-free and an
-// Instant mode. Data is fetched at runtime, not bundled, so the map paints immediately.
+// vs "Leave at" a time (class-change crowding, which re-customizes the CCH live). Data is fetched at
+// runtime, not bundled, so the map paints immediately.
 import * as maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { Protocol } from 'pmtiles'
@@ -113,7 +113,6 @@ function setupUI(
     return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
   }
   const metricOpts = {
-    stepFree: localStorage.getItem('dukemaps.stepFree') === '1',
     leaveAt: localStorage.getItem('dukemaps.leaveAt') || nowHHMM(),
   }
   // "Leave now" (default) = plain base metric, so Contraction Hierarchies stay valid. "Leave at" a time
@@ -123,14 +122,13 @@ function setupUI(
 
   const buildWeight = (): WeightFn =>
     leaveNow
-      ? makeWeight(rg, { stepFreeOnly: metricOpts.stepFree })
+      ? makeWeight(rg)
       : makeWeight(rg, {
-          stepFreeOnly: metricOpts.stepFree,
           time: { departureSecOfDay: hmsToSec(metricOpts.leaveAt), isWeekend: false, schedule, distToAcademicM },
         })
   // A class-change bump is only possible when you've opted into a specific departure time.
   const isPeak = (): boolean => !leaveNow && crowdingMultiplier(0, { secOfDay: hmsToSec(metricOpts.leaveAt), isWeekend: false }, schedule) > 1
-  const isBaseMetric = (): boolean => !metricOpts.stepFree && !isPeak()
+  const isBaseMetric = (): boolean => !isPeak()
 
   let weight = buildWeight() // reassigned whenever the options change
   let cchData: CHData | null = null // populated by applyMetric() below (one customize at startup)
@@ -156,8 +154,7 @@ function setupUI(
     '</div>' +
     '<input type="time" id="leaveat" hidden />' +
     '</div>' +
-    '<div class="opt-row">' +
-    '<button type="button" class="opt" id="stepfree" aria-pressed="false">No stairs</button>' +
+    '<div class="opt-row" id="opt-row" hidden>' +
     '<button type="button" class="opt" id="pickcoords" aria-pressed="false" hidden>📍 Coords</button>' +
     '<button type="button" class="opt" id="doormode" aria-pressed="false" hidden>🚪 Doors</button>' +
     '<button type="button" class="opt" id="doorundo" hidden>↶ Undo door</button>' +
@@ -200,7 +197,7 @@ function setupUI(
     '<li><b>A*</b> — Dijkstra plus a straight-line hint toward the goal: same route, far fewer nodes.</li>' +
     '<li><b>Bidirectional</b> — two searches meet in the middle; two small frontiers beat one big one.</li>' +
     '<li><b>Contraction Hierarchies</b> — precomputed shortcuts let the search leap up to important paths and back down.</li>' +
-    '<li><b>Customizable CH</b> — the same hierarchy, re-weighted cheaply when crowding or a step-free toggle changes.</li>' +
+    '<li><b>Customizable CH</b> — the same hierarchy, re-weighted cheaply when crowding changes.</li>' +
     '</ul>' +
     '<p>The inset tree shows how CH and CCH climb from both ends to a meeting node, then unpack back down to the street-level route.</p>' +
     '<p class="about-cta"><a href="https://fundamentalstack.substack.com" target="_blank" rel="noopener">Read “How Google Maps Works” on Fundamental Stack →</a></p>' +
@@ -231,7 +228,6 @@ function setupUI(
   const leaveNowBtn = panel.querySelector('#leave-now') as HTMLButtonElement
   const leaveAtBtn = panel.querySelector('#leave-at') as HTMLButtonElement
   const leaveatEl = panel.querySelector('#leaveat') as HTMLInputElement
-  const stepfreeBtn = panel.querySelector('#stepfree') as HTMLButtonElement
   const playBtn = panel.querySelector('#playpause') as HTMLButtonElement
   const skipBtn = panel.querySelector('#skip') as HTMLButtonElement
   const speedEl = panel.querySelector('#speed') as HTMLInputElement
@@ -286,8 +282,6 @@ function setupUI(
   leaveatEl.hidden = leaveNow
   leaveNowBtn.classList.toggle('on', leaveNow)
   leaveAtBtn.classList.toggle('on', !leaveNow)
-  stepfreeBtn.classList.toggle('on', metricOpts.stepFree)
-  stepfreeBtn.setAttribute('aria-pressed', String(metricOpts.stepFree))
 
   let curIdx = 0
   let playAll = false
@@ -317,7 +311,7 @@ function setupUI(
   const playAlgo = (i: number, animate = true): void => {
     if (!chosen.from || !chosen.to || i < 0 || i >= algos.length) return
     // CH's shortcuts bake the base metric in — never animate/draw it under a changed metric (its route
-    // can be stale or, under step-free, unsafe). Skip it in the sequence; the chip is disabled too.
+    // can be stale). Skip it in the sequence; the chip is disabled too.
     if (algos[i].key === 'ch' && !isBaseMetric()) {
       if (playAll && i + 1 < algos.length) playAlgo(i + 1, animate)
       else playAll = false
@@ -392,41 +386,23 @@ function setupUI(
   // The least-walking-time route under an alternate metric, for the "What if?" counterfactual. Always
   // Dijkstra (correct under any metric). Nothing to contrast under the plain base metric.
   const renderWhatIf = (): void => {
-    if (!chosen.from || !chosen.to || (!metricOpts.stepFree && leaveNow)) {
+    if (!chosen.from || !chosen.to || leaveNow) {
       whatifEl.textContent = ''
       return
     }
     const s = chosen.from.node.id
     const t = chosen.to.node.id
     const cur = dijkstra(rg, s, t, { weight }).route
-    if (!cur) {
-      whatifEl.textContent = ''
-      return
-    }
-    const timeOpt = { departureSecOfDay: hmsToSec(metricOpts.leaveAt), isWeekend: false, schedule, distToAcademicM }
-    // step-free on → vs stairs-allowed at the same departure; else → this departure's crowding vs off-peak.
-    const altWeight = metricOpts.stepFree
-      ? leaveNow
-        ? makeWeight(rg)
-        : makeWeight(rg, { time: timeOpt })
-      : makeWeight(rg)
-    const alt = dijkstra(rg, s, t, { weight: altWeight }).route
-    if (!alt) {
+    const alt = dijkstra(rg, s, t, { weight: makeWeight(rg) }).route // the same walk under off-peak base time
+    if (!cur || !alt) {
       whatifEl.textContent = ''
       return
     }
     const deltaMin = Math.round((cur.costS - alt.costS) / 60)
-    if (metricOpts.stepFree) {
-      whatifEl.innerHTML =
-        deltaMin > 0
-          ? `<b>What if?</b> Avoiding stairs adds <b>+${deltaMin} min</b> here — the shortest walk uses stairs.`
-          : `<b>What if?</b> No stairs needed — the shortest walk has none.`
-    } else {
-      whatifEl.innerHTML =
-        deltaMin > 0
-          ? `<b>What if?</b> Class-change crowding adds <b>+${deltaMin} min</b> vs off-peak.`
-          : `<b>What if?</b> No class-change crowding at this departure time.`
-    }
+    whatifEl.innerHTML =
+      deltaMin > 0
+        ? `<b>What if?</b> Class-change crowding adds <b>+${deltaMin} min</b> vs off-peak.`
+        : `<b>What if?</b> No class-change crowding at this departure time.`
   }
 
   // CH can't react to a changed metric, so if the current selection is a now-disabled CH, fall back to
@@ -443,7 +419,6 @@ function setupUI(
   // payoff: change the weights, re-customize cheaply, never re-contract. Prebuilt CH bakes the base
   // metric in, so its chip is disabled whenever the metric isn't base. Persists the options locally.
   const applyMetric = (opt: { rerun?: boolean } = {}): void => {
-    localStorage.setItem('dukemaps.stepFree', metricOpts.stepFree ? '1' : '0')
     localStorage.setItem('dukemaps.leaveAt', metricOpts.leaveAt)
     localStorage.setItem('dukemaps.leaveNow', leaveNow ? '1' : '0')
     weight = buildWeight()
@@ -456,13 +431,10 @@ function setupUI(
     if (isBaseMetric()) {
       metricEl.innerHTML = '<span class="dim">Metric: base walking time</span>'
     } else {
-      const bits: string[] = []
-      if (metricOpts.stepFree) bits.push('no stairs')
-      if (isPeak()) bits.push('class-change crowding')
       const recust = cchStructure
         ? ` · <b>CCH re-customized in ${recustMs.toFixed(1)} ms</b> <span class="dim">(CH would need a full rebuild)</span>`
         : ''
-      metricEl.innerHTML = `Metric: ${bits.join(' + ')}${recust}`
+      metricEl.innerHTML = `Metric: class-change crowding${recust}`
     }
     if (opt.rerun && chosen.from && chosen.to) {
       results.clear()
@@ -530,12 +502,6 @@ function setupUI(
   leaveAtBtn.addEventListener('click', () => setLeaveMode(false))
   leaveatEl.addEventListener('change', () => {
     metricOpts.leaveAt = leaveatEl.value || nowHHMM()
-    applyMetric({ rerun: true })
-  })
-  stepfreeBtn.addEventListener('click', () => {
-    metricOpts.stepFree = !metricOpts.stepFree
-    stepfreeBtn.classList.toggle('on', metricOpts.stepFree)
-    stepfreeBtn.setAttribute('aria-pressed', String(metricOpts.stepFree))
     applyMetric({ rerun: true })
   })
   // The single link → watch every algorithm explore in turn, each route persisting in its own colour.
@@ -688,6 +654,7 @@ function setupUI(
   const doorBtn = panel.querySelector('#doormode') as HTMLButtonElement
   const doorUndoBtn = panel.querySelector('#doorundo') as HTMLButtonElement
   const editBtn = panel.querySelector('#editgraph') as HTMLButtonElement
+  const optRow = panel.querySelector('#opt-row') as HTMLDivElement // only holds dev tools now — hidden until dev login
   editBtn.addEventListener('click', () => window.open(new URL('editor/', document.baseURI).href, '_blank')) // the Phase-2 graph editor (dev server only)
   const addDoorPin = (lon: number, lat: number): void => {
     const el = document.createElement('div')
@@ -719,6 +686,7 @@ function setupUI(
   let devMode = localStorage.getItem('dukemaps.dev') === '1'
   let doorsLoaded = false
   const applyDevMode = (): void => {
+    optRow.hidden = !devMode // reveal the dev-tools row only on developer login
     pickBtn.hidden = !devMode
     doorBtn.hidden = !devMode
     doorUndoBtn.hidden = !devMode
