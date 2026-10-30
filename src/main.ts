@@ -20,7 +20,7 @@ import { crowdingMultiplier, hmsToSec, type Schedule } from './graph/time'
 import { createOverlay } from './map/overlay'
 import { makePlayer, type Player } from './anim/player'
 import { ALGORITHMS, runAlgo, type AlgoDef } from './anim/algos'
-import { elimPaths, layoutElimTree } from './anim/elimtree'
+import { elimPaths, layoutElimTree, layoutFullTree } from './anim/elimtree'
 import { createElimTreeView } from './anim/elimtree-view'
 import { createBuildingIcons, type BuildingIcon } from './map/building-icons'
 import aliasesConfig from '../config/aliases.json'
@@ -340,7 +340,14 @@ function setupUI(
       const sIdx = rg.indexOf.get(chosen.from.node.id)
       const tIdx = rg.indexOf.get(chosen.to.node.id)
       const paths = activeCH && sIdx !== undefined && tIdx !== undefined ? elimPaths(activeCH, sIdx, tIdx) : null
-      if (paths && activeCH) elimView.show(layoutElimTree(paths, activeCH), { algoName: def.name })
+      if (paths && activeCH) {
+        const fullCH = activeCH // non-null inside the closure
+        elimView.show(layoutElimTree(paths, fullCH), {
+          algoName: def.name,
+          // Lazy: the whole-map elimination tree (~15k nodes) is only laid out if the user clicks to expand.
+          buildFull: () => ({ full: layoutFullTree(fullCH), sPath: paths.sPath, tPath: paths.tPath, apex: paths.apex }),
+        })
+      }
     }
     const onDone = (): void => {
       playBtn.textContent = 'Replay'

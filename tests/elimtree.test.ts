@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { buildParents, upChain, elimPaths, layoutElimTree } from '../src/anim/elimtree'
+import { buildParents, upChain, elimPaths, layoutElimTree, layoutFullTree } from '../src/anim/elimtree'
 import type { CHData, UpArc } from '../src/algorithms/ch'
 import { buildRoutingGraph, makeWeight } from '../src/algorithms/routing'
 import { buildCCH, customize } from '../src/algorithms/cch'
@@ -122,5 +122,23 @@ describe('elimtree — matches the real CCH query', () => {
       expect(sChainIds.has(apexId) && tChainIds.has(apexId)).toBe(true)
     }
     expect(checked).toBeGreaterThan(0)
+  })
+})
+
+describe('elimtree — full-tree layout (the click-to-expand whole map)', () => {
+  it('places every node: root at the top, leaves at the bottom, parents centred over children', () => {
+    const fl = layoutFullTree(TINY)
+    expect(fl.n).toBe(5)
+    expect(fl.maxDepth).toBe(3)
+    expect([...fl.parent]).toEqual([1, 2, 4, 4, -1]) // mirrors the elimination tree
+    expect(fl.ys[4]).toBeCloseTo(0, 9) // root (index 4, no parent) at the top
+    expect(fl.ys[0]).toBeCloseTo(1, 9) // deepest leaf (index 0) at the bottom
+    for (let i = 0; i < fl.n; i++) {
+      expect(fl.xs[i]).toBeGreaterThanOrEqual(0)
+      expect(fl.xs[i]).toBeLessThanOrEqual(1)
+      expect(fl.ys[i]).toBeGreaterThanOrEqual(0)
+      expect(fl.ys[i]).toBeLessThanOrEqual(1)
+    }
+    expect(fl.xs[4]).toBeCloseTo((fl.xs[2] + fl.xs[3]) / 2, 9) // root centres over its two children
   })
 })

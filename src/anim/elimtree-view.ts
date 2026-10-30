@@ -7,7 +7,15 @@
 // SVG (tens of nodes) is the right tool here vs the map's canvas (thousands); it's crisp + accessible
 // and needs no map projection — the tree is abstract rank-space.
 import type { RenderState } from './player'
-import type { TreeLayout } from './elimtree'
+import type { TreeLayout, FullTreeLayout } from './elimtree'
+
+// What the full-screen view needs: the whole-tree layout plus THIS query's chains to light on top of it.
+export interface FullTreeHighlight {
+  full: FullTreeLayout
+  sPath: number[] // routing indices, From leaf .. apex
+  tPath: number[] // routing indices, To leaf .. apex
+  apex: number // routing index of the meeting node
+}
 
 const NS = 'http://www.w3.org/2000/svg'
 const S_COLOR = '#2e9e5b' // forward / From (matches the map marker)
@@ -27,7 +35,7 @@ const X = (x: number): number => PAD_X + x * (VW - 2 * PAD_X)
 const Y = (y: number): number => PAD_TOP + y * (VH - PAD_TOP - PAD_BOT)
 
 export interface ElimTreeView {
-  show(layout: TreeLayout, opts: { algoName: string }): void
+  show(layout: TreeLayout, opts: { algoName: string; buildFull?: () => FullTreeHighlight }): void
   update(s: RenderState): void
   hide(): void
   dispose(): void
@@ -60,8 +68,144 @@ export function createElimTreeView(container: HTMLElement): ElimTreeView {
     cap.textContent = text
   }
 
-  const show = (l: TreeLayout, opts: { algoName: string }): void => {
+  // ---- Click the inset to expand: the WHOLE elimination tree on a canvas, this route lit on top. ----
+  // The inset is a 6-row sketch; the full tree is ~15k nodes, so it goes on a <canvas> (SVG would choke)
+  // with wheel-zoom + drag-pan. `buildFull` is a lazy thunk from the caller, built only on the first click.
+  let buildFull: (() => FullTreeHighlight) | null = null
+  let fh: FullTreeHighlight | null = null
+  const viewT = { zoom: 1, ox: 0, oy: 0 } // pan/zoom layered over the fit-to-screen base mapping
+
+  const backdrop = document.createElement('div')
+  backdrop.className = 'elim-full'
+  backdrop.hidden = true
+  backdrop.innerHTML =
+    '<div class="elim-full-bar"><span class="elim-full-h"></span>' +
+    '<button type="button" class="elim-full-close" aria-label="Close">×</button></div>' +
+    '<canvas class="elim-full-canvas"></canvas>' +
+    '<div class="elim-full-hint">scroll to zoom · drag to pan</div>'
+  document.body.appendChild(backdrop)
+  const canvas = backdrop.querySelector('.elim-full-canvas') as HTMLCanvasElement
+  const fullH = backdrop.querySelector('.elim-full-h') as HTMLElement
+  const closeFull = (): void => {
+    backdrop.hidden = true
+  }
+
+  const drawFull = (): void => {
+    if (!fh) return
+    const dpr = window.devicePixelRatio || 1
+    const CW = backdrop.clientWidth
+    const CH = backdrop.clientHeight
+    canvas.width = CW * dpr
+    canvas.height = CH * dpr
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+    ctx.clearRect(0, 0, CW, CH)
+    const PAD = 46
+    const PAD_T = 76 // clear the title bar at the top
+    const bx = (x: number): number => PAD + x * (CW - 2 * PAD)
+    const by = (y: number): number => PAD_T + y * (CH - PAD_T - PAD)
+    const sx = (x: number): number => bx(x) * viewT.zoom + viewT.ox
+    const sy = (y: number): number => by(y) * viewT.zoom + viewT.oy
+    const { xs, ys, parent, n } = fh.full
+    // the whole tree, faint — every parent->child edge in one batched path
+    ctx.strokeStyle = DIM
+    ctx.lineWidth = 0.5
+    ctx.beginPath()
+    for (let i = 0; i < n; i++) {
+      const p = parent[i]
+      if (p < 0) continue
+      ctx.moveTo(sx(xs[i]), sy(ys[i]))
+      ctx.lineTo(sx(xs[p]), sy(ys[p]))
+    }
+    ctx.stroke()
+    // this query's two chains, lit on top so you can see where it sits in the whole hierarchy
+    const litChain = (path: number[], color: string): void => {
+      if (!path.length) return
+      ctx.strokeStyle = color
+      ctx.lineWidth = 2.4
+      ctx.lineCap = 'round'
+      ctx.beginPath()
+      for (let i = 0; i + 1 < path.length; i++) {
+        ctx.moveTo(sx(xs[path[i]]), sy(ys[path[i]]))
+        ctx.lineTo(sx(xs[path[i + 1]]), sy(ys[path[i + 1]]))
+      }
+      ctx.stroke()
+      ctx.fillStyle = color
+      for (const v of path) {
+        ctx.beginPath()
+        ctx.arc(sx(xs[v]), sy(ys[v]), 2.4, 0, 7)
+        ctx.fill()
+      }
+    }
+    litChain(fh.sPath, S_COLOR)
+    litChain(fh.tPath, T_COLOR)
+    ctx.fillStyle = APEX_COLOR
+    ctx.beginPath()
+    ctx.arc(sx(xs[fh.apex]), sy(ys[fh.apex]), 5, 0, 7)
+    ctx.fill()
+  }
+
+  const openFull = (): void => {
+    if (!buildFull) return
+    fh = buildFull()
+    viewT.zoom = 1
+    viewT.ox = 0
+    viewT.oy = 0
+    fullH.textContent = `Full elimination tree · ${fh.full.n.toLocaleString()} nodes · your route is the lit path`
+    backdrop.hidden = false
+    requestAnimationFrame(drawFull) // wait a frame so the backdrop has laid out (clientWidth/Height set)
+  }
+
+  backdrop.querySelector('.elim-full-close')?.addEventListener('click', closeFull)
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !backdrop.hidden) closeFull()
+  })
+  window.addEventListener('resize', () => {
+    if (!backdrop.hidden) drawFull()
+  })
+  canvas.addEventListener(
+    'wheel',
+    (e) => {
+      e.preventDefault()
+      const r = canvas.getBoundingClientRect()
+      const mx = e.clientX - r.left
+      const my = e.clientY - r.top
+      const f = e.deltaY < 0 ? 1.15 : 1 / 1.15 // zoom toward the cursor
+      viewT.ox = mx - (mx - viewT.ox) * f
+      viewT.oy = my - (my - viewT.oy) * f
+      viewT.zoom *= f
+      drawFull()
+    },
+    { passive: false },
+  )
+  let dragging = false
+  let lastX = 0
+  let lastY = 0
+  canvas.addEventListener('mousedown', (e) => {
+    dragging = true
+    lastX = e.clientX
+    lastY = e.clientY
+  })
+  window.addEventListener('mousemove', (e) => {
+    if (!dragging) return
+    viewT.ox += e.clientX - lastX
+    viewT.oy += e.clientY - lastY
+    lastX = e.clientX
+    lastY = e.clientY
+    drawFull()
+  })
+  window.addEventListener('mouseup', () => {
+    dragging = false
+  })
+
+  container.style.cursor = 'zoom-in'
+  container.title = 'Click for the full tree'
+  container.addEventListener('click', openFull)
+
+  const show = (l: TreeLayout, opts: { algoName: string; buildFull?: () => FullTreeHighlight }): void => {
     layout = l
+    buildFull = opts.buildFull ?? null
     phase = 'climb'
     lit = new Int8Array(l.nodes.length)
     nodeEls = []
@@ -104,11 +248,12 @@ export function createElimTreeView(container: HTMLElement): ElimTreeView {
     label(X(tLeaf.x), VH - 5, T_COLOR, 'To')
     label(X(apex.x), 9, APEX_COLOR, 'apex')
 
-    const sLen = l.nodes.filter((n) => n.side === 'f').length + 1
-    const tLen = l.nodes.filter((n) => n.side === 'b').length + 1
+    // TRUE climb depth (the tree is sampled to a few rows, but we report the real numbers — honest).
+    const sLen = l.climbS
+    const tLen = l.climbT
     svg.setAttribute('aria-label', `Elimination tree for ${opts.algoName}: the search climbs ${sLen} steps from the start and ${tLen} from the destination, meeting at the apex, then unpacks back down to the route.`)
     title.textContent = `${opts.algoName} · elimination tree`
-    setCap('two searches climb the hierarchy')
+    setCap(`two searches climb ${sLen} & ${tLen} levels`)
     container.hidden = false
   }
 
