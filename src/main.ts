@@ -718,6 +718,8 @@ function setupUI(
       pickBtn.classList.remove('on')
       doorBtn.classList.remove('on')
     }
+    // Door pins are a dev-only overlay — hide them on logout, re-show on re-entry (keep the data).
+    for (const m of doorMarkers) m.getElement().style.display = devMode ? '' : 'none'
   }
   // The "developer login" link is rendered inside the MapLibre attribution — delegate its click.
   document.addEventListener('click', (e) => {
