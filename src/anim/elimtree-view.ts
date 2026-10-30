@@ -15,6 +15,7 @@ export interface FullTreeHighlight {
   sPath: number[] // routing indices, From leaf .. apex
   tPath: number[] // routing indices, To leaf .. apex
   apex: number // routing index of the meeting node
+  buildings?: { idx: number; file: string }[] // placed building icons: routing index of their node + icon URL
 }
 
 const NS = 'http://www.w3.org/2000/svg'
@@ -90,6 +91,8 @@ export function createElimTreeView(container: HTMLElement): ElimTreeView {
     backdrop.hidden = true
   }
 
+  const iconCache = new Map<string, HTMLImageElement>() // placed-building icon images, loaded once
+  let iconDrawPending = false // coalesce the redraws triggered as icons finish loading (avoid a storm)
   const drawFull = (): void => {
     if (!fh) return
     const dpr = window.devicePixelRatio || 1
@@ -144,6 +147,34 @@ export function createElimTreeView(container: HTMLElement): ElimTreeView {
     ctx.beginPath()
     ctx.arc(sx(xs[fh.apex]), sy(ys[fh.apex]), 5, 0, 7)
     ctx.fill()
+    // placed building icons at their nodes — campus landmarks scattered through the hierarchy
+    if (fh.buildings) {
+      const S = 17
+      for (const b of fh.buildings) {
+        let img = iconCache.get(b.file)
+        if (!img) {
+          img = new Image()
+          img.onload = (): void => {
+            if (backdrop.hidden || iconDrawPending) return
+            iconDrawPending = true
+            requestAnimationFrame(() => {
+              iconDrawPending = false
+              drawFull()
+            })
+          }
+          img.src = b.file
+          iconCache.set(b.file, img)
+        }
+        if (!img.complete || !img.naturalWidth) continue
+        const ix = sx(xs[b.idx])
+        const iy = sy(ys[b.idx])
+        ctx.fillStyle = '#fff'
+        ctx.beginPath()
+        ctx.arc(ix, iy, S / 2 + 2, 0, 7)
+        ctx.fill()
+        ctx.drawImage(img, ix - S / 2, iy - S / 2, S, S)
+      }
+    }
   }
 
   const openFull = (): void => {

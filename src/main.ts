@@ -348,7 +348,17 @@ function setupUI(
         elimView.show(layoutElimTree(paths, fullCH), {
           algoName: def.name,
           // Lazy: the whole-map elimination tree (~15k nodes) is only laid out if the user clicks to expand.
-          buildFull: () => ({ full: layoutFullTree(fullCH), sPath: paths.sPath, tPath: paths.tPath, apex: paths.apex }),
+          buildFull: () => {
+            // Snap each placed building to its nearest graph node so the view can drop its icon on the tree.
+            const buildings: { idx: number; file: string }[] = []
+            for (const b of buildingIconsConfig as BuildingIcon[]) {
+              if (b.lat == null || b.lon == null) continue
+              const snap = edgeIndex.snap(b.lon, b.lat)
+              const idx = snap ? rg.indexOf.get(snap.node.id) : undefined
+              if (idx !== undefined) buildings.push({ idx, file: new URL(b.file, document.baseURI).href })
+            }
+            return { full: layoutFullTree(fullCH), sPath: paths.sPath, tPath: paths.tPath, apex: paths.apex, buildings }
+          },
         })
       }
     }
