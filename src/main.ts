@@ -161,6 +161,7 @@ function setupUI(
     '<button type="button" class="opt" id="pickcoords" aria-pressed="false" hidden>📍 Coords</button>' +
     '<button type="button" class="opt" id="doormode" aria-pressed="false" hidden>🚪 Doors</button>' +
     '<button type="button" class="opt" id="doorundo" hidden>↶ Undo door</button>' +
+    '<button type="button" class="opt" id="editgraph" hidden>✏️ Edit graph</button>' +
     '</div>' +
     '</div>' +
     '<div class="metric" id="metric"></div>' +
@@ -689,6 +690,8 @@ function setupUI(
   const pickBtn = panel.querySelector('#pickcoords') as HTMLButtonElement
   const doorBtn = panel.querySelector('#doormode') as HTMLButtonElement
   const doorUndoBtn = panel.querySelector('#doorundo') as HTMLButtonElement
+  const editBtn = panel.querySelector('#editgraph') as HTMLButtonElement
+  editBtn.addEventListener('click', () => window.open(new URL('editor/', document.baseURI).href, '_blank')) // the Phase-2 graph editor (dev server only)
   const addDoorPin = (lon: number, lat: number): void => {
     const el = document.createElement('div')
     el.className = 'door-pin'
@@ -722,6 +725,7 @@ function setupUI(
     pickBtn.hidden = !devMode
     doorBtn.hidden = !devMode
     doorUndoBtn.hidden = !devMode
+    editBtn.hidden = !devMode
     localStorage.setItem('dukemaps.dev', devMode ? '1' : '0')
     const link = document.querySelector('.dm-devlogin') // the attribution link doubles as login / logout
     if (link) link.textContent = devMode ? 'developer logout' : 'developer login'
