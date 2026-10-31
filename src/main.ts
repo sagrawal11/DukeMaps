@@ -572,7 +572,11 @@ function setupUI(
         const idx = snap ? rg.indexOf.get(snap.node.id) : undefined
         if (idx !== undefined) buildings.push({ idx, file: new URL(b.file, document.baseURI).href, name: b.nickname || b.name })
       }
-      elimView.openFullTree(() => ({ full: layoutFullTree(cchData!), sPath: [], tPath: [], apex: -1, buildings }))
+      // If both endpoints are set, light this route's path on the tree; otherwise show the bare tree.
+      const si = chosen.from ? rg.indexOf.get(chosen.from.node.id) : undefined
+      const ti = chosen.to ? rg.indexOf.get(chosen.to.node.id) : undefined
+      const p = si !== undefined && ti !== undefined ? elimPaths(cchData!, si, ti) : null
+      elimView.openFullTree(() => ({ full: layoutFullTree(cchData!), sPath: p?.sPath ?? [], tPath: p?.tPath ?? [], apex: p?.apex ?? -1, buildings }))
     })
   }
 
