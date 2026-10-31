@@ -540,10 +540,11 @@ function setupUI(
     const byRank = Array.from({ length: m }, (_, i) => i).sort((a, b) => s.rank[a] - s.rank[b])
     for (const v of byRank) if (parent[v] >= 0) subtree[parent[v]] += subtree[v] // child before parent (ascending rank)
     const denom = Math.log(m) || 1
+    const offCampus = s.meta.offCampusCount ?? 0 // off-campus nodes (the lowest ranks) forced to leaf-blue
     const NB = 24 // importance buckets, batched one canvas fill each (a smooth blue->red ramp)
     const ids: number[][] = Array.from({ length: NB }, () => [])
     for (let i = 0; i < m; i++) {
-      const t = Math.min(1, Math.log(subtree[i]) / denom) // 0 = leaf, 1 = separates ~the whole map
+      const t = s.rank[i] < offCampus ? 0 : Math.min(1, Math.log(subtree[i]) / denom) // off-campus -> blue; else 0=leaf,1=whole-map
       ids[Math.min(NB - 1, Math.floor(t * NB))].push(s.nodeIds[i])
     }
     heatBuckets = ids.map((bucket, b) => ({ ids: bucket, color: `hsla(${Math.round(240 * (1 - b / (NB - 1)))}, 85%, 52%, 0.82)` }))

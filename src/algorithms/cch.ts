@@ -25,7 +25,7 @@ export interface CCHStructure {
   nodeIds: number[] // routing index -> original node id
   rank: number[] // routing index -> rank (0 = contracted first = least important; separators highest)
   upTo: number[][] // routing index -> up-neighbour indices (the metric-independent up-graph topology)
-  meta: { builtAt: string; nodes: number; origArcs: number; shortcuts: number; orderMs: number; contractMs: number }
+  meta: { builtAt: string; nodes: number; origArcs: number; shortcuts: number; orderMs: number; contractMs: number; offCampusCount?: number }
 }
 
 // ---------- 1. nested dissection ordering (coordinate bisection) ----------
@@ -96,20 +96,38 @@ export function nestedDissectionOrder(rg: RoutingGraph): number[] {
   return rankFromOrder(geometricOrder(rg, Array.from({ length: n }, (_, i) => i), adj))
 }
 
-// Campus-aware order for the TEACHING visuals: cut the graph BY the drawn regions so the inter-region
-// connectors (the high-traffic through-routes) become the top separators, and higher-importance regions
-// rank above lower ones. Slower to query than geometric (more fill-in, see notes/dissection-experiments)
-// — a deliberate mechanism-over-speed choice so the heatmap + elimination tree illustrate how high-traffic
-// areas are the key separators. Least-important region contracted first (lowest rank), connectors last.
-export function regionAwareOrder(rg: RoutingGraph, regions: { name: string; polygon: [number, number][] }[], importanceAsc: string[]): number[] {
+// Convex hull (monotone chain) of [lon,lat] points — used as the campus extent from the drawn regions.
+function convexHull(pts: [number, number][]): [number, number][] {
+  const p = [...pts].sort((a, b) => a[0] - b[0] || a[1] - b[1])
+  if (p.length < 3) return p
+  const cross = (o: [number, number], a: [number, number], b: [number, number]): number => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
+  const half = (src: [number, number][]): [number, number][] => {
+    const h: [number, number][] = []
+    for (const pt of src) {
+      while (h.length >= 2 && cross(h[h.length - 2], h[h.length - 1], pt) <= 0) h.pop()
+      h.push(pt)
+    }
+    h.pop()
+    return h
+  }
+  return half(p).concat(half([...p].reverse()))
+}
+
+// Campus-aware order for the TEACHING visuals. Cut the graph BY the drawn regions so the on-campus,
+// high-traffic inter-region connectors become the top separators (highest rank). Crucially, nodes OFF
+// campus — outside the convex hull of the regions, i.e. the Durham streets that aren't Duke — are
+// contracted FIRST, so they stay low-importance leaves (blue) and never light up red in the far corners.
+// Slower to query than geometric (see notes/dissection-experiments.md): a deliberate mechanism-over-speed
+// choice so the heatmap + elimination tree make campus-relevant sense.
+export function regionAwareOrder(rg: RoutingGraph, regions: { name: string; polygon: [number, number][] }[], importanceAsc: string[]): { rank: number[]; offCampusCount: number } {
   const n = rg.nodes.length
   const adj: Set<number>[] = rg.adj.map((arcs) => new Set(arcs.map((a) => a.to)))
   const all = Array.from({ length: n }, (_, i) => i)
   const imp = (name: string): number => {
     const i = importanceAsc.indexOf(name)
-    return i < 0 ? importanceAsc.length : i
+    return i < 0 ? -1 : i // a region not in the importance list = least important (contracted first)
   }
-  // label each node by its MOST-important containing region, or null (a connector, outside every polygon)
+  // label each node by its MOST-important containing region, or null (outside every region polygon)
   const label: (string | null)[] = new Array(n).fill(null)
   for (let v = 0; v < n; v++) {
     const nd = rg.nodes[v]
@@ -123,12 +141,23 @@ export function regionAwareOrder(rg: RoutingGraph, regions: { name: string; poly
     }
     label[v] = best
   }
-  const nodesWith = (name: string | null): number[] => all.filter((v) => label[v] === name)
+  // split the non-region nodes by the campus extent (convex hull of all region vertices)
+  const hull = convexHull(regions.flatMap((r) => r.polygon))
+  const offCampus: number[] = []
+  const connectors: number[] = []
+  for (let v = 0; v < n; v++) {
+    if (label[v] !== null) continue
+    if (pointInPolygon(rg.nodes[v].lat, rg.nodes[v].lon, hull)) connectors.push(v)
+    else offCampus.push(v)
+  }
+  const nodesWith = (name: string): number[] => all.filter((v) => label[v] === name)
   const regionsAsc = [...regions].sort((a, b) => imp(a.name) - imp(b.name))
-  const order: number[] = []
-  for (const r of regionsAsc) order.push(...geometricOrder(rg, nodesWith(r.name), adj)) // region interiors, low->high importance
-  order.push(...geometricOrder(rg, nodesWith(null), adj)) // inter-region connectors = highest rank
-  return rankFromOrder(order)
+  // contraction order (low rank -> high): off-campus first (leaves), then region interiors by importance,
+  // then the on-campus inter-region connectors last (the high-traffic separators, highest rank).
+  const order: number[] = [...geometricOrder(rg, offCampus, adj)]
+  for (const r of regionsAsc) order.push(...geometricOrder(rg, nodesWith(r.name), adj))
+  order.push(...geometricOrder(rg, connectors, adj))
+  return { rank: rankFromOrder(order), offCampusCount: offCampus.length }
 }
 
 // ---------- 2. metric-independent contraction ----------

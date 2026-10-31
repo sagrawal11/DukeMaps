@@ -23,15 +23,16 @@ const rg = buildRoutingGraph(graph)
 // ── the metric-independent structure (built once) ────────────────────────────
 // Campus-aware order when regions are drawn (config/dissection.json) so the heatmap + elimination tree
 // illustrate how high-traffic inter-region connectors become the top separators; else geometric.
-const IMPORTANCE_ASC = ['athletic', 'hospital', 'graduate', 'apartments', 'east', 'west'] // user-given, least->most
+const IMPORTANCE_ASC = ['apartments', 'athletic', 'graduate', 'hospital', 'east', 'west'] // user-given least->most (west most people; apartments unlisted -> least; hospital not drawn so no nodes)
 const dissectionPath = resolve(ROOT, 'config/dissection.json')
 const regions = existsSync(dissectionPath) ? (JSON.parse(readFileSync(dissectionPath, 'utf8')) as { name: string; polygon: [number, number][] }[]) : []
-const order = regions.length ? regionAwareOrder(rg, regions, IMPORTANCE_ASC) : undefined
+const ra = regions.length ? regionAwareOrder(rg, regions, IMPORTANCE_ASC) : null
 console.log(`[build:cch] order: ${regions.length ? `region-aware (${regions.length} regions)` : 'geometric'} · contracting ${graph.nodes.length} nodes / ${graph.edges.length} edges…`)
 const t0 = performance.now()
-const structure = buildCCH(rg, order)
+const structure = buildCCH(rg, ra?.rank)
 const buildMs = performance.now() - t0
 structure.meta.contractMs = Math.round(buildMs)
+if (ra) structure.meta.offCampusCount = ra.offCampusCount
 structure.meta.builtAt = new Date().toISOString()
 
 // ── metrics to customize for (one structure, many weightings) ────────────────
