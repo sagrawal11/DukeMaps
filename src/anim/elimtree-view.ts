@@ -40,6 +40,7 @@ export interface ElimTreeView {
   update(s: RenderState): void
   hide(): void
   dispose(): void
+  openFullTree(build: () => FullTreeHighlight): void // open the full-screen whole-tree view directly (a chip)
 }
 
 const svgEl = <K extends keyof SVGElementTagNameMap>(name: K, attrs: Record<string, string | number>): SVGElementTagNameMap[K] => {
@@ -143,10 +144,12 @@ export function createElimTreeView(container: HTMLElement): ElimTreeView {
     }
     litChain(fh.sPath, S_COLOR)
     litChain(fh.tPath, T_COLOR)
-    ctx.fillStyle = APEX_COLOR
-    ctx.beginPath()
-    ctx.arc(sx(xs[fh.apex]), sy(ys[fh.apex]), 5, 0, 7)
-    ctx.fill()
+    if (fh.apex >= 0) {
+      ctx.fillStyle = APEX_COLOR
+      ctx.beginPath()
+      ctx.arc(sx(xs[fh.apex]), sy(ys[fh.apex]), 5, 0, 7)
+      ctx.fill()
+    }
     // placed building icons at their nodes — campus landmarks scattered through the hierarchy
     if (fh.buildings) {
       const S = 17
@@ -193,7 +196,7 @@ export function createElimTreeView(container: HTMLElement): ElimTreeView {
     viewT.zoom = 1
     viewT.ox = 0
     viewT.oy = 0
-    fullH.textContent = `Full elimination tree · ${fh.full.n.toLocaleString()} nodes · your route is the lit path`
+    fullH.textContent = `Full elimination tree · ${fh.full.n.toLocaleString()} nodes${fh.sPath.length ? ' · your route is the lit path' : ' · the whole campus hierarchy'}`
     backdrop.hidden = false
     requestAnimationFrame(drawFull) // wait a frame so the backdrop has laid out (clientWidth/Height set)
   }
@@ -357,6 +360,10 @@ export function createElimTreeView(container: HTMLElement): ElimTreeView {
   return {
     show,
     update,
+    openFullTree(build) {
+      buildFull = build
+      openFull()
+    },
     hide() {
       container.hidden = true
       layout = null

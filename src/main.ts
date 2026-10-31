@@ -163,7 +163,7 @@ function setupUI(
     '<button type="button" class="opt" id="regionundo" hidden>↶ Undo</button>' +
     '<button type="button" class="opt" id="editgraph" hidden>✏️ Edit graph</button>' +
     '</div>' +
-    '<div class="opt-row" id="viz-row"><button type="button" class="opt" id="cch-heat" aria-pressed="false" title="Colour every node by how big a section it separates in the hierarchy — red = key separator, blue = leaf">🔥 Node importance</button></div>' +
+    '<div class="opt-row" id="viz-row"><button type="button" class="opt" id="cch-heat" aria-pressed="false" title="Colour every node by how big a section it separates in the hierarchy — red = key separator, blue = leaf">🔥 Node importance</button><button type="button" class="opt" id="cch-tree" title="Open the full elimination tree of the whole campus hierarchy">🌳 Elimination tree</button></div>' +
     '<div class="heat-legend" id="heat-legend" hidden><span>leaf</span><i class="heat-bar"></i><span>important</span></div>' +
     '</div>' +
     '<div class="metric" id="metric"></div>' +
@@ -193,20 +193,20 @@ function setupUI(
     '<div class="about-card" role="dialog" aria-modal="true" aria-label="About DukeMaps">' +
     '<button type="button" class="about-close" id="about-close" aria-label="Close">×</button>' +
     '<h2 class="about-title">DukeMaps</h2>' +
-    '<p>Walking directions across Duke’s campus — and a live look at the search algorithms behind modern routing engines like Google Maps. Search two places, watch each algorithm explore the map, then see its route.</p>' +
+    '<p>DukeMaps gives walking directions across Duke’s campus, and at the same time it is a live, visual explanation of the search algorithms that power routing engines like Google Maps. Pick two places by searching for a building or tapping the map, and each algorithm takes a turn exploring the network while you watch its frontier spread, before the final walking route is drawn with its time and distance.</p>' +
+    '<p>Under the hood the campus is a graph: every path and sidewalk is an edge, every junction a node, and buildings join the network through their real doors. An edge’s cost is how long it takes to walk, which can rise with class-change crowding at certain times of day. The graph, every algorithm below, and the spatial index are all written by hand in TypeScript with no routing libraries, so what you see is the real machinery rather than a wrapper around someone else’s engine.</p>' +
     '<p class="about-h">The algorithms, in the order they appear</p>' +
     '<ul class="about-list">' +
-    '<li><b>BFS</b> — explores in rings of equal hop-count: fewest turns, rarely the fastest walk.</li>' +
-    '<li><b>DFS</b> — plunges down one branch until stuck; finds a path, almost never a good one.</li>' +
-    '<li><b>Dijkstra</b> — always expands the cheapest-so-far node: optimal, but fans out in every direction.</li>' +
-    '<li><b>A*</b> — Dijkstra plus a straight-line hint toward the goal: same route, far fewer nodes.</li>' +
-    '<li><b>Bidirectional</b> — two searches meet in the middle; two small frontiers beat one big one.</li>' +
-    '<li><b>Contraction Hierarchies</b> — precomputed shortcuts let the search leap up to important paths and back down.</li>' +
-    '<li><b>Customizable CH</b> — the same hierarchy, re-weighted cheaply when crowding changes.</li>' +
+    '<li><b>Breadth-first search (BFS)</b> explores outward in rings of equal hop count. It finds the path with the fewest edges, which on a walking network is almost never the fastest, since one long road beats many short cut-throughs. It is the baseline that shows why edge cost matters.</li>' +
+    '<li><b>Dijkstra</b> always expands the node reachable in the least walking time so far. That guarantees the shortest-time route, but it fans out in every direction and settles far more of the map than it needs to.</li>' +
+    '<li><b>A*</b> is Dijkstra with a sense of direction. It adds a straight-line estimate of the distance still to go, so instead of fanning out evenly it leans toward the goal. It returns the exact same optimal route as Dijkstra while settling far fewer nodes.</li>' +
+    '<li><b>Bidirectional search</b> runs two searches at once, one forward from the start and one backward from the destination, and stops when they meet in the middle. Two small frontiers cover much less ground than one big one.</li>' +
+    '<li><b>Customizable Contraction Hierarchies (CCH)</b> is what makes long routes feel instant. Ahead of time it ranks every node by importance and adds shortcut edges, so a query leaps up to a handful of important through-roads and back down instead of walking every side path. Because the ranking comes from the map’s shape alone, the edge weights can be re-customized cheaply when conditions like crowding change, with no need to rebuild the hierarchy. It barely explores the map at all.</li>' +
     '</ul>' +
-    '<p>The inset tree shows how CH and CCH climb from both ends to a meeting node, then unpack back down to the street-level route.</p>' +
-    '<p class="about-cta"><a href="https://fundamentalstack.substack.com" target="_blank" rel="noopener">Read “How Google Maps Works” on Fundamental Stack →</a></p>' +
-    '<p class="about-attr">Map data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors (ODbL) · tiles <a href="https://protomaps.com" target="_blank" rel="noopener">Protomaps</a>. The graph, every algorithm, and the spatial index are hand-written in TypeScript.</p>' +
+    '<p class="about-h">The elimination tree and the heatmap</p>' +
+    '<p>The small inset, and the full-screen view behind the Elimination tree button, show the structure CCH is built on. A search climbs from both the start and the destination up to a shared meeting node near the top of the hierarchy, then unpacks its shortcuts back down to the real street-level route. The Node importance heatmap paints that same structure onto the map: the high-traffic separators that carve the campus into sections glow red, while the quiet leaf streets stay blue.</p>' +
+    '<p class="about-cta"><a href="https://fundamentalstack.substack.com" target="_blank" rel="noopener">Read “How Google Maps Works” on Fundamental Stack</a></p>' +
+    '<p class="about-attr">Map data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors (ODbL). Tiles by <a href="https://protomaps.com" target="_blank" rel="noopener">Protomaps</a>. The graph, every algorithm, and the spatial index are hand-written in TypeScript.</p>' +
     '</div>'
   document.body.appendChild(about)
   const closeAbout = (): void => {
@@ -252,7 +252,7 @@ function setupUI(
   const renderInfo = (): void => {
     const line = (w: Which, name: string): string =>
       chosen[w]
-        ? `<b>${name}:</b> ${esc(chosen[w]!.label)} <span class="dim">· snapped ${Math.round(chosen[w]!.distM)} m</span>`
+        ? `<b>${name}:</b> ${esc(chosen[w]!.label)}`
         : `<b>${name}:</b> <span class="dim">—</span>`
     infoEl.innerHTML = `${line('from', 'From')}<br>${line('to', 'To')}`
   }
@@ -560,6 +560,19 @@ function setupUI(
       cchHeatBtn.setAttribute('aria-pressed', String(heatOn))
       heatLegend.hidden = !heatOn
       overlay.setHeatmap(heatOn ? buildHeat() : null)
+    })
+    // Elimination-tree chip: open the whole-campus CCH tree directly (no query needed).
+    const cchTreeBtn = panel.querySelector('#cch-tree') as HTMLButtonElement
+    cchTreeBtn.addEventListener('click', () => {
+      if (!cchData) return
+      const buildings: { idx: number; file: string; name: string }[] = []
+      for (const b of buildingIconsConfig as BuildingIcon[]) {
+        if (b.lat == null || b.lon == null) continue
+        const snap = edgeIndex.snap(b.lon, b.lat)
+        const idx = snap ? rg.indexOf.get(snap.node.id) : undefined
+        if (idx !== undefined) buildings.push({ idx, file: new URL(b.file, document.baseURI).href, name: b.nickname || b.name })
+      }
+      elimView.openFullTree(() => ({ full: layoutFullTree(cchData!), sPath: [], tPath: [], apex: -1, buildings }))
     })
   }
 
