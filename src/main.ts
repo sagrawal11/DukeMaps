@@ -163,7 +163,7 @@ function setupUI(
     '<button type="button" class="opt" id="regionundo" hidden>↶ Undo</button>' +
     '<button type="button" class="opt" id="editgraph" hidden>✏️ Edit graph</button>' +
     '</div>' +
-    '<div class="opt-row" id="viz-row"><button type="button" class="opt" id="cch-heat" aria-pressed="false" title="Colour every node by its CCH rank — red = important (contracted last), blue = leaf">🔥 Node importance</button></div>' +
+    '<div class="opt-row" id="viz-row"><button type="button" class="opt" id="cch-heat" aria-pressed="false" title="Colour every node by how big a section it separates in the hierarchy — red = key separator, blue = leaf">🔥 Node importance</button></div>' +
     '<div class="heat-legend" id="heat-legend" hidden><span>leaf</span><i class="heat-bar"></i><span>important</span></div>' +
     '</div>' +
     '<div class="metric" id="metric"></div>' +
@@ -523,13 +523,28 @@ function setupUI(
   let heatBuckets: { ids: number[]; color: string }[] | null = null
   const buildHeat = (): { ids: number[]; color: string }[] => {
     if (heatBuckets) return heatBuckets
-    const NB = 24 // rank buckets, batched one canvas fill each (a smooth blue->red ramp)
+    const s = cchStructure!
+    const m = s.rank.length
+    // Importance = how big a section a node SEPARATES = its subtree size in the elimination tree (parent =
+    // lowest-ranked up-neighbour). Leaves = 1 (blue); a node above a whole region has a huge subtree (red)
+    // and sits AT the cut — so reds land on the real separators, not smeared into a corner (raw rank was
+    // spatially biased by the dissection's traversal order, which is why the old heatmap looked diagonal).
+    const parent = new Int32Array(m).fill(-1)
+    for (let v = 0; v < m; v++) {
+      let best = -1
+      let bestRank = Infinity
+      for (const u of s.upTo[v]) if (s.rank[u] < bestRank) ((bestRank = s.rank[u]), (best = u))
+      parent[v] = best
+    }
+    const subtree = new Float64Array(m).fill(1)
+    const byRank = Array.from({ length: m }, (_, i) => i).sort((a, b) => s.rank[a] - s.rank[b])
+    for (const v of byRank) if (parent[v] >= 0) subtree[parent[v]] += subtree[v] // child before parent (ascending rank)
+    const denom = Math.log(m) || 1
+    const NB = 24 // importance buckets, batched one canvas fill each (a smooth blue->red ramp)
     const ids: number[][] = Array.from({ length: NB }, () => [])
-    const ranks = cchStructure!.rank
-    const m = ranks.length
     for (let i = 0; i < m; i++) {
-      const t = m > 1 ? ranks[i] / (m - 1) : 0 // 0 = leaf, 1 = most important
-      ids[Math.min(NB - 1, Math.floor(t * NB))].push(cchStructure!.nodeIds[i])
+      const t = Math.min(1, Math.log(subtree[i]) / denom) // 0 = leaf, 1 = separates ~the whole map
+      ids[Math.min(NB - 1, Math.floor(t * NB))].push(s.nodeIds[i])
     }
     heatBuckets = ids.map((bucket, b) => ({ ids: bucket, color: `hsla(${Math.round(240 * (1 - b / (NB - 1)))}, 85%, 52%, 0.82)` }))
     return heatBuckets

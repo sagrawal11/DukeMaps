@@ -19,6 +19,7 @@
 import type { RoutingGraph, WeightFn } from './routing'
 import type { CHData, UpArc, Shortcut } from './ch'
 import { encodeShortcut } from './ch'
+import { pointInPolygon } from '../graph/geo'
 
 export interface CCHStructure {
   nodeIds: number[] // routing index -> original node id
@@ -93,6 +94,41 @@ export function nestedDissectionOrder(rg: RoutingGraph): number[] {
   const n = rg.nodes.length
   const adj: Set<number>[] = rg.adj.map((arcs) => new Set(arcs.map((a) => a.to)))
   return rankFromOrder(geometricOrder(rg, Array.from({ length: n }, (_, i) => i), adj))
+}
+
+// Campus-aware order for the TEACHING visuals: cut the graph BY the drawn regions so the inter-region
+// connectors (the high-traffic through-routes) become the top separators, and higher-importance regions
+// rank above lower ones. Slower to query than geometric (more fill-in, see notes/dissection-experiments)
+// — a deliberate mechanism-over-speed choice so the heatmap + elimination tree illustrate how high-traffic
+// areas are the key separators. Least-important region contracted first (lowest rank), connectors last.
+export function regionAwareOrder(rg: RoutingGraph, regions: { name: string; polygon: [number, number][] }[], importanceAsc: string[]): number[] {
+  const n = rg.nodes.length
+  const adj: Set<number>[] = rg.adj.map((arcs) => new Set(arcs.map((a) => a.to)))
+  const all = Array.from({ length: n }, (_, i) => i)
+  const imp = (name: string): number => {
+    const i = importanceAsc.indexOf(name)
+    return i < 0 ? importanceAsc.length : i
+  }
+  // label each node by its MOST-important containing region, or null (a connector, outside every polygon)
+  const label: (string | null)[] = new Array(n).fill(null)
+  for (let v = 0; v < n; v++) {
+    const nd = rg.nodes[v]
+    let best: string | null = null
+    let bestImp = -1
+    for (const r of regions) {
+      if (imp(r.name) > bestImp && pointInPolygon(nd.lat, nd.lon, r.polygon)) {
+        bestImp = imp(r.name)
+        best = r.name
+      }
+    }
+    label[v] = best
+  }
+  const nodesWith = (name: string | null): number[] => all.filter((v) => label[v] === name)
+  const regionsAsc = [...regions].sort((a, b) => imp(a.name) - imp(b.name))
+  const order: number[] = []
+  for (const r of regionsAsc) order.push(...geometricOrder(rg, nodesWith(r.name), adj)) // region interiors, low->high importance
+  order.push(...geometricOrder(rg, nodesWith(null), adj)) // inter-region connectors = highest rank
+  return rankFromOrder(order)
 }
 
 // ---------- 2. metric-independent contraction ----------

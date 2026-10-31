@@ -3,13 +3,13 @@
 // crowding snapshot. Self-checks each customization against Dijkstra, then ships the structure as
 // public/data/cch.json (the app customizes in-browser per "Leave at" time / toggle in Phase 6).
 // Run: `npm run build:cch`.
-import { readFileSync, writeFileSync } from 'node:fs'
+import { readFileSync, writeFileSync, existsSync } from 'node:fs'
 import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { performance } from 'node:perf_hooks'
 import type { Graph } from '../src/graph/types'
 import { buildRoutingGraph, makeWeight } from '../src/algorithms/routing'
-import { buildCCH, customize } from '../src/algorithms/cch'
+import { buildCCH, customize, regionAwareOrder } from '../src/algorithms/cch'
 import { ch } from '../src/algorithms/ch'
 import { dijkstra } from '../src/algorithms/dijkstra'
 import { hmsToSec, type Schedule } from '../src/graph/time'
@@ -21,9 +21,15 @@ const schedule = JSON.parse(readFileSync(resolve(ROOT, 'config/schedule.json'), 
 const rg = buildRoutingGraph(graph)
 
 // ── the metric-independent structure (built once) ────────────────────────────
-console.log(`[build:cch] nested dissection + contracting ${graph.nodes.length} nodes / ${graph.edges.length} edges…`)
+// Campus-aware order when regions are drawn (config/dissection.json) so the heatmap + elimination tree
+// illustrate how high-traffic inter-region connectors become the top separators; else geometric.
+const IMPORTANCE_ASC = ['athletic', 'hospital', 'graduate', 'apartments', 'east', 'west'] // user-given, least->most
+const dissectionPath = resolve(ROOT, 'config/dissection.json')
+const regions = existsSync(dissectionPath) ? (JSON.parse(readFileSync(dissectionPath, 'utf8')) as { name: string; polygon: [number, number][] }[]) : []
+const order = regions.length ? regionAwareOrder(rg, regions, IMPORTANCE_ASC) : undefined
+console.log(`[build:cch] order: ${regions.length ? `region-aware (${regions.length} regions)` : 'geometric'} · contracting ${graph.nodes.length} nodes / ${graph.edges.length} edges…`)
 const t0 = performance.now()
-const structure = buildCCH(rg)
+const structure = buildCCH(rg, order)
 const buildMs = performance.now() - t0
 structure.meta.contractMs = Math.round(buildMs)
 structure.meta.builtAt = new Date().toISOString()
