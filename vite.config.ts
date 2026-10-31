@@ -5,7 +5,7 @@ import { defineConfig } from 'vitest/config'
 // vitest bundles its own nested vite, and the two Plugin types are otherwise incompatible.
 import type { Plugin } from 'vitest/config'
 import type { IncomingMessage } from 'node:http'
-import { readFileSync, writeFileSync, renameSync, existsSync } from 'node:fs'
+import { readFileSync, writeFileSync, renameSync, existsSync, copyFileSync, mkdirSync } from 'node:fs'
 import { resolve } from 'node:path'
 
 // Dev-only server routes for the graph editor (npm run editor). The editor runs in the browser,
@@ -125,9 +125,28 @@ function editorServer(): Plugin {
 // The editor (editor/index.html) is intentionally NOT listed as a build input, so
 // `vite build` excludes it from production. Vite's dev server still serves it at
 // /editor/, which is all the brief's "dev-only page" needs.
+// maplibre builds its web-worker URL dynamically (`new URL(`./${name}`, import.meta.url)`, name chosen at
+// runtime), so Vite/Rollup can't statically emit it — the production build ships NO worker and it 404s at
+// runtime (dev hides this by serving it from node_modules). The worker is a self-contained prebuilt file,
+// so copy it next to the entry chunk (dist/assets/), where import.meta.url resolves it. Build-only.
+function copyMaplibreWorker(): Plugin {
+  return {
+    name: 'copy-maplibre-worker',
+    apply: 'build',
+    closeBundle() {
+      const dstDir = resolve(process.cwd(), 'dist/assets')
+      mkdirSync(dstDir, { recursive: true })
+      for (const f of ['maplibre-gl-worker.mjs', 'maplibre-gl-worker-dev.mjs']) {
+        const src = resolve(process.cwd(), 'node_modules/maplibre-gl/dist', f)
+        if (existsSync(src)) copyFileSync(src, resolve(dstDir, f))
+      }
+    },
+  }
+}
+
 export default defineConfig({
   base: './',
-  plugins: [editorServer()],
+  plugins: [editorServer(), copyMaplibreWorker()],
   // maplibre-gl v6 loads a web worker (maplibre-gl-worker.mjs) via a relative URL. Vite's dep
   // optimizer pre-bundles maplibre but doesn't copy that worker into .vite/deps, so the worker
   // 404s and the map hangs forever on "Loading…". Excluding it from pre-bundling makes the
