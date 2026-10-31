@@ -149,6 +149,24 @@
         font: 600 12.5px var(--sans); color: var(--accent-ink); transition: background 0.15s, border-color 0.15s;
       }
       .algos-link:hover { background: var(--line-2); border-color: #d8d5cc; }
+      .algos-link.open { background: var(--line-2); border-color: #d8d5cc; }
+      .algos-arrow { display: inline-block; transition: transform 0.15s; }
+      .algos-link.open .algos-arrow { transform: rotate(90deg); }
+
+      /* The algorithm chooser the link toggles open: one ▶ row per algorithm, plus the CCH viz chips. */
+      .algos-panel[hidden] { display: none; }
+      .algos-panel { margin-bottom: 10px; }
+      .algo-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+      .algo-run {
+        display: flex; align-items: center; gap: 9px; width: 100%; text-align: left;
+        border: 1px solid var(--line); background: var(--paper-2); border-radius: var(--radius-sm);
+        padding: 8px 11px; font: 12.5px var(--sans); color: var(--ink); cursor: pointer;
+        transition: background 0.15s, border-color 0.15s;
+      }
+      .algo-run:hover { background: var(--line-2); border-color: #d8d5cc; }
+      .algo-play { color: var(--accent-ink); font-size: 11px; }
+      .viz-row[hidden] { display: none; } /* .opt-row sets display:flex, which would beat plain [hidden] */
+      .algos-panel .viz-row { border-top: 1px solid var(--line); padding-top: 10px; }
 
       /* Compare table colour key (matches the persisted route colours). */
       .swatch { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 6px; vertical-align: middle; }

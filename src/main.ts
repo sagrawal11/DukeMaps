@@ -163,13 +163,16 @@ function setupUI(
     '<button type="button" class="opt" id="regionundo" hidden>↶ Undo</button>' +
     '<button type="button" class="opt" id="editgraph" hidden>✏️ Edit graph</button>' +
     '</div>' +
-    '<div class="opt-row" id="viz-row"><button type="button" class="opt" id="cch-heat" aria-pressed="false" title="Colour every node by how big a section it separates in the hierarchy — red = key separator, blue = leaf">🔥 Node importance</button><button type="button" class="opt" id="cch-tree" title="Open the full elimination tree of the whole campus hierarchy">🌳 Elimination tree</button></div>' +
-    '<div class="heat-legend" id="heat-legend" hidden><span>leaf</span><i class="heat-bar"></i><span>important</span></div>' +
     '</div>' +
     '<div class="metric" id="metric"></div>' +
     '<div class="info" id="info"></div>' +
     '<div class="show" id="show" hidden>' +
-    '<button type="button" class="algos-link" id="algos-link">Look how different search algorithms find this path! →</button>' +
+    '<button type="button" class="algos-link" id="algos-link" aria-expanded="false">Look how different search algorithms find this path! <span class="algos-arrow">→</span></button>' +
+    '<div class="algos-panel" id="algos-panel" hidden>' +
+    '<div class="algo-list" id="algo-list"></div>' +
+    '<div class="opt-row viz-row" id="viz-row"><button type="button" class="opt" id="cch-heat" aria-pressed="false" title="Colour every node by how big a section it separates in the hierarchy — red = key separator, blue = leaf">🔥 Node importance</button><button type="button" class="opt" id="cch-tree" title="Open the full elimination tree of the whole campus hierarchy">🌳 Elimination tree</button></div>' +
+    '<div class="heat-legend" id="heat-legend" hidden><span>leaf</span><i class="heat-bar"></i><span>important</span></div>' +
+    '</div>' +
     '<div class="caption" id="caption"></div>' +
     '<div class="controls" id="controls" hidden>' +
     '<button type="button" id="playpause" class="ctl-primary">Pause</button>' +
@@ -223,6 +226,8 @@ function setupUI(
 
   const showEl = panel.querySelector('#show') as HTMLDivElement
   const algosLink = panel.querySelector('#algos-link') as HTMLButtonElement
+  const algosPanel = panel.querySelector('#algos-panel') as HTMLDivElement
+  const algoListEl = panel.querySelector('#algo-list') as HTMLDivElement
   const controlsEl = panel.querySelector('#controls') as HTMLDivElement
   const captionEl = panel.querySelector('#caption') as HTMLDivElement
   const statsEl = panel.querySelector('#stats') as HTMLDivElement
@@ -289,9 +294,7 @@ function setupUI(
   leaveAtBtn.classList.toggle('on', !leaveNow)
 
   let curIdx = 0
-  let playAll = false
-  let showCompare = false // the compare table only appears after "Play all", never on a normal search
-  let advanceTimer = 0
+  let showCompare = false // the compare table appears once an algorithm is played from the panel, never on a normal (instant) search
   const results = new Map<string, { settled: number; searchMs: number; costS: number; found: boolean; optimal: boolean; edges: string[]; explored: number[] }>()
 
   // A small table that accumulates as each algorithm finishes — the mechanism contrast, side by side.
@@ -316,15 +319,10 @@ function setupUI(
   const playAlgo = (i: number, animate = true): void => {
     if (!chosen.from || !chosen.to || i < 0 || i >= algos.length) return
     // CH's shortcuts bake the base metric in — never animate/draw it under a changed metric (its route
-    // can be stale). Skip it in the sequence; the chip is disabled too.
-    if (algos[i].key === 'ch' && !isBaseMetric()) {
-      if (playAll && i + 1 < algos.length) playAlgo(i + 1, animate)
-      else playAll = false
-      return
-    }
-    window.clearTimeout(advanceTimer)
+    // can be stale). Dead for the current algo set (no plain CH), kept as a defensive guard.
+    if (algos[i].key === 'ch' && !isBaseMetric()) return
     player?.dispose()
-    overlay.clearState() // clear the exploration frontier; persisted routes stay (they stack during Play all)
+    overlay.clearState() // clear the exploration frontier; persisted routes stay (they stack across runs)
     elimView.hide() // re-shown just below, only for the hierarchy searches
     resultEl.textContent = ''
     statsEl.textContent = '' // settled/relaxed only shows while animating (set in the render loop below)
@@ -385,13 +383,11 @@ function setupUI(
       })
       renderCompare()
       if (trace.route) {
-        overlay.addRoute(trace.route.edges, playAll ? ALGO_COLORS[def.key] ?? '#1b7a37' : '#1b7a37')
+        overlay.addRoute(trace.route.edges, animate ? ALGO_COLORS[def.key] ?? '#1b7a37' : '#1b7a37')
         resultEl.innerHTML = `<b>${fmtTime(trace.route.costS)}</b> · ${fmtDist(trace.route.distanceM)} walk${animate ? ` · explored ${trace.stats.nodesSettled} nodes` : ''}`
       } else {
         resultEl.textContent = 'No route found.'
       }
-      if (playAll && curIdx < algos.length - 1) advanceTimer = window.setTimeout(() => playAlgo(curIdx + 1, true), 1100)
-      else playAll = false
     }
     player = makePlayer(
       trace,
@@ -504,7 +500,6 @@ function setupUI(
     renderCompare()
     renderWhatIf()
     overlay.clearRoutes()
-    playAll = false
     playAlgo(optimalIdx, false)
   }
 
@@ -593,16 +588,30 @@ function setupUI(
     metricOpts.leaveAt = leaveatEl.value || nowHHMM()
     applyMetric({ rerun: true })
   })
-  // The single link → watch every algorithm explore in turn, each route persisting in its own colour.
+  // The link just toggles the chooser open; nothing plays until the user clicks an algorithm's ▶.
   algosLink.addEventListener('click', () => {
+    const open = algosPanel.hidden
+    algosPanel.hidden = !open
+    algosLink.classList.toggle('open', open)
+    algosLink.setAttribute('aria-expanded', String(open))
+  })
+  // One ▶ row per algorithm. Clicking one plays just that algorithm; its row accumulates in #compare.
+  algoListEl.innerHTML = algos
+    .map((a, i) => `<button type="button" class="algo-run" data-i="${i}"><span class="algo-play">▶</span><span>${esc(a.name)}</span></button>`)
+    .join('')
+  const playOne = (i: number): void => {
     if (!chosen.from || !chosen.to) return
-    window.clearTimeout(advanceTimer)
+    // First play after a search: drop the instant route + its auto-recorded row, then accumulate per click.
+    if (!showCompare) {
+      results.clear()
+      overlay.clearRoutes()
+    }
     showCompare = true
-    results.clear()
-    renderCompare()
-    overlay.clearRoutes()
-    playAll = true
-    playAlgo(0, true)
+    playAlgo(i, true)
+  }
+  algoListEl.addEventListener('click', (e) => {
+    const btn = (e.target as HTMLElement).closest('.algo-run') as HTMLElement | null
+    if (btn) playOne(Number(btn.dataset.i))
   })
   playBtn.addEventListener('click', () => {
     if (!player) return
@@ -648,7 +657,6 @@ function setupUI(
     elimView.hide()
     player?.dispose()
     player = null
-    window.clearTimeout(advanceTimer)
     whatifEl.textContent = ''
   }
 
