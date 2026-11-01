@@ -21,7 +21,7 @@ export interface FullTreeHighlight {
 const NS = 'http://www.w3.org/2000/svg'
 const S_COLOR = '#2e9e5b' // forward / From (matches the map marker)
 const T_COLOR = '#d64545' // backward / To
-const APEX_COLOR = '#0b7285' // the design accent — the meeting node
+const APEX_COLOR = '#0C2850' // the design accent (navy) — the meeting node
 const ROUTE_COLOR = '#1b7a37' // descent / final route green
 const DIM = '#d2cfc6' // not-yet-reached (on the search path)
 const FAINT = '#e8e5de' // unsearched sibling branches — just there for tree context

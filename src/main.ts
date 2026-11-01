@@ -281,7 +281,7 @@ function setupUI(
   // One colour per algorithm — routes persist in these colours during "Play all". The optimal searches
   // find the identical route (so they overlap); BFS and DFS differ, so their colours stand apart.
   const ALGO_COLORS: Record<string, string> = {
-    bfs: '#e8590c', dfs: '#ae3ec9', dijkstra: '#1b7a37', astar: '#1c7ed6', bidir: '#f08c00', ch: '#e03131', cch: '#0b7285',
+    bfs: '#e8590c', dfs: '#ae3ec9', dijkstra: '#1b7a37', astar: '#1c7ed6', bidir: '#f08c00', ch: '#e03131', cch: '#0C2850',
   }
   // The one optimal algorithm the default (instant) route draw uses (CCH if the hierarchy loaded, else Dijkstra).
   const optimalIdx = ((): number => {
@@ -800,8 +800,8 @@ function setupUI(
   const emptyFC: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features: [] }
   map.addSource(REGION_SRC, { type: 'geojson', data: emptyFC })
   map.addSource(DRAFT_SRC, { type: 'geojson', data: emptyFC })
-  map.addLayer({ id: 'dm-regions-fill', type: 'fill', source: REGION_SRC, paint: { 'fill-color': '#0b7285', 'fill-opacity': 0.1 } })
-  map.addLayer({ id: 'dm-regions-line', type: 'line', source: REGION_SRC, paint: { 'line-color': '#0b7285', 'line-width': 2 } })
+  map.addLayer({ id: 'dm-regions-fill', type: 'fill', source: REGION_SRC, paint: { 'fill-color': '#0C2850', 'fill-opacity': 0.1 } })
+  map.addLayer({ id: 'dm-regions-line', type: 'line', source: REGION_SRC, paint: { 'line-color': '#0C2850', 'line-width': 2 } })
   map.addLayer({ id: 'dm-regions-label', type: 'symbol', source: REGION_SRC, layout: { 'text-field': ['get', 'name'], 'text-size': 13, 'text-font': ['Noto Sans Regular'] }, paint: { 'text-color': '#0b5566', 'text-halo-color': '#fff', 'text-halo-width': 1.6 } })
   map.addLayer({ id: 'dm-draft-line', type: 'line', source: DRAFT_SRC, paint: { 'line-color': '#e8590c', 'line-width': 2, 'line-dasharray': [2, 1] } })
   map.addLayer({ id: 'dm-draft-pts', type: 'circle', source: DRAFT_SRC, filter: ['==', ['geometry-type'], 'Point'], paint: { 'circle-radius': 4, 'circle-color': '#e8590c' } })
