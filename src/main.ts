@@ -143,7 +143,7 @@ function setupUI(
   panel.className = 'panel'
   panel.innerHTML =
     '<button type="button" class="sheet-handle" id="sheet-handle" aria-label="Expand or collapse the panel"></button>' +
-    '<div class="brandrow"><span class="brand"><img class="brand-logo" src="/fundamental-stack.svg" alt="Fundamental Stack" onerror="this.hidden=true" /><span class="brand-txt"><span class="brand-name">DukeMaps</span><span class="brand-by">by Fundamental Stack</span></span></span><button type="button" class="about-link" id="about-open">About</button></div>' +
+    '<div class="brandrow"><span class="brand"><span class="brand-logo" role="img" aria-label="Fundamental Stack"></span><span class="brand-txt"><span class="brand-name">DukeMaps</span><span class="brand-by">by Fundamental Stack</span></span></span><button type="button" class="about-link" id="about-open">About</button></div>' +
     '<div class="field"><input id="from" placeholder="From — search or tap the map" autocomplete="off" /><button type="button" class="field-x" id="x-from" aria-label="Clear start" hidden>×</button><div class="ac" id="ac-from"></div></div>' +
     '<div class="field"><input id="to" placeholder="To — search or tap the map" autocomplete="off" /><button type="button" class="field-x" id="x-to" aria-label="Clear destination" hidden>×</button><div class="ac" id="ac-to"></div></div>' +
     '<div class="options" id="options">' +
