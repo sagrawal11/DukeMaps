@@ -209,6 +209,7 @@ function setupUI(
     '<p class="about-h">The elimination tree and the heatmap</p>' +
     '<p>The small inset, and the full-screen view behind the Elimination tree button, show the structure CCH is built on. A search climbs from both the start and the destination up to a shared meeting node near the top of the hierarchy, then unpacks its shortcuts back down to the real street-level route. The Node importance heatmap paints that same structure onto the map: the high-traffic separators that carve the campus into sections glow red, while the quiet leaf streets stay blue.</p>' +
     '<p class="about-cta"><a href="https://fundamentalstack.substack.com" target="_blank" rel="noopener">Read “How Google Maps Works” on Fundamental Stack</a></p>' +
+    '<p class="about-attr">Built by Sarthak Agrawal.</p>' +
     '<p class="about-attr">Map data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors (ODbL). Tiles by <a href="https://protomaps.com" target="_blank" rel="noopener">Protomaps</a>. The graph, every algorithm, and the spatial index are hand-written in TypeScript.</p>' +
     '</div>'
   document.body.appendChild(about)
@@ -383,7 +384,7 @@ function setupUI(
       })
       renderCompare()
       if (trace.route) {
-        overlay.addRoute(trace.route.edges, animate ? ALGO_COLORS[def.key] ?? '#1b7a37' : '#1b7a37')
+        overlay.addRoute(trace.route.edges, animate ? ALGO_COLORS[def.key] ?? '#1b7a37' : '#0C2850')
         resultEl.innerHTML = `<b>${fmtTime(trace.route.costS)}</b> · ${fmtDist(trace.route.distanceM)} walk${animate ? ` · explored ${trace.stats.nodesSettled} nodes` : ''}`
       } else {
         resultEl.textContent = 'No route found.'
