@@ -287,8 +287,12 @@
       .door-pin { width: 12px; height: 12px; border-radius: 50%; background: #e5484d; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(26, 24, 23, 0.4); }
 
       /* ── About modal ──────────────────────────────────────────────────────────── */
-      .brandrow { display: flex; align-items: baseline; justify-content: space-between; margin: 2px 0 14px; }
+      .brandrow { display: flex; align-items: center; justify-content: space-between; margin: 2px 0 14px; }
       .brandrow .brand { margin: 0; }
+      .brand { display: inline-flex; align-items: center; gap: 9px; }
+      .brand-txt { display: inline-flex; flex-direction: column; line-height: 1; }
+      .brand-logo { height: 34px; width: 34px; flex: none; }
+      .brand-by { font: 500 11.5px var(--sans); color: var(--muted); letter-spacing: 0; margin-top: 4px; }
       .about-link { border: 0; background: none; color: var(--accent-ink); font: 12.5px var(--sans); cursor: pointer; padding: 2px 0; }
       .about-link:hover { text-decoration: underline; }
       .about-backdrop {
