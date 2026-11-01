@@ -533,7 +533,7 @@
   "file": "icons/7760-thomas-f-keller-center-fuqua-school-of-business.svg",
   "area": "West Campus",
   "nickname": "Fuqua",
-  "tier": 2,
+  "tier": 1,
   "doors": [],
   "lat": 35.99881165652174,
   "lon": -78.94742123913042,
@@ -665,7 +665,7 @@
   "file": "icons/7783-edens-3a-decker-tower.svg",
   "area": "West Campus",
   "nickname": "Decker",
-  "tier": 1,
+  "tier": 2,
   "doors": [],
   "lat": 35.9984930475,
   "lon": -78.9355631525,
@@ -912,7 +912,7 @@
   "name": "von der Heyden Pavilion",
   "file": "icons/component-53-von-der-heyden-pavilion.svg",
   "area": "West Campus",
-  "nickname": "von der Heyden Pavilion",
+  "nickname": "Vondy",
   "tier": 3,
   "doors": [
    [
@@ -1026,7 +1026,7 @@
   "file": "icons/7203-east-house.svg",
   "area": "East Campus",
   "nickname": "East House",
-  "tier": 1,
+  "tier": 2,
   "doors": [
    [
     -78.91414231334842,
@@ -1045,7 +1045,7 @@
   "file": "icons/7204-west-house.svg",
   "area": "East Campus",
   "nickname": "West House",
-  "tier": 1,
+  "tier": 2,
   "doors": [
    [
     -78.91527407793436,
@@ -1092,7 +1092,7 @@
   "file": "icons/7207-the-ark.svg",
   "area": "East Campus",
   "nickname": "The Ark",
-  "tier": 1,
+  "tier": 2,
   "doors": [],
   "lat": 36.00716568,
   "lon": -78.91356296000001,
@@ -1120,7 +1120,7 @@
   "file": "icons/7213-richard-white-lecture-hall.svg",
   "area": "East Campus",
   "nickname": "White Lecture Hall",
-  "tier": 3,
+  "tier": 1,
   "doors": [
    [
     -78.91404312814736,
@@ -1234,7 +1234,7 @@
   "file": "icons/7219-baldwin-auditorium.svg",
   "area": "East Campus",
   "nickname": "Baldwin",
-  "tier": 2,
+  "tier": 1,
   "doors": [
    [
     -78.91464958831222,
@@ -2581,7 +2581,7 @@
   "file": "icons/7103-arts-annex.svg",
   "area": "Central Campus And Gardens",
   "nickname": "Arts Annex",
-  "tier": 3,
+  "tier": 1,
   "doors": [],
   "lat": 35.99968338888888,
   "lon": -78.9187769,
@@ -2665,7 +2665,7 @@
   "file": "icons/7138-freeman-center-for-jewish-life.svg",
   "area": "Central Campus And Gardens",
   "nickname": "Freeman Center for Jewish Life",
-  "tier": 3,
+  "tier": 1,
   "doors": [],
   "lat": 36.00029848,
   "lon": -78.92225102333333,
@@ -2731,7 +2731,7 @@
   "file": "icons/7194-rubenstein-arts-center.svg",
   "area": "Central Campus And Gardens",
   "nickname": "The Ruby",
-  "tier": 2,
+  "tier": 1,
   "doors": [
    [
     -78.92967985287166,
