@@ -772,6 +772,7 @@ function setupUI(
     doorMode = !doorMode
     doorBtn.classList.toggle('on', doorMode)
     doorBtn.setAttribute('aria-pressed', String(doorMode))
+    localStorage.setItem('dukemaps.doormode', doorMode ? '1' : '0') // survive the auto-reload after a door save
     if (doorMode) flashNotice(`🚪 Door mode on — click each door (${doorPts.length} placed)`)
   })
   doorUndoBtn.addEventListener('click', () => {
@@ -925,6 +926,16 @@ function setupUI(
     }
   })
   applyDevMode()
+  // After a door-save auto-reload, come back in door mode (dev only) so you can keep placing without re-toggling.
+  if (devMode && localStorage.getItem('dukemaps.doormode') === '1') {
+    doorMode = true
+    doorBtn.classList.add('on')
+    doorBtn.setAttribute('aria-pressed', 'true')
+  }
+  // Dev only: remember the camera so a door-save auto-reload returns you here instead of re-fitting the campus.
+  map.on('moveend', () => {
+    if (devMode) localStorage.setItem('dukemaps.view', JSON.stringify({ c: map.getCenter().toArray(), z: map.getZoom() }))
+  })
 
   // Tap fills From, then To; a tap when both are set starts a fresh pair. The pin is labelled with the
   // building you're nearest (not "Dropped pin").
@@ -1006,6 +1017,16 @@ map.on('load', () => {
       return
     }
     fitToCampus(map, buildingIconsConfig as BuildingIcon[], graph)
+    // Dev only: a door-save auto-reload returns to the saved camera instead of re-fitting the whole campus.
+    const devView = localStorage.getItem('dukemaps.dev') === '1' ? localStorage.getItem('dukemaps.view') : null
+    if (devView) {
+      try {
+        const v = JSON.parse(devView) as { c: [number, number]; z: number }
+        map.jumpTo({ center: v.c, zoom: v.z })
+      } catch {
+        /* ignore a corrupt saved view — fitToCampus already ran */
+      }
+    }
     const aliases = (aliasesConfig as { aliases?: Record<string, string> }).aliases ?? {}
     const placeIndex = buildPlaceIndex(places ?? [], aliases)
     const edgeIndex = buildEdgeIndex(graph)

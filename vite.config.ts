@@ -7,6 +7,7 @@ import type { Plugin } from 'vitest/config'
 import type { IncomingMessage } from 'node:http'
 import { readFileSync, writeFileSync, renameSync, existsSync, copyFileSync, mkdirSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { assignDoors } from './scripts/assign-doors-core'
 
 // Dev-only server routes for the graph editor (npm run editor). The editor runs in the browser,
 // which can't write repo files, so this middleware persists its edit log and serves the base
@@ -24,6 +25,21 @@ function editorServer(): Plugin {
     configureServer(server) {
       const editsPath = resolve(server.config.root, 'data/my_edits.json')
       const basePath = resolve(server.config.root, 'data/processed/graph.base.json')
+      // Auto-apply placed doors: on each door save, (re)run the assign-doors core so the door lands in
+      // config/building-icons.json (the file the app imports) with no manual `npm run assign:doors`. Debounced
+      // so a burst of clicks coalesces into one write — which then triggers Vite's page reload exactly once.
+      let doorAssignTimer: ReturnType<typeof setTimeout> | null = null
+      const scheduleDoorAssign = (): void => {
+        if (doorAssignTimer) clearTimeout(doorAssignTimer)
+        doorAssignTimer = setTimeout(() => {
+          try {
+            const r = assignDoors(server.config.root)
+            server.config.logger.info(`[doors] auto-assigned ${r.assigned}/${r.doors} door(s)${r.orphans.length ? `, ${r.orphans.length} orphan` : ''} → building-icons.json`)
+          } catch (e) {
+            server.config.logger.error(`[doors] auto-assign failed: ${(e as Error).message}`)
+          }
+        }, 1000)
+      }
       const readBody = (req: IncomingMessage): Promise<string> =>
         new Promise((ok, err) => {
           let s = ''
@@ -81,6 +97,7 @@ function editorServer(): Plugin {
               renameSync(tmp, doorsPath)
               res.statusCode = 204
               res.end()
+              scheduleDoorAssign() // propagate into building-icons.json (debounced) so the door takes effect
             } catch {
               res.statusCode = 400
               res.end('invalid JSON')
