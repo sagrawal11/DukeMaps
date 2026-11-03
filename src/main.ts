@@ -814,7 +814,22 @@ function setupUI(
   const addDoorPin = (lon: number, lat: number): void => {
     const el = document.createElement('div')
     el.className = 'door-pin'
-    doorMarkers.push(new maplibregl.Marker({ element: el, anchor: 'center' }).setLngLat([lon, lat]).addTo(map))
+    el.title = 'Door mode: click to remove this door'
+    const marker = new maplibregl.Marker({ element: el, anchor: 'center' }).setLngLat([lon, lat]).addTo(map)
+    doorMarkers.push(marker)
+    // In door mode, click a pin to delete that specific door — the Undo button only pops the last one, so
+    // this is the only way to remove an older stray (e.g. a misplaced door you've since re-placed correctly).
+    el.addEventListener('click', (ev) => {
+      if (!doorMode) return
+      ev.stopPropagation() // don't also fire the map-click handler (which would add a new door here)
+      const i = doorMarkers.indexOf(marker)
+      if (i < 0) return
+      doorPts.splice(i, 1)
+      doorMarkers.splice(i, 1)
+      marker.remove()
+      saveDoors()
+      flashNotice(`🚪 removed a door — ${doorPts.length} left`)
+    })
   }
   // Persist the working door set. Always mirror to localStorage so edits survive a reload. In dev that's
   // backed by the /__doors server write (auto-assign + reload); on the live site there's no server, so the
