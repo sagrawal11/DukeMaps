@@ -81,6 +81,61 @@ function fitToCampus(m: maplibregl.Map, icons: BuildingIcon[], graph: Graph): vo
   if (!bounds.isEmpty()) m.fitBounds(bounds, { padding: 30, duration: 0 })
 }
 
+// --- Live door publishing ----------------------------------------------------------------------
+// The live site is static (Vercel) with no server to receive /__doors, so the dev-login door editor
+// persists by committing straight to the GitHub repo via the API with a user-supplied fine-grained
+// token (stored in this browser only). Vercel rebuilds `main` on push, so edits go live in ~1–2 min.
+const GH = { owner: 'sagrawal11', repo: 'DukeMaps', branch: 'main' }
+
+// Browser port of scripts/assign-doors-core.ts: from the placed doors, build the three files to commit.
+// Re-serializing the parsed icons is byte-faithful (verified), so building-icons.json changes only in
+// `doors` fields — nicknames/tiers/coords are untouched.
+function computeDoorFiles(doorPts: [number, number][], icons: BuildingIcon[]): { path: string; content: string }[] {
+  const MAX_M = 95 // a door must sit within this of a building centroid, else it's an orphan (dropped)
+  const placed = icons.filter((i) => typeof i.lat === 'number' && typeof i.lon === 'number')
+  const byBuilding: Record<string, [number, number][]> = {}
+  for (const [lon, lat] of doorPts) {
+    let best: BuildingIcon | null = null
+    let bestD = Infinity
+    for (const b of placed) {
+      const d = haversineM(lat, lon, b.lat as number, b.lon as number)
+      if (d < bestD) {
+        bestD = d
+        best = b
+      }
+    }
+    if (best && bestD <= MAX_M) (byBuilding[best.id] ??= []).push([lon, lat])
+  }
+  const patched = icons.map((i) => ({ ...i, doors: byBuilding[i.id] ?? [] }))
+  return [
+    { path: 'data/doors.json', content: JSON.stringify(doorPts, null, 2) + '\n' },
+    { path: 'config/building-doors.json', content: JSON.stringify(byBuilding, null, 1) + '\n' },
+    { path: 'config/building-icons.json', content: JSON.stringify(patched, null, 1) + '\n' },
+  ]
+}
+
+// Commit several files in one atomic commit via the GitHub Git Data API (CORS-enabled for browsers).
+async function githubCommitFiles(token: string, files: { path: string; content: string }[], message: string): Promise<void> {
+  const api = `https://api.github.com/repos/${GH.owner}/${GH.repo}`
+  const call = async (path: string, init?: RequestInit): Promise<{ sha: string; object?: { sha: string }; tree?: { sha: string } }> => {
+    const r = await fetch(api + path, {
+      ...init,
+      headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json', 'Content-Type': 'application/json', ...(init?.headers ?? {}) },
+    })
+    if (!r.ok) throw new Error(`${r.status} ${(await r.text()).slice(0, 140)}`)
+    return r.json() as Promise<{ sha: string; object?: { sha: string }; tree?: { sha: string } }>
+  }
+  const ref = await call(`/git/ref/heads/${GH.branch}`)
+  const headSha = ref.object!.sha
+  const baseCommit = await call(`/git/commits/${headSha}`)
+  const tree = await call('/git/trees', {
+    method: 'POST',
+    body: JSON.stringify({ base_tree: baseCommit.tree!.sha, tree: files.map((f) => ({ path: f.path, mode: '100644', type: 'blob', content: f.content })) }),
+  })
+  const commit = await call('/git/commits', { method: 'POST', body: JSON.stringify({ message, tree: tree.sha, parents: [headSha] }) })
+  await call(`/git/refs/heads/${GH.branch}`, { method: 'PATCH', body: JSON.stringify({ sha: commit.sha }) })
+}
+
 const esc = (s: string): string =>
   s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c] as string)
 
@@ -158,6 +213,7 @@ function setupUI(
     '<button type="button" class="opt" id="pickcoords" aria-pressed="false" hidden>📍 Coords</button>' +
     '<button type="button" class="opt" id="doormode" aria-pressed="false" hidden>🚪 Doors</button>' +
     '<button type="button" class="opt" id="doorundo" hidden>↶ Undo door</button>' +
+    '<button type="button" class="opt" id="doorpublish" hidden>💾 Publish doors</button>' +
     '<button type="button" class="opt" id="regionmode" aria-pressed="false" hidden>🗺️ Region</button>' +
     '<button type="button" class="opt" id="regionfinish" hidden>✓ Finish</button>' +
     '<button type="button" class="opt" id="regionundo" hidden>↶ Undo</button>' +
@@ -751,6 +807,7 @@ function setupUI(
   const pickBtn = panel.querySelector('#pickcoords') as HTMLButtonElement
   const doorBtn = panel.querySelector('#doormode') as HTMLButtonElement
   const doorUndoBtn = panel.querySelector('#doorundo') as HTMLButtonElement
+  const doorPublishBtn = panel.querySelector('#doorpublish') as HTMLButtonElement
   const editBtn = panel.querySelector('#editgraph') as HTMLButtonElement
   const optRow = panel.querySelector('#opt-row') as HTMLDivElement // only holds dev tools now — hidden until dev login
   editBtn.addEventListener('click', () => window.open(new URL('editor/', document.baseURI).href, '_blank')) // the Phase-2 graph editor (dev server only)
@@ -759,16 +816,47 @@ function setupUI(
     el.className = 'door-pin'
     doorMarkers.push(new maplibregl.Marker({ element: el, anchor: 'center' }).setLngLat([lon, lat]).addTo(map))
   }
-  // Persist the doors and only report success once the dev server confirms the write. Fire-and-forget here
-  // was a trap: on the deployed/preview site (or with `npm run dev` not running) /__doors 404s or the fetch
-  // rejects, yet the UI used to say "(saved)" anyway — so edits silently vanished.
-  const saveDoors = (okMsg?: string): void => {
+  // Persist the working door set. Always mirror to localStorage so edits survive a reload. In dev that's
+  // backed by the /__doors server write (auto-assign + reload); on the live site there's no server, so the
+  // doors live in the browser until you hit 💾 Publish (which commits them to the repo). The old fire-and-
+  // forget POST was a trap: it said "(saved)" even when /__doors 404'd, so live edits silently vanished.
+  const saveDoors = (): void => {
+    localStorage.setItem('dukemaps.doorpts', JSON.stringify(doorPts)) // working copy, survives reload (dev + live)
+    if (!import.meta.env.DEV) {
+      flashNotice(`🚪 ${doorPts.length} doors — 💾 Publish to push them live`)
+      return
+    }
     void fetch('/__doors', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(doorPts) })
       .then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`)
-        if (okMsg) flashNotice(okMsg)
+        flashNotice(`🚪 ${doorPts.length} doors (saved)`)
       })
-      .catch(() => flashNotice('⚠ Doors NOT saved — run `npm run dev` and edit on localhost, not the deployed site'))
+      .catch(() => flashNotice('⚠ Doors NOT saved — run `npm run dev` and edit on localhost'))
+  }
+  // Commit the current doors to the repo (live-site maintenance). Vercel rebuilds main → live in ~1–2 min.
+  const publishDoors = async (): Promise<void> => {
+    let token = localStorage.getItem('dukemaps.ghtoken') ?? ''
+    if (!token) {
+      token = (window.prompt('Paste a GitHub fine-grained token (repo: DukeMaps · Contents: Read and write). Stored in this browser only.') ?? '').trim()
+      if (!token) return
+      localStorage.setItem('dukemaps.ghtoken', token)
+    }
+    doorPublishBtn.disabled = true
+    flashNotice('⏳ Publishing doors to GitHub…')
+    try {
+      await githubCommitFiles(token, computeDoorFiles(doorPts, buildingIconsConfig as BuildingIcon[]), `Doors: update ${doorPts.length} via live editor`)
+      flashNotice(`✅ Published ${doorPts.length} doors — live site rebuilds in ~1–2 min`)
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e)
+      if (/^(401|403|404)/.test(msg)) {
+        localStorage.removeItem('dukemaps.ghtoken') // bad/expired/unscoped token — forget it so the next click re-prompts
+        flashNotice(`⚠ Token rejected (${msg.slice(0, 48)}) — click 💾 Publish to re-enter it`)
+      } else {
+        flashNotice(`⚠ Publish failed: ${msg}`)
+      }
+    } finally {
+      doorPublishBtn.disabled = false
+    }
   }
   pickBtn.addEventListener('click', () => {
     pickCoords = !pickCoords
@@ -787,8 +875,8 @@ function setupUI(
     doorPts.pop()
     doorMarkers.pop()?.remove()
     saveDoors()
-    flashNotice(`🚪 ${doorPts.length} doors`)
   })
+  doorPublishBtn.addEventListener('click', () => void publishDoors())
 
   // Region editor (dev-only): draw campus / sub-region polygons by clicking the map, then "Finish" to
   // name + save one. Persisted to config/dissection.json via the /__regions dev endpoint. These regions
@@ -876,6 +964,7 @@ function setupUI(
     pickBtn.hidden = !devMode
     doorBtn.hidden = !devMode
     doorUndoBtn.hidden = !devMode
+    doorPublishBtn.hidden = !devMode
     editBtn.hidden = !devMode
     regionBtn.hidden = !devMode
     localStorage.setItem('dukemaps.dev', devMode ? '1' : '0')
@@ -883,14 +972,22 @@ function setupUI(
     if (link) link.textContent = devMode ? 'developer logout' : 'developer login'
     if (devMode && !doorsLoaded) {
       doorsLoaded = true
-      void fetch('/__doors')
-        .then((r) => (r.ok ? r.json() : []))
-        .then((pts: [number, number][]) => {
-          for (const p of pts) {
-            doorPts.push(p)
-            addDoorPin(p[0], p[1])
-          }
-        })
+      const applyDoors = (pts: [number, number][]): void => {
+        for (const p of pts) {
+          doorPts.push(p)
+          addDoorPin(p[0], p[1])
+        }
+      }
+      const working = localStorage.getItem('dukemaps.doorpts')
+      if (!import.meta.env.DEV) {
+        // Live site: your unpublished working copy if you have one, else the currently-published doors
+        // (flattened from building-icons.json, which is what the deployed app bundles).
+        applyDoors(working ? (JSON.parse(working) as [number, number][]) : (buildingIconsConfig as BuildingIcon[]).flatMap((b) => (b.doors ?? []) as [number, number][]))
+      } else {
+        void fetch('/__doors')
+          .then((r) => (r.ok ? r.json() : []))
+          .then(applyDoors)
+      }
     }
     if (devMode && !regionsLoaded) {
       regionsLoaded = true
@@ -957,7 +1054,7 @@ function setupUI(
     if (doorMode) {
       doorPts.push([e.lngLat.lng, e.lngLat.lat])
       addDoorPin(e.lngLat.lng, e.lngLat.lat)
-      saveDoors(`🚪 ${doorPts.length} doors (saved)`)
+      saveDoors()
       return
     }
     if (pickCoords) {
