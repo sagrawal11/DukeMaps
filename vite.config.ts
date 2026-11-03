@@ -135,7 +135,7 @@ function editorServer(): Plugin {
   }
 }
 
-// DukeMaps is a fully static site deployed to GitHub Pages. A relative base means
+// DukeMaps is a fully static site auto-deployed via Vercel (dukemaps.vercel.app). A relative base means
 // the build works regardless of the repo subpath it's served from; revisit in
 // Phase 7 if the deploy target needs an absolute base.
 //

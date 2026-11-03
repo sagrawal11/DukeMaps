@@ -32,8 +32,10 @@ product someone can use on their phone, not a demo notebook.
   - Every algorithm has a tiny hand-built graph test with a known answer.
   - No route may ever use an edge the active profile can't traverse, including inside unpacked
     CH shortcuts.
-- **Fully static site.** Runs entirely in the browser and deploys to GitHub Pages. No backend,
-  no API keys.
+- **Fully static site.** Runs entirely in the browser and auto-deploys via Vercel
+  (dukemaps.vercel.app) on push to `main`. No backend, and no API keys in the build or for visitors.
+  (Owner-only exception: the dev door editor publishes edits from the live site via the GitHub API
+  with a fine-grained token the owner enters at runtime, stored only in their browser.)
 - **Never map building interiors.** Buildings and dorms are modeled as door-to-door passage
   edges between entrances.
 - **Don't invent Duke facts.** Bounding boxes, building names, class end times, dorm swipe rules,
@@ -235,7 +237,7 @@ CH with time-dependent weights:
 - Demo presets on the landing screen so a visitor sees something impressive in one tap.
 - Lighthouse pass (performance and accessibility at 90+).
 - README with screenshots, a GIF of the show, and an explanation of the architecture.
-- Deploy to GitHub Pages via a GitHub Action.
+- Deploy via Vercel (auto-deploys `main` to dukemaps.vercel.app).
 
 ## Definition of done
 - Deployed URL works on desktop and phone.

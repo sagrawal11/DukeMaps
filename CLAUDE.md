@@ -17,8 +17,11 @@ final route with walk time, distance, and directions. Full spec: `BRIEF.md`.
   costs on thousands of random pairs under every access profile. Each algorithm also has a
   tiny hand-built graph test with a known answer. No route may ever use an edge the active
   profile can't traverse — including inside unpacked CH shortcuts.
-- **Fully static site.** Runs entirely in the browser, deploys to GitHub Pages. No backend,
-  no API keys.
+- **Fully static site.** Runs entirely in the browser; the live site auto-deploys via **Vercel**
+  (`dukemaps.vercel.app`) on push to `main`. No backend and no API keys in the build or for visitors.
+  *Owner-only exception:* the dev door editor can publish door edits from the live site via the GitHub
+  API, using a fine-grained token the owner enters at runtime and keeps only in their browser (never
+  committed) — see the door-editor code in `src/main.ts`.
 - **Never map building interiors.** Buildings and dorms are modeled as door-to-door passage
   edges between entrances.
 - **Don't invent Duke facts.** Bounding boxes, building names, class end times, dorm swipe
@@ -41,7 +44,7 @@ editor · `data/raw` (gitignored, re-fetchable) · `data/processed` (committed) 
 ## npm scripts
 `dev`, `editor`, `build`, `preview`, `test`, `typecheck`, `fetch` (OSM import), `build:graph`
 (merge OSM + edits), `build:ch` (hierarchies), `bench`, `rebuild` (fetch → build:graph →
-build:ch), `deploy` (GitHub Pages — wired in Phase 7).
+build:ch), `deploy` (placeholder — the live site auto-deploys via Vercel on push to `main`).
 
 ## How to work with the user
 - **One phase at a time.** Start each phase in **plan mode**; show the plan before coding.
