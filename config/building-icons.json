@@ -104,7 +104,12 @@
   "area": "West Campus",
   "nickname": "Reuben-Cooke",
   "tier": 3,
-  "doors": [],
+  "doors": [
+   [
+    -78.93708409922087,
+    36.002491724495684
+   ]
+  ],
   "lat": 36.00238662272728,
   "lon": -78.93678018636363,
   "place": "Rueben-Cooke",
@@ -118,7 +123,12 @@
   "area": "West Campus",
   "nickname": "Social Sciences",
   "tier": 3,
-  "doors": [],
+  "doors": [
+   [
+    -78.93750910688325,
+    36.00183934677119
+   ]
+  ],
   "lat": 36.00176229999999,
   "lon": -78.93738344736842,
   "place": "Social Sciences Building",
@@ -469,7 +479,12 @@
   "area": "West Campus",
   "nickname": "Allen",
   "tier": 2,
-  "doors": [],
+  "doors": [
+   [
+    -78.93743709849467,
+    36.001003265288205
+   ]
+  ],
   "lat": 36.00117729642857,
   "lon": -78.93742518214286,
   "place": "Allen Building",
