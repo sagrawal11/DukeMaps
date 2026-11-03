@@ -759,8 +759,16 @@ function setupUI(
     el.className = 'door-pin'
     doorMarkers.push(new maplibregl.Marker({ element: el, anchor: 'center' }).setLngLat([lon, lat]).addTo(map))
   }
-  const saveDoors = (): void => {
+  // Persist the doors and only report success once the dev server confirms the write. Fire-and-forget here
+  // was a trap: on the deployed/preview site (or with `npm run dev` not running) /__doors 404s or the fetch
+  // rejects, yet the UI used to say "(saved)" anyway — so edits silently vanished.
+  const saveDoors = (okMsg?: string): void => {
     void fetch('/__doors', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(doorPts) })
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`)
+        if (okMsg) flashNotice(okMsg)
+      })
+      .catch(() => flashNotice('⚠ Doors NOT saved — run `npm run dev` and edit on localhost, not the deployed site'))
   }
   pickBtn.addEventListener('click', () => {
     pickCoords = !pickCoords
@@ -949,8 +957,7 @@ function setupUI(
     if (doorMode) {
       doorPts.push([e.lngLat.lng, e.lngLat.lat])
       addDoorPin(e.lngLat.lng, e.lngLat.lat)
-      saveDoors()
-      flashNotice(`🚪 ${doorPts.length} doors (saved)`)
+      saveDoors(`🚪 ${doorPts.length} doors (saved)`)
       return
     }
     if (pickCoords) {
