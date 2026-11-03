@@ -59,10 +59,6 @@
   "tier": 3,
   "doors": [
    [
-    -78.93841316814697,
-    36.00163059798996
-   ],
-   [
     -78.93811342145159,
     36.00208567097137
    ],
@@ -912,19 +908,19 @@
   "name": "David M. Rubenstein Rare Book & Manuscript Library",
   "file": "icons/component-52-david-m-rubenstein-rare-book-manuscript-library.svg",
   "area": "West Campus",
-  "nickname": "David M. Rubenstein Rare Book & Manuscript Library",
-  "tier": 3,
-  "doors": [],
-  "lat": null,
-  "lon": null,
-  "place": null,
-  "confidence": "none",
-  "suggestion": {
-   "name": "Rubenstein Library",
-   "lat": 36.001829757692306,
-   "lon": -78.93864754615385,
-   "score": 0.29
-  }
+  "nickname": "Rubenstein Library",
+  "tier": 2,
+  "doors": [
+   [
+    -78.93841316814697,
+    36.00163059798996
+   ]
+  ],
+  "lat": 36.001829757692306,
+  "lon": -78.93864754615385,
+  "place": "Rubenstein Library",
+  "confidence": "override",
+  "suggestion": null
  },
  {
   "id": "component-53",
